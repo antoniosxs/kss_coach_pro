@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KSS Coach">
+<link rel="apple-touch-icon" href="kss_coach_192.png">
+<link rel="manifest" href="manifest.json">
+<title>KSS Coach</title>
+<style>
+:root {
+  --bg-primary: #0a0f1a;
+  --bg-card: #111827;
+  --bg-input: #0d1321;
+  --border: #1e2a3a;
+  --border-focus: #0ea5e9;
+  --text-primary: #e8ecf1;
+  --text-secondary: #7a8599;
+  --text-muted: #4a556b;
+  --accent: #0ea5e9;
+  --accent-glow: rgba(14,165,233,.15);
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,.12);
+  --yellow: #eab308;
+  --yellow-bg: rgba(234,179,8,.12);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,.12);
+  --orange: #f97316;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --nav-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{overscroll-behavior:none;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100%;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 8px);overscroll-behavior:none;-webkit-user-select:none;user-select:none;font-size:15px;line-height:1.5}
+input,textarea,select,button{font-family:inherit;-webkit-user-select:text;user-select:text}
+button{cursor:pointer;border:none;background:none;color:inherit}
+
+/* === VIEWS === */
+.view{display:none;padding:16px 16px 24px;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* === NAV === */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-b));padding-bottom:var(--safe-b);background:var(--bg-card);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--text-muted);font-weight:600;letter-spacing:.03em;transition:color .15s}
+.nav-btn.active{color:var(--accent)}
+.nav-btn.disabled{opacity:.3;pointer-events:none}
+.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* === CARDS === */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-header{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-header svg{width:16px;height:16px}
+
+/* === FORMS === */
+.field{margin-bottom:16px}
+.field-label{display:block;font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.field-input{width:100%;padding:12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:15px;transition:border-color .15s}
+.field-input:focus{outline:none;border-color:var(--border-focus)}
+select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a8599'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+/* === BUTTONS === */
+.btn{padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:700;text-align:center;transition:all .15s;width:100%;display:block}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:active{transform:scale(.98);opacity:.9}
+.btn-outline{border:1px solid var(--border);color:var(--text-secondary)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-sm{padding:10px 16px;font-size:13px}
+
+/* === SEGMENT CONTROL === */
+.seg-row{display:flex;gap:6px;margin-bottom:16px}
+.seg-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary)}
+.seg-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+
+/* === SEMAPHORE (Crowd) === */
+.sem-row{display:flex;gap:8px}
+.sem-btn{flex:1;padding:12px 4px;border-radius:var(--radius-sm);border:2px solid var(--border);font-size:22px;text-align:center;transition:all .15s}
+.sem-btn.selected{transform:scale(1.05)}
+.sem-btn[data-v="empty"].selected{border-color:var(--green);background:var(--green-bg)}
+.sem-btn[data-v="medium"].selected{border-color:var(--yellow);background:var(--yellow-bg)}
+.sem-btn[data-v="crowded"].selected{border-color:var(--red);background:var(--red-bg)}
+
+/* === STAR RATING === */
+.stars{display:flex;gap:4px}
+.star{font-size:28px;color:var(--text-muted);cursor:pointer;transition:color .1s;line-height:1}
+.star.active{color:var(--yellow)}
+
+/* === ATHLETE CHIPS === */
+.athlete-grid{display:flex;flex-wrap:wrap;gap:8px}
+.athlete-chip{padding:10px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:14px;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px}
+.athlete-chip.selected{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.athlete-chip .avi{width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff}
+
+/* === TACTICAL IQ === */
+.tac-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.tac-athlete-name{font-size:20px;font-weight:800;letter-spacing:-.02em}
+.tac-nav-arrow{padding:8px 16px;font-size:22px;color:var(--text-secondary)}
+.tac-stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.tac-stat{text-align:center;padding:16px;border-radius:var(--radius);background:var(--bg-card);border:1px solid var(--border)}
+.tac-stat-val{font-size:36px;font-weight:800;letter-spacing:-.03em}
+.tac-stat-label{font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-top:2px}
+.tac-catch{font-size:48px;font-weight:800;text-align:center;padding:20px;border-radius:var(--radius);margin-bottom:16px}
+.tac-catch.good{color:var(--green);background:var(--green-bg);border:1px solid rgba(34,197,94,.2)}
+.tac-catch.mid{color:var(--yellow);background:var(--yellow-bg);border:1px solid rgba(234,179,8,.2)}
+.tac-catch.low{color:var(--red);background:var(--red-bg);border:1px solid rgba(239,68,68,.2)}
+.tac-catch-label{font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+
+/* Big counters */
+.counter-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.counter-btn{padding:20px 8px;border-radius:var(--radius);border:2px solid var(--border);text-align:center;font-weight:800;font-size:15px;transition:all .1s;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:90px;justify-content:center}
+.counter-btn:active{transform:scale(.95)}
+.counter-btn .cnt-icon{font-size:28px}
+.counter-btn .cnt-val{font-size:28px;font-weight:800}
+.counter-btn.c-paddle{border-color:var(--accent);color:var(--accent);background:rgba(14,165,233,.06)}
+.counter-btn.c-catch{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.06)}
+.counter-btn.c-fall{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.06)}
+
+/* Eval buttons */
+.eval-section{margin-bottom:14px}
+.eval-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.eval-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.eval-btn{padding:10px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);font-size:12px;font-weight:700;text-align:center;transition:all .12s}
+.eval-btn:active{transform:scale(.95)}
+.eval-btn.sel-r{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.eval-btn.sel-y{border-color:var(--yellow);color:var(--yellow);background:var(--yellow-bg)}
+.eval-btn.sel-g{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.eval-btn.sel-b{border-color:var(--accent);color:var(--accent);background:rgba(14,165,233,.12)}
+.eval-btn.sel-a{border-color:#f97316;color:#f97316;background:rgba(249,115,22,.12)}
+.eval-btn.sel-m{border-color:var(--text-secondary);color:var(--text-secondary);background:rgba(148,163,184,.12)}
+
+/* Maneuver tags */
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tag-btn{padding:8px 14px;border-radius:16px;border:1.5px solid var(--border);font-size:12px;font-weight:700;transition:all .12s}
+.tag-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+
+/* Undo toast */
+.undo-toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 16px);left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:200;display:none;animation:slideUp .25s ease}
+.undo-toast.show{display:flex;align-items:center;gap:12px}
+.undo-toast button{color:var(--accent);font-weight:800;font-size:13px}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* === OVERVIEW === */
+.ov-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:12px}
+.ov-row:last-child{border:none}
+.ov-name{flex:1;font-weight:700;font-size:15px}
+.ov-stats{font-size:13px;color:var(--text-secondary);font-weight:600}
+.ov-ratio{font-size:18px;font-weight:800;min-width:50px;text-align:right}
+.ov-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:6px}
+.ov-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+
+/* === DEBRIEF === */
+.db-condition{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.db-tag{padding:6px 12px;border-radius:14px;background:var(--bg-input);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-secondary)}
+.db-athlete-card{border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;background:var(--bg-card)}
+.db-athlete-name{font-size:16px;font-weight:800;margin-bottom:8px}
+.db-stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.db-stat{text-align:center}
+.db-stat-v{font-size:20px;font-weight:800}
+.db-stat-l{font-size:10px;color:var(--text-secondary);text-transform:uppercase;font-weight:700}
+.db-xp{font-size:13px;color:var(--accent);font-weight:700;margin-top:6px}
+
+/* === ATHLETES LIST === */
+.ath-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.ath-item:last-child{border:none}
+.ath-avi{width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.ath-info{flex:1}
+.ath-name{font-weight:700;font-size:15px}
+.ath-sub{font-size:12px;color:var(--text-secondary)}
+
+/* === MODAL === */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-sheet{background:var(--bg-card);border-radius:16px 16px 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:24px 20px calc(20px + var(--safe-b));animation:sheetUp .25s ease}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--text-muted);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:16px}
+
+/* === TIMER === */
+.session-bar{position:sticky;top:0;z-index:50;background:var(--bg-primary);padding:8px 16px;display:none;border-bottom:1px solid var(--border)}
+.session-bar.active{display:flex;align-items:center;justify-content:space-between}
+.sb-info{font-size:12px;color:var(--text-secondary);font-weight:600}
+.sb-time{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)}
+
+/* === UTILITIES === */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
+.empty-state svg{width:48px;height:48px;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:14px;margin-bottom:16px}
+.mt-4{margin-top:16px}.mb-4{margin-bottom:16px}
+.text-center{text-align:center}
+.text-sm{font-size:13px}
+.text-muted{color:var(--text-secondary)}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-2{gap:8px}
+/* === JUDGE MODE === */
+.jm-setup{padding:16px}
+.jm-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.jm-surfer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.jm-surfer-item{display:flex;flex-direction:column;gap:4px}
+.jm-surfer-item label{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px}
+.jm-surfer-item input{padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px}
+.jm-surfer-item input:focus{outline:none;border-color:var(--border-focus)}
+.jm-surfer-item select{padding:8px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.jm-surfer-item select:focus{outline:none;border-color:var(--border-focus)}
+
+.jm-timer-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--green);border-radius:var(--radius);margin-bottom:12px}
+.jm-timer-bar.warning{background:var(--yellow)}
+.jm-timer-bar.critical{background:var(--red);animation:pulse 1s infinite}
+.jm-timer{font-size:36px;font-weight:800;font-variant-numeric:tabular-nums;color:#fff}
+.jm-timer-btns{display:flex;gap:6px}
+.jm-timer-btn{padding:8px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.3)}
+
+.jm-grid-wrap{overflow-x:auto;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.jm-grid{border-collapse:separate;border-spacing:3px;min-width:900px}
+.jm-grid th{background:#1e2a3a;color:var(--text-secondary);padding:6px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border-radius:4px;text-align:center;white-space:nowrap}
+.jm-grid td{text-align:center;position:relative}
+.jm-color-cell{font-weight:700;font-size:12px;padding:10px 6px;border-radius:6px;cursor:pointer;position:relative;white-space:nowrap;transition:transform .1s}
+.jm-color-cell:active{transform:scale(.95)}
+.jm-color-red{background:#991b1b;color:#fecaca;border:1px solid #7f1d1d}
+.jm-color-yellow{background:#854d0e;color:#fef08a;border:1px solid #713f12}
+.jm-color-black{background:#0f172a;color:#e2e8f0;border:1px solid #334155}
+.jm-color-white{background:#f0f0f0;color:#0f172a;border:1px solid #d1d5db}
+.jm-color-blue{background:#1e3a8a;color:#bfdbfe;border:1px solid #1e40af}
+
+.jm-int-badge{position:absolute;bottom:2px;right:2px;font-size:8px;padding:1px 4px;border-radius:3px;font-weight:800;background:#475569;color:#cbd5e1}
+.jm-int-badge.l1{background:#f59e0b;color:#fff}
+.jm-int-badge.l2{background:#ef4444;color:#fff}
+.jm-int-badge.l3{background:#dc2626;color:#fff}
+.jm-int-badge.l4{background:#991b1b;color:#fff}
+.jm-int-badge.l5{background:#7f1d1d;color:#fff}
+.jm-int-badge.l6{background:#000;color:#fff;border:1px solid #ef4444}
+
+.jm-score-input{width:46px;padding:7px 3px;font-size:13px;font-weight:700;text-align:center;border:1px solid var(--border);border-radius:4px;background:var(--bg-input);color:var(--text-primary);-webkit-user-select:text;user-select:text}
+.jm-score-input:focus{outline:none;border-color:var(--border-focus);background:var(--bg-card)}
+.jm-score-input:disabled{opacity:.25;cursor:not-allowed;background:#060a12}
+.jm-score-input.best{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#d97706;color:#78350f}
+.jm-score-input.locked{border-color:#475569;opacity:.85}
+.jm-score-input.recent{border-color:var(--accent);box-shadow:0 0 4px rgba(14,165,233,.3)}
+.jm-score-input.int-marked{border:2px solid var(--red);background:rgba(239,68,68,.1)}
+.jm-tri{position:absolute;top:0;right:2px;color:var(--red);font-size:14px;pointer-events:none;display:none}
+
+.jm-rankings{margin-bottom:12px}
+.jm-rank-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:6px;border-radius:8px;font-weight:700;font-size:14px}
+.jm-rank-item:nth-child(1){background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f}
+.jm-rank-item:nth-child(2){background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#0f172a}
+.jm-rank-item:nth-child(3){background:linear-gradient(135deg,#d97706,#f59e0b);color:#78350f}
+.jm-rank-item:nth-child(n+4){background:#1e2a3a;color:#cbd5e1}
+.jm-rank-waves{font-size:11px;opacity:.8;font-weight:500;margin-top:2px}
+.jm-rank-need{font-size:11px;font-style:italic;font-weight:700;margin-top:2px}
+.jm-rank-int{font-size:11px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.2);color:#fca5a5;margin-left:4px}
+.jm-priority{display:flex;gap:6px;margin-bottom:12px}
+.jm-pri-item{flex:1;text-align:center;padding:10px 4px;border-radius:8px;font-weight:700;cursor:pointer;transition:all .15s}
+.jm-pri-item:nth-child(1){background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+.jm-pri-item:nth-child(2){background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+.jm-pri-item.tied{background:#475569;color:#cbd5e1}
+.jm-pri-num{font-size:20px;font-weight:800}
+.jm-pri-col{font-size:12px}
+.jm-pri-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.04em;opacity:.8}
+
+.jm-results{margin-top:16px}
+.jm-meta-collapsed{font-size:12px;color:var(--text-secondary);font-weight:600;margin-bottom:10px;display:none}
+.jm-meta-collapsed.active{display:block}
+.jm-setup-form.hidden{display:none}
+.jm-notes-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
+.jm-notes-modal.active{display:flex}
+.jm-notes-box{background:var(--bg-card);border-radius:12px;padding:20px;width:90%;max-width:500px;border:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- SESSION BAR (visible during active session) -->
+<div class="session-bar" id="sessionBar">
+  <div class="sb-info" id="sbInfo">Parguito · 3-4ft</div>
+  <div class="sb-time" id="sbTime">00:00</div>
+  <div style="display:flex;gap:4px">
+    <button class="btn-sm btn-outline" onclick="showView('session-hub')" style="padding:6px 10px;font-size:11px;border-radius:4px;border:1px solid var(--border)">Hub</button>
+    <button class="btn-sm btn-outline" onclick="showView('overview')" style="padding:6px 10px;font-size:11px;border-radius:4px;border:1px solid var(--border)">All</button>
+  </div>
+</div>
+
+<!-- ==================== HOME ==================== -->
+<div class="view active" id="view-home">
+  <div style="text-align:center;margin:20px 0 24px">
+    <div style="font-size:28px;font-weight:800;letter-spacing:-.03em">KSS Coach</div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-top:2px" id="homeGreeting">Surf Coaching System</div>
+  </div>
+
+  <button class="btn btn-accent" onclick="startNewSession()" id="homeStartBtn" style="margin-bottom:20px;font-size:17px;padding:18px">
+    ⚡ Nueva Sesión
+  </button>
+
+  <div class="card" id="homeLastSession" style="display:none">
+    <div class="card-header"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Última Sesión</div>
+    <div id="homeLastContent"></div>
+  </div>
+
+  <div class="card" id="homeHighlights" style="display:none">
+    <div class="card-header"><svg viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>Highlights</div>
+    <div id="homeHighContent"></div>
+  </div>
+
+  <div id="homeEmpty" class="empty-state" style="margin-top:20px">
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/></svg>
+    <p>No tienes sesiones aún.<br>Agrega atletas y arranca tu primera sesión.</p>
+    <button class="btn btn-outline btn-sm" onclick="showView('athletes')" style="width:auto;display:inline-block">Agregar Atletas</button>
+  </div>
+</div>
+
+<!-- ==================== SESSION CREATOR ==================== -->
+<div class="view" id="view-session-setup">
+  <div class="flex-between mb-4">
+    <button class="text-sm text-muted" onclick="cancelSession()">← Cancelar</button>
+    <div style="font-size:17px;font-weight:800">Nueva Sesión</div>
+    <div style="width:60px"></div>
+  </div>
+
+  <!-- Spot -->
+  <div class="field">
+    <label class="field-label">📍 Spot</label>
+    <select class="field-input" id="ssSpot"></select>
+  </div>
+
+  <!-- Conditions -->
+  <div class="card">
+    <div class="card-header">🌊 Condiciones</div>
+    
+    <div class="field">
+      <label class="field-label">Tamaño</label>
+      <div class="seg-row" id="ssSize">
+        <button class="seg-btn" data-v="1" onclick="segSelect('ssSize',this)">1<br><span style="font-size:10px;font-weight:400">Flat</span></button>
+        <button class="seg-btn" data-v="2" onclick="segSelect('ssSize',this)">2<br><span style="font-size:10px;font-weight:400">Small</span></button>
+        <button class="seg-btn selected" data-v="3" onclick="segSelect('ssSize',this)">3<br><span style="font-size:10px;font-weight:400">Fun</span></button>
+        <button class="seg-btn" data-v="4" onclick="segSelect('ssSize',this)">4<br><span style="font-size:10px;font-weight:400">Solid</span></button>
+        <button class="seg-btn" data-v="5" onclick="segSelect('ssSize',this)">5<br><span style="font-size:10px;font-weight:400">Huge</span></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Calidad</label>
+      <div class="stars" id="ssQuality">
+        <span class="star" onclick="starSelect('ssQuality',1)">★</span>
+        <span class="star" onclick="starSelect('ssQuality',2)">★</span>
+        <span class="star active" onclick="starSelect('ssQuality',3)">★</span>
+        <span class="star" onclick="starSelect('ssQuality',4)">★</span>
+        <span class="star" onclick="starSelect('ssQuality',5)">★</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Viento</label>
+      <select class="field-input" id="ssWind">
+        <option value="glassy">🌅 Glassy (sin viento)</option>
+        <option value="offshore">💨 Off-shore (bueno)</option>
+        <option value="onshore">🌬️ On-shore (malo)</option>
+        <option value="cross">↗️ Cross-shore (lateral)</option>
+      </select>
+    </div>
+
+    <div class="field" style="margin-bottom:0">
+      <label class="field-label">Crowd</label>
+      <div class="sem-row">
+        <button class="sem-btn selected" data-v="empty" onclick="semSelect(this)">🟢<br><span style="font-size:11px">Vacío</span></button>
+        <button class="sem-btn" data-v="medium" onclick="semSelect(this)">🟡<br><span style="font-size:11px">Medio</span></button>
+        <button class="sem-btn" data-v="crowded" onclick="semSelect(this)">🔴<br><span style="font-size:11px">Lleno</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Objective -->
+  <div class="field">
+    <label class="field-label">🎯 Objetivo de la Sesión</label>
+    <input class="field-input" id="ssFocus" placeholder="Ej: Técnica de Bottom Turn">
+  </div>
+
+  <!-- Athletes -->
+  <div class="card">
+    <div class="card-header flex-between" style="margin-bottom:8px">
+      <span>👥 Atletas</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="openAddAthleteModal()">+ Agregar</button>
+    </div>
+    <div class="athlete-grid" id="ssAthletes"></div>
+    <div id="ssAthCount" style="margin-top:10px;font-size:12px;color:var(--text-secondary);font-weight:600"></div>
+  </div>
+
+  <button class="btn btn-accent" onclick="launchSession()" id="ssLaunchBtn" style="font-size:17px;padding:18px">
+    🏄 Iniciar Sesión
+  </button>
+</div>
+
+<!-- ==================== SESSION HUB ==================== -->
+<div class="view" id="view-session-hub">
+  <div style="text-align:center;margin:16px 0 20px">
+    <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em">● Sesión Activa</div>
+    <div style="font-size:22px;font-weight:800;margin-top:4px" id="hubSpot">—</div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="hubConditions">—</div>
+    <div style="font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text-primary);margin-top:8px" id="hubTimer">00:00</div>
+  </div>
+
+  <!-- Session athletes -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header" style="margin-bottom:6px">👥 Atletas en Sesión</div>
+    <div id="hubAthletes" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  </div>
+
+  <!-- Objective -->
+  <div id="hubFocusCard" class="card" style="margin-bottom:16px;display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🎯 Objetivo</div>
+    <div id="hubFocus" style="font-size:14px;color:var(--text-primary)"></div>
+  </div>
+
+  <!-- Mode selection -->
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+    <button class="btn" onclick="showView('tactical')" style="padding:20px;font-size:16px;background:linear-gradient(135deg,var(--green),#059669);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:32px">🏄</span>
+      <div><div style="font-weight:800">Tactical IQ</div><div style="font-size:12px;font-weight:500;opacity:.85;margin-top:2px">Tracking de remadas, atrapadas, caídas</div></div>
+    </button>
+    <button class="btn" onclick="hubEnterJudge()" style="padding:20px;font-size:16px;background:linear-gradient(135deg,#6366f1,#4f46e5);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:32px">⚖️</span>
+      <div><div style="font-weight:800">Judge Heat</div><div style="font-size:12px;font-weight:500;opacity:.85;margin-top:2px">Scoring ISA 0-10, rankings, interferencia</div></div>
+    </button>
+  </div>
+
+  <!-- Quick overview button -->
+  <button class="btn btn-outline" onclick="showView('overview')" style="margin-bottom:10px">
+    📊 Vista General (Quick Overview)
+  </button>
+
+  <!-- End session -->
+  <button class="btn" onclick="endSessionFromHub()" style="background:var(--bg-card);border:1px solid var(--red);color:var(--red);font-size:14px;padding:14px">
+    🏁 Finalizar Sesión
+  </button>
+</div>
+
+<!-- ==================== TACTICAL IQ ==================== -->
+<div class="view" id="view-tactical" style="padding:0 0 24px">
+  <!-- Sticky header -->
+  <div class="tac-header">
+    <button class="tac-nav-arrow" onclick="tacPrev()">‹</button>
+    <div style="text-align:center">
+      <div class="tac-athlete-name" id="tacName">—</div>
+      <div style="font-size:11px;color:var(--text-secondary);font-weight:600" id="tacLevel"></div>
+    </div>
+    <button class="tac-nav-arrow" onclick="tacNext()">›</button>
+  </div>
+
+  <div style="padding:12px 16px">
+    <!-- Catch Ratio -->
+    <div class="tac-catch mid" id="tacCatch">
+      <div id="tacCatchVal">—%</div>
+      <div class="tac-catch-label">Catch Ratio</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="tac-stat-row">
+      <div class="tac-stat"><div class="tac-stat-val" id="tacPaddled" style="color:var(--accent)">0</div><div class="tac-stat-label">Remadas</div></div>
+      <div class="tac-stat"><div class="tac-stat-val" id="tacCaught" style="color:var(--green)">0</div><div class="tac-stat-label">Atrapadas</div></div>
+    </div>
+
+    <!-- BIG COUNTER BUTTONS -->
+    <div class="counter-row">
+      <button class="counter-btn c-paddle" onclick="tacCount('paddle')">
+        <span class="cnt-icon">🏊</span>
+        <span style="font-size:11px">REMÓ</span>
+        <span class="cnt-val" id="tacPaddleBtn">+1</span>
+      </button>
+      <button class="counter-btn c-catch" onclick="tacCount('catch')">
+        <span class="cnt-icon">✅</span>
+        <span style="font-size:11px">ATRAPÓ</span>
+        <span class="cnt-val" id="tacCatchBtn">+1</span>
+      </button>
+      <button class="counter-btn c-fall" onclick="tacCount('fall')">
+        <span class="cnt-icon">💥</span>
+        <span style="font-size:11px">CAÍDA</span>
+        <span class="cnt-val" id="tacFallBtn">+1</span>
+      </button>
+    </div>
+
+    <!-- Quick Eval (only visible after catching a wave) -->
+    <div id="tacEvalSection" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Evaluación Rápida — Última Ola</div>
+      
+      <!-- Set or Interset -->
+      <div class="eval-section">
+        <div class="eval-label">Tipo de Ola</div>
+        <div class="eval-row" id="evalWaveType">
+          <button class="eval-btn" data-v="set" onclick="evalSet('wave_type',this,'b')" style="flex:1">🌊 Set</button>
+          <button class="eval-btn" data-v="interset" onclick="evalSet('wave_type',this,'m')" style="flex:1">〰️ Interset</button>
+        </div>
+      </div>
+
+      <!-- Set vs Interset -->
+      <div class="eval-section">
+        <div class="eval-label">Tipo de Ola</div>
+        <div class="eval-row" id="evalWaveType">
+          <button class="eval-btn" data-v="set" onclick="evalSet('wave_type',this,'a')" style="flex:1">🌊 Set</button>
+          <button class="eval-btn" data-v="interset" onclick="evalSet('wave_type',this,'y')" style="flex:1">〰️ Interset</button>
+        </div>
+      </div>
+
+      <!-- Wave Quality -->
+      <div class="eval-section">
+        <div class="eval-label">Calidad de la Ola</div>
+        <div class="eval-row" id="evalWaveQuality">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('wave_quality',this,'r')">💩 Pobre</button>
+          <button class="eval-btn" data-v="regular" onclick="evalSet('wave_quality',this,'y')">👌 Regular</button>
+          <button class="eval-btn" data-v="good" onclick="evalSet('wave_quality',this,'g')">🔥 Buena</button>
+          <button class="eval-btn" data-v="excellent" onclick="evalSet('wave_quality',this,'a')">⭐ Excelente</button>
+        </div>
+      </div>
+
+      <div class="eval-section">
+        <div class="eval-label">Wave Selection</div>
+        <div class="eval-row" id="evalSelection">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('selection',this,'r')">🔴 Mala</button>
+          <button class="eval-btn" data-v="normal" onclick="evalSet('selection',this,'y')">🟡 Normal</button>
+          <button class="eval-btn" data-v="excellent" onclick="evalSet('selection',this,'g')">🟢 Excelente</button>
+        </div>
+      </div>
+
+      <div class="eval-section">
+        <div class="eval-label">Positioning</div>
+        <div class="eval-row" id="evalPosition">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('position',this,'r')">🔴 Fuera</button>
+          <button class="eval-btn" data-v="normal" onclick="evalSet('position',this,'y')">🟡 Ok</button>
+          <button class="eval-btn" data-v="excellent" onclick="evalSet('position',this,'g')">🟢 En el pico</button>
+        </div>
+      </div>
+
+      <div class="eval-section">
+        <div class="eval-label">Commitment</div>
+        <div class="eval-row" id="evalCommit">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('commit',this,'r')">🔴 Dudó</button>
+          <button class="eval-btn" data-v="normal" onclick="evalSet('commit',this,'y')">🟡 Normal</button>
+          <button class="eval-btn" data-v="excellent" onclick="evalSet('commit',this,'g')">🟢 Full Send</button>
+        </div>
+      </div>
+
+      <!-- Maneuver Tags -->
+      <div class="eval-label">Maniobras</div>
+      <div class="tag-row" id="tacTags">
+        <button class="tag-btn" data-m="takeoff" onclick="tagToggle(this)">Take Off</button>
+        <button class="tag-btn" data-m="bt" onclick="tagToggle(this)">BT</button>
+        <button class="tag-btn" data-m="carving" onclick="tagToggle(this)">Carving</button>
+        <button class="tag-btn" data-m="cutback" onclick="tagToggle(this)">Cutback</button>
+        <button class="tag-btn" data-m="snap" onclick="tagToggle(this)">Snap</button>
+        <button class="tag-btn" data-m="floater" onclick="tagToggle(this)">Floater</button>
+        <button class="tag-btn" data-m="aerial" onclick="tagToggle(this)">Aerial</button>
+        <button class="tag-btn" data-m="tube" onclick="tagToggle(this)">Tube</button>
+        <button class="tag-btn" data-m="reentry" onclick="tagToggle(this)">Re-entry</button>
+      </div>
+
+      <button class="btn btn-sm" onclick="confirmWave()" style="margin-top:12px;background:#f97316;color:#fff;font-weight:800;font-size:16px;padding:16px;box-shadow:0 0 20px rgba(249,115,22,.5);border:2px solid #fb923c;letter-spacing:.03em">✓ CONFIRMAR OLA</button>
+    </div>
+
+    <!-- Falls counter visible -->
+    <div class="tac-stat-row" style="margin-top:12px">
+      <div class="tac-stat"><div class="tac-stat-val" id="tacFalls" style="color:var(--red)">0</div><div class="tac-stat-label">Caídas</div></div>
+      <div class="tac-stat"><div class="tac-stat-val" id="tacWaves" style="color:var(--text-primary)">0</div><div class="tac-stat-label">Total Olas</div></div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="showView('overview')" style="flex:1">👥 Ver Todos</button>
+      <button class="btn btn-sm" style="flex:1;background:var(--red);color:#fff" onclick="endSession()">■ Cerrar Sesión</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== OVERVIEW ==================== -->
+<div class="view" id="view-overview" style="padding-top:8px">
+  <div class="flex-between mb-4" style="padding:0 4px">
+    <div style="font-size:17px;font-weight:800">Sesión en Vivo</div>
+    <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="showView('tactical')">← Tracking</button>
+  </div>
+  <div id="ovInfo" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;font-weight:600"></div>
+  <div class="card" style="padding:0;overflow:hidden" id="ovList"></div>
+  <div style="margin-top:16px;text-align:center">
+    <div style="font-size:13px;color:var(--text-secondary);font-weight:600">Catch Ratio Promedio</div>
+    <div id="ovAvg" style="font-size:32px;font-weight:800;color:var(--accent)">—%</div>
+  </div>
+  <button class="btn btn-sm" style="margin-top:16px;background:var(--red);color:#fff" onclick="endSession()">■ Cerrar Sesión</button>
+</div>
+
+<!-- ==================== DEBRIEF ==================== -->
+<div class="view" id="view-debrief">
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px">📋 Session Debrief</div>
+  <div id="dbDate" style="font-size:13px;color:var(--text-secondary);margin-bottom:16px"></div>
+
+  <div class="db-condition" id="dbConditions"></div>
+
+  <div class="card" style="padding:12px">
+    <div class="flex-between">
+      <span style="font-size:13px;font-weight:700;color:var(--text-secondary)">EQUIPO</span>
+      <span id="dbTeamRatio" style="font-size:15px;font-weight:800;color:var(--accent)"></span>
+    </div>
+    <div id="dbTeamStats" style="font-size:12px;color:var(--text-secondary);margin-top:4px"></div>
+  </div>
+
+  <div id="dbAthletes"></div>
+
+  <div class="field" style="margin-top:16px">
+    <label class="field-label">📝 Nota General</label>
+    <textarea class="field-input" id="dbNotes" rows="3" placeholder="Notas sobre la sesión..."></textarea>
+  </div>
+
+  <div class="field">
+    <label class="field-label">⭐ Rating de la Sesión</label>
+    <div class="stars" id="dbRating">
+      <span class="star" onclick="starSelect('dbRating',1)">★</span>
+      <span class="star" onclick="starSelect('dbRating',2)">★</span>
+      <span class="star" onclick="starSelect('dbRating',3)">★</span>
+      <span class="star" onclick="starSelect('dbRating',4)">★</span>
+      <span class="star" onclick="starSelect('dbRating',5)">★</span>
+    </div>
+  </div>
+
+  <button class="btn btn-accent" onclick="saveAndExport()" style="margin-bottom:10px">💾 Guardar y Exportar CSV</button>
+  <button class="btn btn-outline" onclick="saveDebrief(); showView('home')">Guardar sin Exportar</button>
+</div>
+
+<!-- ==================== ATHLETES ==================== -->
+<div class="view" id="view-athletes">
+  <div class="flex-between mb-4">
+    <div style="font-size:20px;font-weight:800">👥 Mis Atletas</div>
+    <button style="color:var(--accent);font-weight:700;font-size:14px" onclick="openAddAthleteModal()">+ Nuevo</button>
+  </div>
+  <div id="athList"></div>
+  <div id="athEmpty" class="empty-state">
+    <p>No tienes atletas registrados.</p>
+    <button class="btn btn-accent btn-sm" onclick="openAddAthleteModal()" style="width:auto;display:inline-block">Agregar Atleta</button>
+  </div>
+</div>
+
+<!-- ==================== SETTINGS ==================== -->
+<div class="view" id="view-settings">
+  <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ Configuración</div>
+
+  <div class="card">
+    <div class="card-header">📍 Spots</div>
+    <div id="setSpotList"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input class="field-input" id="setNewSpot" placeholder="Nuevo spot..." style="flex:1">
+      <button class="btn btn-accent btn-sm" onclick="addSpot()" style="width:auto;padding:10px 20px">+</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📊 Datos</div>
+    <button class="btn btn-outline btn-sm" onclick="exportAllData()" style="margin-bottom:8px">📥 Exportar Todos los Datos (CSV)</button>
+    <button class="btn btn-sm" style="background:var(--red);color:#fff" onclick="confirmClearData()">🗑️ Borrar Todos los Datos</button>
+  </div>
+
+  <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
+    KSS Coach v1.0 · Phase 1<br>Karibe Surf Score
+  </div>
+</div>
+
+<!-- ==================== ADD ATHLETE MODAL ==================== -->
+<div class="modal-overlay" id="modalAddAthlete">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo Atleta</div>
+    <div class="field">
+      <label class="field-label">Nombre</label>
+      <input class="field-input" id="maName" placeholder="Nombre completo">
+    </div>
+    <div class="field">
+      <label class="field-label">Stance</label>
+      <div class="seg-row" id="maStance">
+        <button class="seg-btn selected" data-v="regular" onclick="segSelect('maStance',this)">Regular</button>
+        <button class="seg-btn" data-v="goofy" onclick="segSelect('maStance',this)">Goofy</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Edad</label>
+      <input class="field-input" id="maAge" type="number" placeholder="15" min="5" max="60">
+    </div>
+    <button class="btn btn-accent" onclick="saveNewAthlete()">Guardar Atleta</button>
+    <button class="btn btn-outline" onclick="closeModal('modalAddAthlete')" style="margin-top:8px">Cancelar</button>
+  </div>
+</div>
+
+<!-- UNDO TOAST -->
+<div class="undo-toast" id="undoToast">
+  <span id="undoText"></span>
+  <button onclick="undoLastAction()">UNDO</button>
+</div>
+
+<!-- ==================== JUDGE MODE ==================== -->
+<div class="view" id="view-judge" style="padding:8px 8px 24px">
+  <!-- Collapsed metadata -->
+  <div class="jm-meta-collapsed" id="jmMetaCollapsed"></div>
+  
+  <!-- Setup form -->
+  <div class="jm-setup-form" id="jmSetupForm">
+    <div style="font-size:17px;font-weight:800;margin-bottom:12px">⚖️ Judge Mode</div>
+    <div class="card">
+      <div class="card-header">Heat Info</div>
+      <div class="jm-meta-grid">
+        <div class="field" style="margin-bottom:8px"><label class="field-label">Heat #</label><input class="field-input" id="jmHeatNum" placeholder="1"></div>
+        <div class="field" style="margin-bottom:8px"><label class="field-label">Category</label><input class="field-input" id="jmCategory" placeholder="Open Men"></div>
+        <div class="field" style="margin-bottom:8px"><label class="field-label">Round</label><input class="field-input" id="jmRound" placeholder="Quarter Final"></div>
+        <div class="field" style="margin-bottom:8px"><label class="field-label">Location</label><input class="field-input" id="jmLocation" placeholder="Parguito"></div>
+      </div>
+      <div class="field" style="margin-bottom:0"><label class="field-label">Duration (min)</label><input class="field-input" id="jmDuration" type="number" value="20" min="5" max="60" style="width:100px"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">👥 Surfers</div>
+      <div class="jm-surfer-grid" id="jmSurferSetup"></div>
+    </div>
+  </div>
+
+  <!-- Timer bar -->
+  <div class="jm-timer-bar" id="jmTimerBar" style="display:none">
+    <div class="jm-timer" id="jmTimerDisplay">20:00</div>
+    <div class="jm-timer-btns">
+      <button class="jm-timer-btn" onclick="jmNotes()" title="Notes">📝</button>
+      <button class="jm-timer-btn" id="jmCloseBtn" onclick="jmCloseHeat()">🏁 Close</button>
+      <button class="jm-timer-btn" id="jmReopenBtn" onclick="jmReopenHeat()" style="display:none">🔓 Reopen</button>
+    </div>
+  </div>
+
+  <!-- Start / Reset buttons -->
+  <div style="display:flex;gap:8px;margin-bottom:8px">
+    <button class="btn btn-accent" id="jmStartBtn" onclick="jmStartTimer()" style="flex:1;padding:14px">▶️ Start Heat</button>
+    <button class="btn btn-outline" onclick="jmResetHeat()" style="width:auto;padding:14px 20px">🔄</button>
+  </div>
+  <div id="jmCloseRow" style="display:none;margin-bottom:12px">
+    <button class="btn" id="jmCloseBtn2" onclick="jmCloseHeat()" style="width:100%;padding:14px;background:var(--red);font-size:15px;font-weight:800">🏁 Cerrar Heat</button>
+  </div>
+
+  <!-- Score Grid -->
+  <div class="card" style="padding:10px;overflow:hidden">
+    <div class="jm-grid-wrap">
+      <table class="jm-grid" id="jmGrid"></table>
+    </div>
+  </div>
+
+  <!-- Priority -->
+  <div class="card" style="padding:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">🎯 Priority (tap surfer to send right →)</div>
+    <div class="jm-priority" id="jmPriority"></div>
+  </div>
+
+  <!-- Live Rankings -->
+  <div class="card" style="padding:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center">📊 Live Rankings</div>
+    <div class="jm-rankings" id="jmRankings"></div>
+  </div>
+
+  <!-- Results (after close) -->
+  <div class="jm-results" id="jmResults" style="display:none">
+    <div class="card">
+      <div class="card-header">🏆 Final Results</div>
+      <div id="jmResultsContent"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-sm btn-outline" onclick="jmExportCSV()" style="flex:1">📊 CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Tracker -->
+  <div id="jmTracker" style="display:none;margin-top:12px">
+    <div class="card">
+      <div class="card-header">📈 Session Tracker</div>
+      <div style="overflow-x:auto" id="jmTrackerContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Judge Notes Modal -->
+<div class="jm-notes-modal" id="jmNotesModal" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="jm-notes-box">
+    <div class="flex-between mb-4"><span style="font-weight:800">📝 Heat Notes</span><button onclick="document.getElementById('jmNotesModal').classList.remove('active')" style="font-size:18px">✕</button></div>
+    <textarea class="field-input" id="jmNotesText" rows="6" placeholder="Notes..."></textarea>
+  </div>
+</div>
+
+<!-- ==================== BOTTOM NAV ==================== -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-view="home" onclick="showView('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" data-view="athletes" onclick="showView('athletes')">
+    <svg viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    Atletas
+  </button>
+  <button class="nav-btn" data-view="judge" onclick="showView('judge')">
+    <svg viewBox="0 0 24 24"><path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+    Judge
+  </button>
+  <button class="nav-btn disabled" data-view="drills">
+    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    Drills
+  </button>
+  <button class="nav-btn" data-view="settings" onclick="showView('settings')">
+    <svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+    Config
+  </button>
+</nav>
+
+<script>
+// ============================================================
+// STORAGE LAYER
+// ============================================================
+const DB = {
+  _get(k, def) { try { return JSON.parse(localStorage.getItem('kss_' + k)) || def; } catch { return def; } },
+  _set(k, v) { localStorage.setItem('kss_' + k, JSON.stringify(v)); },
+  _cache: { activeSession: undefined },
+  
+  get athletes() { return this._get('athletes', []); },
+  set athletes(v) { this._set('athletes', v); },
+  
+  get spots() { return this._get('spots', ['Parguito', 'El Tirano', 'Los Caracas', 'Playa El Agua']); },
+  set spots(v) { this._set('spots', v); },
+  
+  get sessions() { return this._get('sessions', []); },
+  set sessions(v) { this._set('sessions', v); },
+  
+  get activeSession() {
+    if (this._cache.activeSession === undefined) {
+      this._cache.activeSession = this._get('active_session', null);
+    }
+    return this._cache.activeSession;
+  },
+  set activeSession(v) {
+    this._cache.activeSession = v;
+    this._set('active_session', v);
+  },
+  
+  // Flush in-memory activeSession to localStorage (call after mutations)
+  saveActive() {
+    if (this._cache.activeSession !== undefined) {
+      this._set('active_session', this._cache.activeSession);
+    }
+  },
+  
+  get coach() { return this._get('coach', { name: 'Coach' }); },
+  set coach(v) { this._set('coach', v); },
+  
+  get judgeHeat() { return this._get('judge_heat', null); },
+  set judgeHeat(v) { this._set('judge_heat', v); },
+  
+  get judgeTracker() { return this._get('judge_tracker', {}); },
+  set judgeTracker(v) { this._set('judge_tracker', v); },
+
+  genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+};
+
+// ============================================================
+// VIEW ROUTER
+// ============================================================
+let currentView = 'home';
+let sessionTimer = null;
+let sessionStartTime = null;
+
+function showView(id) {
+  // Guard: if session active, restrict nav
+  const s = DB.activeSession;
+  if (s && !['tactical', 'overview', 'debrief', 'judge', 'session-hub'].includes(id)) {
+    if (!confirm('Tienes una sesión activa. ¿Salir del tracking?')) return;
+  }
+  
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + id);
+  if (el) el.classList.add('active');
+  
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nav = document.querySelector(`.nav-btn[data-view="${id}"]`);
+  if (nav) nav.classList.add('active');
+  
+  currentView = id;
+  
+  // Clean up hub timer when leaving hub
+  if (id !== 'session-hub' && typeof hubTimerInterval !== 'undefined' && hubTimerInterval) {
+    clearInterval(hubTimerInterval);
+    hubTimerInterval = null;
+  }
+  
+  // Lifecycle hooks
+  if (id === 'home') renderHome();
+  if (id === 'athletes') renderAthletes();
+  if (id === 'settings') renderSettings();
+  if (id === 'session-setup') renderSessionSetup();
+  if (id === 'session-hub') renderSessionHub();
+  if (id === 'tactical') renderTactical();
+  if (id === 'overview') renderOverview();
+  if (id === 'debrief') renderDebrief();
+  if (id === 'judge') renderJudge();
+  
+  // Session bar
+  updateSessionBar();
+}
+
+function updateSessionBar() {
+  const bar = document.getElementById('sessionBar');
+  const s = DB.activeSession;
+  if (s && ['tactical', 'overview'].includes(currentView)) {
+    const sizeNames = { 1: 'Flat', 2: '1-2ft', 3: '2-4ft', 4: '4-6ft', 5: '+6ft' };
+    bar.querySelector('#sbInfo').textContent = `${s.spot} · ${sizeNames[s.wave_size] || ''} · ${s.wind_condition}`;
+    bar.classList.add('active');
+    if (!sessionTimer) startSessionTimer();
+  } else {
+    bar.classList.remove('active');
+  }
+}
+
+function startSessionTimer() {
+  const s = DB.activeSession;
+  if (!s) return;
+  sessionStartTime = new Date(s.started_at);
+  sessionTimer = setInterval(() => {
+    const diff = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+    const m = String(Math.floor(diff / 60)).padStart(2, '0');
+    const sec = String(diff % 60).padStart(2, '0');
+    document.getElementById('sbTime').textContent = `${m}:${sec}`;
+  }, 1000);
+}
+
+function stopSessionTimer() {
+  if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function renderHome() {
+  const sessions = DB.sessions;
+  const athletes = DB.athletes;
+  const s = DB.activeSession;
+  
+  // If active session, change button
+  const btn = document.getElementById('homeStartBtn');
+  if (s) {
+    btn.textContent = '🏄 Volver a Sesión';
+    btn.onclick = () => showView('session-hub');
+  } else {
+    btn.textContent = '⚡ Nueva Sesión';
+    btn.onclick = () => startNewSession();
+  }
+  
+  // Last session
+  const lastDiv = document.getElementById('homeLastSession');
+  if (sessions.length > 0) {
+    const last = sessions[sessions.length - 1];
+    const d = new Date(last.date);
+    const totalCaught = Object.values(last.athlete_data).reduce((s, a) => s + a.caught, 0);
+    const totalPaddled = Object.values(last.athlete_data).reduce((s, a) => s + a.paddled, 0);
+    const ratio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
+    document.getElementById('homeLastContent').innerHTML = `
+      <div style="font-size:14px;font-weight:700">${last.spot} · ${new Intl.DateTimeFormat('es',{day:'numeric',month:'short'}).format(d)}</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${Object.keys(last.athlete_data).length} atletas · Catch ratio: ${ratio}%</div>
+    `;
+    lastDiv.style.display = 'block';
+  } else {
+    lastDiv.style.display = 'none';
+  }
+  
+  // Highlights
+  const hlDiv = document.getElementById('homeHighlights');
+  if (athletes.length > 0 && sessions.length > 0) {
+    // Find best catch ratio athlete from last session
+    const last = sessions[sessions.length - 1];
+    let best = null, bestRatio = 0;
+    for (const [id, data] of Object.entries(last.athlete_data)) {
+      const r = data.paddled > 0 ? data.caught / data.paddled : 0;
+      if (r > bestRatio) { bestRatio = r; best = id; }
+    }
+    const bestAthlete = athletes.find(a => a.id === best);
+    let html = '';
+    if (bestAthlete) {
+      html += `<div style="font-size:13px;margin-bottom:6px">🏆 Mejor catch ratio: <strong>${bestAthlete.name}</strong> (${Math.round(bestRatio * 100)}%)</div>`;
+    }
+    // Total sessions count
+    html += `<div style="font-size:13px;color:var(--text-secondary)">📊 ${sessions.length} sesiones registradas</div>`;
+    document.getElementById('homeHighContent').innerHTML = html;
+    hlDiv.style.display = 'block';
+  } else {
+    hlDiv.style.display = 'none';
+  }
+  
+  // Empty state
+  document.getElementById('homeEmpty').style.display = sessions.length === 0 && athletes.length === 0 ? 'block' : 'none';
+}
+
+// ============================================================
+// SESSION CREATOR
+// ============================================================
+function startNewSession() {
+  if (DB.athletes.length === 0) {
+    openAddAthleteModal();
+    return;
+  }
+  showView('session-setup');
+}
+
+function renderSessionSetup() {
+  // Spots dropdown
+  const spotSel = document.getElementById('ssSpot');
+  const spots = DB.spots;
+  spotSel.innerHTML = spots.map(s => `<option value="${s}">${s}</option>`).join('');
+  
+  // Pre-select last used spot
+  const sessions = DB.sessions;
+  if (sessions.length > 0) {
+    spotSel.value = sessions[sessions.length - 1].spot;
+  }
+  
+  // Athletes
+  renderSSAthletes();
+}
+
+function renderSSAthletes() {
+  const container = document.getElementById('ssAthletes');
+  const athletes = DB.athletes;
+  const sessions = DB.sessions;
+  
+  // Pre-select from last session
+  const lastAthletes = sessions.length > 0 ? Object.keys(sessions[sessions.length - 1].athlete_data) : [];
+  
+  if (!window._ssSelected) {
+    window._ssSelected = new Set(lastAthletes.length > 0 ? lastAthletes : athletes.map(a => a.id));
+  }
+  
+  container.innerHTML = athletes.map(a => {
+    const sel = window._ssSelected.has(a.id);
+    const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    return `<button class="athlete-chip ${sel ? 'selected' : ''}" onclick="toggleSSAthlete('${a.id}',this)">
+      <span class="avi">${initials}</span>${a.name.split(' ')[0]}
+    </button>`;
+  }).join('');
+  
+  const cnt = window._ssSelected.size;
+  document.getElementById('ssAthCount').textContent = cnt > 0 ? `✓ ${cnt} atleta${cnt > 1 ? 's' : ''} · +${cnt * 10} XP` : 'Selecciona al menos 1 atleta';
+}
+
+function toggleSSAthlete(id, el) {
+  if (window._ssSelected.has(id)) { window._ssSelected.delete(id); el.classList.remove('selected'); }
+  else { window._ssSelected.add(id); el.classList.add('selected'); }
+  const cnt = window._ssSelected.size;
+  document.getElementById('ssAthCount').textContent = cnt > 0 ? `✓ ${cnt} atleta${cnt > 1 ? 's' : ''} · +${cnt * 10} XP` : 'Selecciona al menos 1 atleta';
+}
+
+function cancelSession() {
+  window._ssSelected = null;
+  showView('home');
+}
+
+function launchSession() {
+  const spot = document.getElementById('ssSpot').value;
+  const size = getSegValue('ssSize');
+  const quality = getStarValue('ssQuality');
+  const wind = document.getElementById('ssWind').value;
+  const crowd = document.querySelector('.sem-btn.selected')?.dataset.v || 'empty';
+  const focus = document.getElementById('ssFocus').value;
+  const selectedIds = Array.from(window._ssSelected || []);
+  
+  if (selectedIds.length === 0) { alert('Selecciona al menos un atleta'); return; }
+  
+  // Build athlete data
+  const athleteData = {};
+  selectedIds.forEach(id => {
+    athleteData[id] = {
+      paddled: 0,
+      caught: 0,
+      falls: 0,
+      waves: [] // Array of wave objects
+    };
+  });
+  
+  const session = {
+    id: DB.genId(),
+    spot,
+    wave_size: parseInt(size),
+    wave_quality: parseInt(quality),
+    wind_condition: wind,
+    crowd_factor: crowd,
+    focus_area: focus,
+    started_at: new Date().toISOString(),
+    athlete_data: athleteData,
+    status: 'active'
+  };
+  
+  DB.activeSession = session;
+  window._ssSelected = null;
+  window._tacIdx = 0;
+  window._pendingWave = null;
+  
+  showView('session-hub');
+}
+
+// ============================================================
+// SESSION HUB
+// ============================================================
+let hubTimerInterval = null;
+
+function renderSessionHub() {
+  const s = DB.activeSession;
+  if (!s) { showView('home'); return; }
+  
+  const sizeNames = { 1:'Flat', 2:'1-2ft', 3:'2-4ft', 4:'4-6ft', 5:'+6ft' };
+  const qualityStr = '★'.repeat(s.wave_quality) + '☆'.repeat(5 - s.wave_quality);
+  const windNames = { glassy:'Glassy', offshore:'Off-shore', onshore:'On-shore', cross:'Cross-shore' };
+  const crowdNames = { empty:'🟢 Vacío', medium:'🟡 Medio', crowded:'🔴 Lleno' };
+  
+  document.getElementById('hubSpot').textContent = s.spot;
+  document.getElementById('hubConditions').textContent = `${sizeNames[s.wave_size]} · ${qualityStr} · ${windNames[s.wind_condition]} · ${crowdNames[s.crowd_factor]}`;
+  
+  // Focus
+  const focusCard = document.getElementById('hubFocusCard');
+  if (s.focus_area) {
+    focusCard.style.display = 'block';
+    document.getElementById('hubFocus').textContent = s.focus_area;
+  } else {
+    focusCard.style.display = 'none';
+  }
+  
+  // Athletes
+  const athletes = DB.athletes;
+  const ids = Object.keys(s.athlete_data);
+  document.getElementById('hubAthletes').innerHTML = ids.map(id => {
+    const ath = athletes.find(a => a.id === id);
+    if (!ath) return '';
+    const data = s.athlete_data[id];
+    const caught = data.caught || 0;
+    const paddled = data.paddled || 0;
+    const ratio = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
+    const hasData = paddled > 0;
+    return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px">
+      <span class="avi" style="width:28px;height:28px;font-size:11px">${ath.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>
+      <span style="font-weight:700">${ath.name.split(' ')[0]}</span>
+      ${hasData ? `<span style="font-size:11px;color:var(--text-secondary);margin-left:auto">${caught}/${paddled} · ${ratio}%</span>` : ''}
+    </div>`;
+  }).join('');
+  
+  // Hub timer
+  if (!hubTimerInterval) {
+    const startTime = new Date(s.started_at);
+    hubTimerInterval = setInterval(() => {
+      const diff = Math.floor((Date.now() - startTime.getTime()) / 1000);
+      const m = String(Math.floor(diff / 60)).padStart(2, '0');
+      const sec = String(diff % 60).padStart(2, '0');
+      const el = document.getElementById('hubTimer');
+      if (el) el.textContent = `${m}:${sec}`;
+    }, 1000);
+  }
+}
+
+function hubEnterJudge() {
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  const athletes = DB.athletes;
+  const ids = Object.keys(s.athlete_data);
+  
+  // Reset judge heat cache so it picks up fresh data
+  window._jmHeatCache = null;
+  
+  // Pre-populate judge surfers from session athletes (max 5)
+  const h = jmGetHeat();
+  const surferAthletes = ids.slice(0, 5);
+  
+  surferAthletes.forEach((id, i) => {
+    const ath = athletes.find(a => a.id === id);
+    if (ath && h.surfers[i]) {
+      h.surfers[i].name = ath.name;
+      h.surfers[i].athlete_id = id;
+    }
+  });
+  
+  // Pre-fill location from session
+  h.metadata.location = s.spot;
+  
+  jmSave();
+  
+  // Clear surfer setup init flag so dropdowns refresh with pre-selected values
+  const sg = document.getElementById('jmSurferSetup');
+  if (sg) delete sg.dataset.init;
+  
+  showView('judge');
+}
+
+function endSessionFromHub() {
+  if (!confirm('¿Finalizar esta sesión? Podrás revisar el debrief.')) return;
+  
+  // Stop hub timer
+  if (hubTimerInterval) { clearInterval(hubTimerInterval); hubTimerInterval = null; }
+  
+  // Auto-confirm any pending wave
+  if (window._pendingWave) confirmWave();
+  stopSessionTimer();
+  
+  showView('debrief');
+}
+
+// ============================================================
+// TACTICAL IQ
+// ============================================================
+function renderTactical() {
+  const s = DB.activeSession;
+  if (!s) { showView('home'); return; }
+  
+  const ids = Object.keys(s.athlete_data);
+  if (window._tacIdx === undefined || window._tacIdx >= ids.length) window._tacIdx = 0;
+  
+  const currentId = ids[window._tacIdx];
+  const athlete = DB.athletes.find(a => a.id === currentId);
+  const data = s.athlete_data[currentId];
+  
+  document.getElementById('tacName').textContent = athlete ? athlete.name : 'Atleta';
+  document.getElementById('tacLevel').textContent = athlete ? `Nivel ${athlete.level || 1} · ${athlete.stance || 'Regular'}` : '';
+  
+  // Stats
+  document.getElementById('tacPaddled').textContent = data.paddled;
+  document.getElementById('tacCaught').textContent = data.caught;
+  document.getElementById('tacFalls').textContent = data.falls;
+  document.getElementById('tacWaves').textContent = data.waves.length;
+  
+  // Catch ratio
+  const ratio = data.paddled > 0 ? Math.round(data.caught / data.paddled * 100) : 0;
+  const catchEl = document.getElementById('tacCatch');
+  document.getElementById('tacCatchVal').textContent = data.paddled > 0 ? ratio + '%' : '—%';
+  catchEl.className = 'tac-catch ' + (ratio >= 60 ? 'good' : ratio >= 40 ? 'mid' : data.paddled > 0 ? 'low' : 'mid');
+  
+  // Reset eval section
+  document.getElementById('tacEvalSection').style.display = window._pendingWave ? 'block' : 'none';
+  if (!window._pendingWave) resetEvalUI();
+  
+  updateSessionBar();
+}
+
+function tacPrev() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const ids = Object.keys(s.athlete_data);
+  window._tacIdx = (window._tacIdx - 1 + ids.length) % ids.length;
+  window._pendingWave = null;
+  renderTactical();
+}
+
+function tacNext() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const ids = Object.keys(s.athlete_data);
+  window._tacIdx = (window._tacIdx + 1) % ids.length;
+  window._pendingWave = null;
+  renderTactical();
+}
+
+function tacCount(type) {
+  const s = DB.activeSession;
+  if (!s) return;
+  const ids = Object.keys(s.athlete_data);
+  const currentId = ids[window._tacIdx];
+  const data = s.athlete_data[currentId];
+  
+  if (type === 'paddle') {
+    data.paddled++;
+    showUndoToast('Remada +1', () => { data.paddled = Math.max(0, data.paddled - 1); saveSession(); renderTactical(); });
+  } else if (type === 'catch') {
+    data.caught++;
+    if (data.paddled < data.caught) data.paddled = data.caught; // Auto-correct
+    // Show eval section for this wave
+    window._pendingWave = { type: 'caught', timestamp: new Date().toISOString(), wave_type: null, wave_quality: null, selection: null, position: null, commit: null, maneuvers: [] };
+    document.getElementById('tacEvalSection').style.display = 'block';
+    resetEvalUI();
+    showUndoToast('Atrapada +1', () => { 
+      data.caught = Math.max(0, data.caught - 1); 
+      window._pendingWave = null;
+      document.getElementById('tacEvalSection').style.display = 'none';
+      saveSession(); renderTactical(); 
+    });
+  } else if (type === 'fall') {
+    data.falls++;
+    data.paddled++;
+    if (data.paddled < data.caught + data.falls) data.paddled = data.caught + data.falls;
+    // Record fall wave
+    data.waves.push({ type: 'fall', timestamp: new Date().toISOString() });
+    showUndoToast('Caída +1', () => { 
+      data.falls = Math.max(0, data.falls - 1); 
+      data.paddled = Math.max(0, data.paddled - 1);
+      data.waves.pop(); 
+      saveSession(); renderTactical(); 
+    });
+  }
+  
+  // Haptic
+  if (navigator.vibrate) navigator.vibrate(30);
+  
+  saveSession();
+  renderTactical();
+}
+
+function evalSet(field, el, color) {
+  const parent = el.parentElement;
+  parent.querySelectorAll('.eval-btn').forEach(b => b.className = 'eval-btn');
+  el.classList.add('sel-' + color);
+  if (window._pendingWave) window._pendingWave[field] = el.dataset.v;
+}
+
+function tagToggle(el) {
+  el.classList.toggle('selected');
+  if (window._pendingWave) {
+    const m = el.dataset.m;
+    const idx = window._pendingWave.maneuvers.indexOf(m);
+    if (idx >= 0) window._pendingWave.maneuvers.splice(idx, 1);
+    else window._pendingWave.maneuvers.push(m);
+  }
+}
+
+function confirmWave() {
+  if (!window._pendingWave) return;
+  const s = DB.activeSession;
+  const ids = Object.keys(s.athlete_data);
+  const currentId = ids[window._tacIdx];
+  s.athlete_data[currentId].waves.push({ ...window._pendingWave });
+  window._pendingWave = null;
+  document.getElementById('tacEvalSection').style.display = 'none';
+  saveSession();
+  renderTactical();
+  if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+}
+
+function resetEvalUI() {
+  document.querySelectorAll('#tacEvalSection .eval-btn').forEach(b => b.className = 'eval-btn');
+  document.querySelectorAll('#tacTags .tag-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function saveSession() {
+  DB.saveActive();
+}
+
+// ============================================================
+// OVERVIEW
+// ============================================================
+function renderOverview() {
+  const s = DB.activeSession;
+  if (!s) { showView('home'); return; }
+  
+  const sizeNames = { 1: 'Flat', 2: '1-2ft', 3: '2-4ft', 4: '4-6ft', 5: '+6ft' };
+  document.getElementById('ovInfo').textContent = `${s.spot} · ${sizeNames[s.wave_size]} · ${s.focus_area || ''}`;
+  
+  const athletes = DB.athletes;
+  const ids = Object.keys(s.athlete_data);
+  let totalPaddled = 0, totalCaught = 0;
+  
+  let html = '';
+  ids.forEach((id, i) => {
+    const a = athletes.find(x => x.id === id);
+    const d = s.athlete_data[id];
+    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : d.paddled > 0 ? 'var(--red)' : 'var(--text-muted)';
+    totalPaddled += d.paddled;
+    totalCaught += d.caught;
+    
+    html += `<div class="ov-row" onclick="window._tacIdx=${i};showView('tactical')" style="cursor:pointer">
+      <div class="ov-name">${a ? a.name.split(' ')[0] : 'Atleta'}</div>
+      <div class="ov-stats">${d.paddled}/${d.caught}</div>
+      <div class="ov-ratio" style="color:${color}">${d.paddled > 0 ? ratio + '%' : '—'}</div>
+    </div>`;
+  });
+  
+  document.getElementById('ovList').innerHTML = html;
+  const avgRatio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
+  document.getElementById('ovAvg').textContent = totalPaddled > 0 ? avgRatio + '%' : '—%';
+  
+  updateSessionBar();
+}
+
+// ============================================================
+// END SESSION → DEBRIEF
+// ============================================================
+function endSession() {
+  if (!confirm('¿Cerrar la sesión actual?')) return;
+  // Auto-confirm any pending wave
+  if (window._pendingWave) confirmWave();
+  stopSessionTimer();
+  showView('debrief');
+}
+
+function renderDebrief() {
+  const s = DB.activeSession;
+  if (!s) { showView('home'); return; }
+  
+  const d = new Date(s.started_at);
+  document.getElementById('dbDate').textContent = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+  
+  // Conditions tags
+  const sizeNames = { 1: 'Flat', 2: '1-2ft', 3: '2-4ft', 4: '4-6ft', 5: '+6ft' };
+  const windNames = { glassy: '🌅 Glassy', offshore: '💨 Off-shore', onshore: '🌬️ On-shore', cross: '↗️ Cross-shore' };
+  const crowdNames = { empty: '🟢 Vacío', medium: '🟡 Medio', crowded: '🔴 Lleno' };
+  
+  let tags = `<span class="db-tag">📍 ${s.spot}</span>`;
+  tags += `<span class="db-tag">🌊 ${sizeNames[s.wave_size]}</span>`;
+  tags += `<span class="db-tag">${'⭐'.repeat(s.wave_quality)}</span>`;
+  tags += `<span class="db-tag">${windNames[s.wind_condition]}</span>`;
+  tags += `<span class="db-tag">${crowdNames[s.crowd_factor]}</span>`;
+  if (s.focus_area) tags += `<span class="db-tag">🎯 ${s.focus_area}</span>`;
+  document.getElementById('dbConditions').innerHTML = tags;
+  
+  // Team stats
+  const ids = Object.keys(s.athlete_data);
+  let totalP = 0, totalC = 0, totalF = 0;
+  ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled; totalC += d.caught; totalF += d.falls; });
+  const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
+  
+  document.getElementById('dbTeamRatio').textContent = `Catch Ratio: ${teamRatio}%`;
+  document.getElementById('dbTeamStats').textContent = `${ids.length} atletas · ${totalP} remadas · ${totalC} atrapadas · ${totalF} caídas`;
+  
+  // Per athlete
+  const athletes = DB.athletes;
+  let athHtml = '';
+  ids.forEach(id => {
+    const a = athletes.find(x => x.id === id);
+    const ad = s.athlete_data[id];
+    const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
+    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+    
+    // Calculate XP
+    let xp = 10; // Attendance
+    const goodWaves = ad.waves.filter(w => w.selection === 'excellent').length;
+    xp += goodWaves * 15;
+    if (ratio >= 70) xp += 25;
+    if (ad.falls === 0 && ad.caught > 0) xp += 40;
+    
+    // Maneuver summary
+    const maneuvers = {};
+    ad.waves.forEach(w => {
+      if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; });
+    });
+    const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+    
+    athHtml += `<div class="db-athlete-card">
+      <div class="db-athlete-name">${a ? a.name : 'Atleta'}</div>
+      <div class="db-stat-grid">
+        <div class="db-stat"><div class="db-stat-v">${ad.paddled}</div><div class="db-stat-l">Remó</div></div>
+        <div class="db-stat"><div class="db-stat-v">${ad.caught}</div><div class="db-stat-l">Atrapó</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
+      </div>
+      ${ad.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${ad.falls} caída${ad.falls > 1 ? 's' : ''}</div>` : ''}
+      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}
+      <div class="db-xp">✨ +${xp} XP</div>
+    </div>`;
+  });
+  document.getElementById('dbAthletes').innerHTML = athHtml;
+}
+
+function saveDebrief() {
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  s.status = 'completed';
+  s.ended_at = new Date().toISOString();
+  s.date = s.started_at;
+  s.coach_notes = document.getElementById('dbNotes').value;
+  s.coach_rating = getStarValue('dbRating');
+  
+  // Calculate duration
+  const start = new Date(s.started_at);
+  const end = new Date(s.ended_at);
+  s.duration_min = Math.round((end - start) / 60000);
+  
+  // Add XP to athletes
+  const athletes = DB.athletes;
+  Object.keys(s.athlete_data).forEach(id => {
+    const a = athletes.find(x => x.id === id);
+    if (!a) return;
+    const ad = s.athlete_data[id];
+    let xp = 10;
+    const ratio = ad.paddled > 0 ? ad.caught / ad.paddled : 0;
+    if (ratio >= 0.7) xp += 25;
+    if (ad.falls === 0 && ad.caught > 0) xp += 40;
+    const goodWaves = ad.waves.filter(w => w.selection === 'excellent').length;
+    xp += goodWaves * 15;
+    a.xp_total = (a.xp_total || 0) + xp;
+    a.sessions_count = (a.sessions_count || 0) + 1;
+  });
+  DB.athletes = athletes;
+  
+  // Save session
+  const sessions = DB.sessions;
+  sessions.push(s);
+  DB.sessions = sessions;
+  
+  // Clear active
+  DB.activeSession = null;
+  stopSessionTimer();
+}
+
+function saveAndExport() {
+  saveDebrief();
+  exportSessionCSV();
+  showView('home');
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportSessionCSV() {
+  const sessions = DB.sessions;
+  if (sessions.length === 0) return;
+  const s = sessions[sessions.length - 1];
+  const athletes = DB.athletes;
+  
+  let csv = 'KSS Coach - Session Export\n';
+  csv += `Date,${s.date}\n`;
+  csv += `Spot,${s.spot}\n`;
+  csv += `Wave Size,${s.wave_size}\n`;
+  csv += `Wave Quality,${s.wave_quality}\n`;
+  csv += `Wind,${s.wind_condition}\n`;
+  csv += `Crowd,${s.crowd_factor}\n`;
+  csv += `Focus,${s.focus_area}\n`;
+  csv += `Duration (min),${s.duration_min || ''}\n`;
+  csv += `Coach Notes,"${(s.coach_notes || '').replace(/"/g, '""')}"\n`;
+  csv += `Rating,${s.coach_rating || ''}\n\n`;
+  
+  csv += 'Athlete,Paddled,Caught,Falls,Catch Ratio,Waves,Maneuvers,Selection,Position,Commitment,XP\n';
+  
+  Object.keys(s.athlete_data).forEach(id => {
+    const a = athletes.find(x => x.id === id);
+    const d = s.athlete_data[id];
+    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    
+    const maneuvers = {};
+    let selCounts = { poor: 0, normal: 0, excellent: 0 };
+    let posCounts = { poor: 0, normal: 0, excellent: 0 };
+    let comCounts = { poor: 0, normal: 0, excellent: 0 };
+    
+    d.waves.forEach(w => {
+      if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1);
+      if (w.selection) selCounts[w.selection]++;
+      if (w.position) posCounts[w.position]++;
+      if (w.commit) comCounts[w.commit]++;
+    });
+    
+    let xp = 10;
+    if (ratio >= 70) xp += 25;
+    if (d.falls === 0 && d.caught > 0) xp += 40;
+    xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
+    
+    const manStr = Object.entries(maneuvers).map(([m, c]) => `${m}:${c}`).join(';');
+    const selStr = `P:${selCounts.poor} N:${selCounts.normal} E:${selCounts.excellent}`;
+    const posStr = `P:${posCounts.poor} N:${posCounts.normal} E:${posCounts.excellent}`;
+    const comStr = `P:${comCounts.poor} N:${comCounts.normal} E:${comCounts.excellent}`;
+    
+    csv += `"${a ? a.name : id}",${d.paddled},${d.caught},${d.falls},${ratio}%,${d.waves.length},"${manStr}","${selStr}","${posStr}","${comStr}",${xp}\n`;
+  });
+  
+  // Download
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `KSS_Session_${s.spot.replace(/\s/g, '')}_${new Date(s.date).toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportAllData() {
+  const data = {
+    athletes: DB.athletes,
+    sessions: DB.sessions,
+    spots: DB.spots,
+    exported_at: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `KSS_Coach_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// ATHLETES
+// ============================================================
+function renderAthletes() {
+  const athletes = DB.athletes;
+  const container = document.getElementById('athList');
+  const empty = document.getElementById('athEmpty');
+  
+  if (athletes.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  
+  const sessions = DB.sessions;
+  
+  container.innerHTML = '<div class="card" style="padding:0;overflow:hidden">' + athletes.map(a => {
+    const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const level = a.level || 1;
+    const xp = a.xp_total || 0;
+    const sessCount = a.sessions_count || 0;
+    
+    // Calculate level from XP
+    const thresholds = [0, 100, 400, 1000, 2000, 3500, 5700, 8700, 12700, 18200];
+    let calcLevel = 1;
+    for (let i = 1; i < thresholds.length; i++) {
+      if (xp >= thresholds[i]) calcLevel = i + 1;
+    }
+    
+    return `<div class="ath-item">
+      <div class="ath-avi">${initials}</div>
+      <div class="ath-info">
+        <div class="ath-name">${a.name}</div>
+        <div class="ath-sub">Nivel ${calcLevel} · ${a.stance || 'Regular'} · ${sessCount} sesiones · ${xp} XP</div>
+      </div>
+      <button onclick="deleteAthlete('${a.id}')" style="color:var(--text-muted);font-size:18px;padding:8px">×</button>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function openAddAthleteModal() {
+  document.getElementById('maName').value = '';
+  document.getElementById('maAge').value = '';
+  segSelect('maStance', document.querySelector('#maStance .seg-btn[data-v="regular"]'));
+  document.getElementById('modalAddAthlete').classList.add('active');
+  setTimeout(() => document.getElementById('maName').focus(), 300);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function saveNewAthlete() {
+  const name = document.getElementById('maName').value.trim();
+  if (!name) { alert('Ingresa el nombre del atleta'); return; }
+  
+  const stance = getSegValue('maStance');
+  const age = parseInt(document.getElementById('maAge').value) || null;
+  
+  const athletes = DB.athletes;
+  athletes.push({
+    id: DB.genId(),
+    name,
+    stance,
+    age,
+    level: 1,
+    xp_total: 0,
+    sessions_count: 0,
+    created_at: new Date().toISOString()
+  });
+  DB.athletes = athletes;
+  
+  closeModal('modalAddAthlete');
+  
+  if (currentView === 'athletes') renderAthletes();
+  if (currentView === 'session-setup') renderSSAthletes();
+}
+
+function deleteAthlete(id) {
+  if (!confirm('¿Eliminar este atleta?')) return;
+  DB.athletes = DB.athletes.filter(a => a.id !== id);
+  renderAthletes();
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings() {
+  const spots = DB.spots;
+  document.getElementById('setSpotList').innerHTML = spots.map((s, i) => 
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${s}</span>
+      <button onclick="removeSpot(${i})" style="color:var(--text-muted);font-size:16px;padding:4px 8px">×</button>
+    </div>`
+  ).join('');
+}
+
+function addSpot() {
+  const input = document.getElementById('setNewSpot');
+  const name = input.value.trim();
+  if (!name) return;
+  const spots = DB.spots;
+  if (!spots.includes(name)) { spots.push(name); DB.spots = spots; }
+  input.value = '';
+  renderSettings();
+}
+
+function removeSpot(i) {
+  const spots = DB.spots;
+  if (spots.length <= 1) { alert('Necesitas al menos un spot'); return; }
+  spots.splice(i, 1);
+  DB.spots = spots;
+  renderSettings();
+}
+
+function confirmClearData() {
+  if (confirm('⚠️ ¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) {
+    if (confirm('¿Estás seguro? Se borrarán atletas, sesiones y configuración.')) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function segSelect(groupId, el) {
+  document.querySelectorAll(`#${groupId} .seg-btn`).forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getSegValue(groupId) {
+  return document.querySelector(`#${groupId} .seg-btn.selected`)?.dataset.v || '3';
+}
+
+function starSelect(groupId, n) {
+  document.querySelectorAll(`#${groupId} .star`).forEach((s, i) => {
+    s.classList.toggle('active', i < n);
+  });
+  document.getElementById(groupId).dataset.value = n;
+}
+
+function getStarValue(groupId) {
+  return parseInt(document.getElementById(groupId).dataset?.value) || 3;
+}
+
+function semSelect(el) {
+  document.querySelectorAll('.sem-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+let _undoTimer = null;
+function showUndoToast(text, undoFn) {
+  const toast = document.getElementById('undoToast');
+  document.getElementById('undoText').textContent = text;
+  window._undoFn = undoFn;
+  toast.classList.add('show');
+  clearTimeout(_undoTimer);
+  _undoTimer = setTimeout(() => { toast.classList.remove('show'); window._undoFn = null; }, 3000);
+}
+
+function undoLastAction() {
+  if (window._undoFn) { window._undoFn(); window._undoFn = null; }
+  document.getElementById('undoToast').classList.remove('show');
+  clearTimeout(_undoTimer);
+}
+
+// ============================================================
+// JUDGE MODE
+// ============================================================
+const JM_COLORS = ['Red', 'Yellow', 'Black', 'White', 'Blue'];
+const JM_COLOR_CSS = { Red:'jm-color-red', Yellow:'jm-color-yellow', Black:'jm-color-black', White:'jm-color-white', Blue:'jm-color-blue' };
+const JM_INT_LABELS = { 0:'—', 1:'INT-1', 2:'INT-2', 3:'INT-3', 4:'2×INT', 5:'2×INT', 6:'DQ' };
+const JM_INT_DESC = { 0:'', 1:'½ 2nd (Non-Pri)', 2:'0 2nd (Priority)', 3:'0 1st (Last 5min)', 4:'½ 1st + 0 2nd', 5:'0 both', 6:'DISQUALIFIED' };
+let jmTimer = null;
+let jmStartTime = null;
+let jmScoreTimestamps = {};
+const JM_LOCK_DELAY = 30000;
+
+function jmGetHeat() {
+  if (!window._jmHeatCache) {
+    let h = DB.judgeHeat;
+    if (!h) {
+      h = {
+        metadata: { heat_number:'', category:'', round:'', location:'', duration:20, is_closed:false, notes:'' },
+        surfers: JM_COLORS.map(c => ({ color:c, name:'', athlete_id:'', goal:0, waves:new Array(20).fill(null), interference:0, interference_waves:[] })),
+        priority_order: [],
+        started: false
+      };
+      DB.judgeHeat = h;
+    }
+    window._jmHeatCache = h;
+  }
+  return window._jmHeatCache;
+}
+function jmSave() { DB.judgeHeat = window._jmHeatCache; }
+
+function renderJudge() {
+  const h = jmGetHeat();
+  const athletes = DB.athletes;
+  // Surfer setup fields
+  const sg = document.getElementById('jmSurferSetup');
+  if (sg && !sg.dataset.init) {
+    sg.dataset.init = '1';
+    sg.innerHTML = JM_COLORS.map((c, i) => {
+      const lbl = c === 'Red' ? 'color:#fecaca;background:#991b1b' : c === 'Yellow' ? 'color:#fef08a;background:#854d0e' : c === 'Black' ? 'color:#e2e8f0;background:#0f172a' : c === 'White' ? 'color:#0f172a;background:#f0f0f0' : 'color:#bfdbfe;background:#1e3a8a';
+      const curId = h.surfers[i].athlete_id || '';
+      const curName = h.surfers[i].name || '';
+      let opts = '<option value="">— Vacío —</option>';
+      athletes.forEach(a => {
+        const sel = a.id === curId ? 'selected' : '';
+        opts += `<option value="${a.id}" ${sel}>${a.name}</option>`;
+      });
+      opts += `<option value="__custom" ${curId === '__custom' ? 'selected' : ''}>✏️ Otro...</option>`;
+      return `<div class="jm-surfer-item"><label style="${lbl}">${c}</label><select id="jmSN${i}" onchange="jmSelectSurfer(${i})">
+        ${opts}</select><input placeholder="Nombre manual" id="jmSNcustom${i}" value="${curId === '__custom' ? curName : ''}" onchange="jmUpdateSurfer()" style="display:${curId === '__custom' ? 'block' : 'none'}"><input type="number" placeholder="Goal" step="0.1" min="0" max="20" id="jmSG${i}" value="${h.surfers[i].goal||''}" onchange="jmUpdateSurfer()"></div>`;
+    }).join('');
+  }
+  // Duration
+  document.getElementById('jmDuration').value = h.metadata.duration;
+  document.getElementById('jmHeatNum').value = h.metadata.heat_number;
+  document.getElementById('jmCategory').value = h.metadata.category;
+  document.getElementById('jmRound').value = h.metadata.round;
+  document.getElementById('jmLocation').value = h.metadata.location;
+  
+  // Build score grid
+  jmBuildGrid(h);
+  
+  // Rankings + priority
+  jmUpdateRankings();
+  jmUpdatePriority();
+  
+  // Timer state
+  if (h.started) {
+    document.getElementById('jmSetupForm').querySelector('.card:first-of-type .card-header').parentElement.parentElement.querySelector('.jm-setup-form') || null;
+    jmCollapseSetup();
+    document.getElementById('jmTimerBar').style.display = 'flex';
+    document.getElementById('jmCloseRow').style.display = 'block';
+    document.getElementById('jmStartBtn').disabled = true;
+    document.getElementById('jmStartBtn').style.opacity = '.4';
+  }
+  
+  // Closed state
+  if (h.metadata.is_closed) {
+    document.getElementById('jmCloseBtn').style.display = 'none';
+    document.getElementById('jmCloseRow').style.display = 'none';
+    document.getElementById('jmReopenBtn').style.display = 'inline-block';
+    document.getElementById('jmResults').style.display = 'block';
+    jmDisplayResults();
+  } else {
+    document.getElementById('jmResults').style.display = 'none';
+  }
+  
+  // Sequential + lock states
+  jmUpdateSequential();
+}
+
+function jmBuildGrid(h) {
+  const grid = document.getElementById('jmGrid');
+  let html = '<thead><tr><th>Surfer</th>';
+  for (let w = 1; w <= 20; w++) html += `<th>W${w}</th>`;
+  html += '</tr></thead><tbody>';
+  
+  h.surfers.forEach((s, si) => {
+    const intLvl = s.interference > 0 ? ` l${s.interference}` : '';
+    const intText = s.interference > 0 ? JM_INT_LABELS[s.interference] : 'INT';
+    html += `<tr><td class="jm-color-cell ${JM_COLOR_CSS[s.color]}" onclick="jmSendPriority(${si})">
+      ${s.color}${s.name ? '<br><span style="font-size:10px;font-weight:500;opacity:.8">'+s.name.split(' ')[0]+'</span>':''}
+      <span class="jm-int-badge${intLvl}" onclick="event.stopPropagation();jmToggleInt(${si})" title="Tap to cycle interference">${intText}</span>
+    </td>`;
+    for (let wi = 0; wi < 20; wi++) {
+      const val = s.waves[wi] !== null ? s.waves[wi] : '';
+      const intMarked = s.interference_waves.includes(wi);
+      const cls = [intMarked ? 'int-marked' : ''].filter(Boolean).join(' ');
+      html += `<td><input type="number" class="jm-score-input ${cls}" min="0" max="10" step="0.1" inputmode="decimal"
+        id="jm-s${si}-w${wi}" data-si="${si}" data-wi="${wi}" value="${val}"
+        onchange="jmScoreChange(this)" onfocus="jmScoreFocus(${si},${wi})"
+        onkeydown="jmScoreKey(event,${si},${wi})"
+        ondblclick="jmMarkInt(${si},${wi})">
+        <span class="jm-tri" id="jm-tri-${si}-${wi}" ${intMarked?'style="display:block"':''}>▲</span></td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  grid.innerHTML = html;
+}
+
+function jmSelectSurfer(i) {
+  const sel = document.getElementById(`jmSN${i}`);
+  const customInp = document.getElementById(`jmSNcustom${i}`);
+  const val = sel.value;
+  const h = jmGetHeat();
+  
+  if (val === '') {
+    h.surfers[i].name = '';
+    h.surfers[i].athlete_id = '';
+    customInp.style.display = 'none';
+  } else if (val === '__custom') {
+    h.surfers[i].athlete_id = '__custom';
+    h.surfers[i].name = customInp.value;
+    customInp.style.display = 'block';
+    customInp.focus();
+  } else {
+    const ath = DB.athletes.find(a => a.id === val);
+    h.surfers[i].name = ath ? ath.name : '';
+    h.surfers[i].athlete_id = val;
+    customInp.style.display = 'none';
+  }
+  jmSave();
+  jmBuildGrid(h);
+  jmUpdateSequential();
+}
+
+function jmUpdateSurfer() {
+  const h = jmGetHeat();
+  JM_COLORS.forEach((c, i) => {
+    const sel = document.getElementById('jmSN' + i);
+    const customInp = document.getElementById('jmSNcustom' + i);
+    if (sel && sel.value === '__custom' && customInp) {
+      h.surfers[i].name = customInp.value;
+      h.surfers[i].athlete_id = '__custom';
+    }
+    h.surfers[i].goal = parseFloat(document.getElementById('jmSG' + i).value) || 0;
+  });
+  jmSave();
+  jmBuildGrid(h);
+  jmUpdateSequential();
+}
+
+function jmUpdateMeta() {
+  const h = jmGetHeat();
+  h.metadata.heat_number = document.getElementById('jmHeatNum').value;
+  h.metadata.category = document.getElementById('jmCategory').value;
+  h.metadata.round = document.getElementById('jmRound').value;
+  h.metadata.location = document.getElementById('jmLocation').value;
+  h.metadata.duration = parseInt(document.getElementById('jmDuration').value) || 20;
+  jmSave();
+}
+
+function jmCollapseSetup() {
+  const h = jmGetHeat();
+  document.getElementById('jmSetupForm').classList.add('hidden');
+  const mc = document.getElementById('jmMetaCollapsed');
+  mc.textContent = `Heat ${h.metadata.heat_number||'?'} · ${h.metadata.category||'?'} · ${h.metadata.round||'?'} · ${h.metadata.location||'?'} · ${h.metadata.duration}min`;
+  mc.classList.add('active');
+}
+
+function jmExpandSetup() {
+  document.getElementById('jmSetupForm').classList.remove('hidden');
+  document.getElementById('jmMetaCollapsed').classList.remove('active');
+}
+
+// TIMER
+function jmStartTimer() {
+  jmUpdateMeta();
+  jmUpdateSurfer();
+  const h = jmGetHeat();
+  h.started = true;
+  jmSave();
+  
+  jmCollapseSetup();
+  document.getElementById('jmTimerBar').style.display = 'flex';
+  document.getElementById('jmCloseRow').style.display = 'block';
+  document.getElementById('jmStartBtn').disabled = true;
+  document.getElementById('jmStartBtn').style.opacity = '.4';
+  
+  jmStartTime = Date.now();
+  const dur = h.metadata.duration;
+  document.getElementById('jmTimerDisplay').textContent = `${dur}:00`;
+  
+  if (jmTimer) clearInterval(jmTimer);
+  jmTimer = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - jmStartTime) / 1000);
+    const total = dur * 60;
+    const rem = Math.max(0, total - elapsed);
+    const m = Math.floor(rem / 60);
+    const s = rem % 60;
+    document.getElementById('jmTimerDisplay').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    
+    const bar = document.getElementById('jmTimerBar');
+    bar.className = 'jm-timer-bar' + (rem <= 60 ? ' critical' : rem <= 300 ? ' warning' : '');
+    
+    if (rem === 0) { clearInterval(jmTimer); jmTimer = null; }
+  }, 250);
+}
+
+// SCORING
+function jmScoreChange(input) {
+  const si = parseInt(input.dataset.si);
+  const wi = parseInt(input.dataset.wi);
+  const h = jmGetHeat();
+  const val = input.value;
+  
+  if (val === '') {
+    h.surfers[si].waves[wi] = null;
+    delete jmScoreTimestamps[`${si}-${wi}`];
+  } else {
+    const n = parseFloat(val);
+    if (n >= 0 && n <= 10) {
+      h.surfers[si].waves[wi] = n;
+      jmScoreTimestamps[`${si}-${wi}`] = Date.now();
+    } else {
+      input.value = '';
+      h.surfers[si].waves[wi] = null;
+    }
+  }
+  jmSave();
+  jmUpdateRankings();
+  jmUpdateSequential();
+}
+
+function jmScoreFocus(si, wi) {
+  const key = `${si}-${wi}`;
+  if (jmScoreTimestamps[key]) {
+    const el = Date.now() - jmScoreTimestamps[key];
+    if (el > JM_LOCK_DELAY) {
+      const input = document.getElementById(`jm-s${si}-w${wi}`);
+      if (!confirm(`⚠️ Score entered ${Math.floor(el/1000)}s ago. Edit?`)) { input.blur(); return; }
+      jmScoreTimestamps[key] = Date.now();
+    }
+  }
+}
+
+function jmScoreKey(e, si, wi) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const cur = document.getElementById(`jm-s${si}-w${wi}`);
+    if (cur.value) jmScoreChange(cur);
+    // Move to next available
+    for (let w = wi + 1; w < 20; w++) {
+      const nx = document.getElementById(`jm-s${si}-w${w}`);
+      if (!nx.disabled) { nx.focus(); return; }
+    }
+    for (let s = si + 1; s < 5; s++) {
+      for (let w = 0; w < 20; w++) {
+        const nx = document.getElementById(`jm-s${s}-w${w}`);
+        if (nx && !nx.disabled) { nx.focus(); return; }
+      }
+    }
+    cur.blur();
+  }
+}
+
+function jmUpdateSequential() {
+  for (let si = 0; si < 5; si++) {
+    let foundEmpty = false;
+    for (let wi = 0; wi < 20; wi++) {
+      const inp = document.getElementById(`jm-s${si}-w${wi}`);
+      if (!inp) continue;
+      if (!inp.value) {
+        inp.disabled = foundEmpty;
+        if (!foundEmpty) foundEmpty = true;
+      } else {
+        inp.disabled = false;
+      }
+    }
+  }
+  // Lock states
+  const now = Date.now();
+  for (const [key, ts] of Object.entries(jmScoreTimestamps)) {
+    const [si, wi] = key.split('-');
+    const inp = document.getElementById(`jm-s${si}-w${wi}`);
+    if (!inp || !inp.value) continue;
+    const el = now - ts;
+    inp.classList.toggle('locked', el > JM_LOCK_DELAY);
+    inp.classList.toggle('recent', el < 5000);
+  }
+}
+
+// RANKINGS (ISA rules - ported from Python)
+function jmCalcRankings() {
+  const h = jmGetHeat();
+  const results = h.surfers.map((s, idx) => {
+    const valid = s.waves.filter(w => w !== null).sort((a, b) => b - a);
+    const top2 = valid.slice(0, 2);
+    let total = top2.reduce((a, b) => a + b, 0);
+    
+    // Interference penalties
+    if (s.interference === 1 && top2.length >= 2) total -= top2[1] / 2;
+    else if (s.interference === 2 && top2.length >= 2) total -= top2[1];
+    else if (s.interference === 3 && top2.length >= 1) total -= top2[0];
+    else if (s.interference === 4) {
+      if (top2.length >= 1) total -= top2[0] / 2;
+      if (top2.length >= 2) total -= top2[1];
+    } else if (s.interference === 5) {
+      total = 0;
+    } else if (s.interference === 6) {
+      total = 0;
+    }
+    total = Math.max(0, total);
+    
+    const all_wave_avg = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+    
+    return { idx, color: s.color, name: s.name, athlete_id: s.athlete_id || '', top_waves: top2, all_sorted: valid, total, interference: s.interference, all_wave_avg, wave_count: valid.length };
+  });
+  
+  results.sort((a, b) => {
+    if (b.total !== a.total) return b.total - a.total;
+    const maxW = Math.max(a.all_sorted.length, b.all_sorted.length);
+    for (let i = 0; i < maxW; i++) {
+      const av = a.all_sorted[i] || 0, bv = b.all_sorted[i] || 0;
+      if (bv !== av) return bv - av;
+    }
+    return 0;
+  });
+  
+  results.forEach((r, i) => r.position = i + 1);
+  return results;
+}
+
+function jmUpdateRankings() {
+  const results = jmCalcRankings();
+  const c = document.getElementById('jmRankings');
+  const first = results[0]?.total || 0;
+  const second = results[1]?.total || 0;
+  
+  c.innerHTML = results.map(r => {
+    const emoji = r.position === 1 ? '🥇' : r.position === 2 ? '🥈' : r.position === 3 ? '🥉' : r.position + '.';
+    const wStr = r.top_waves.map(w => w.toFixed(1)).join(' + ') || 'No scores';
+    let intStr = r.interference > 0 ? `<span class="jm-rank-int">${JM_INT_LABELS[r.interference]}</span>` : '';
+    let need = '';
+    if (r.position === 2) {
+      const target = first + 0.01;
+      const best = r.top_waves[0] || 0;
+      const wn = target - best;
+      need = wn <= 10 ? `<div class="jm-rank-need">needs ${wn.toFixed(2)} for 1st</div>` : `<div class="jm-rank-need">needs combo ${target.toFixed(2)}</div>`;
+    } else if (r.position >= 3) {
+      const target = second + 0.01;
+      const best = r.top_waves[0] || 0;
+      const wn = target - best;
+      need = wn <= 10 ? `<div class="jm-rank-need">needs ${wn.toFixed(2)} for 2nd</div>` : `<div class="jm-rank-need">needs combo ${target.toFixed(2)}</div>`;
+    }
+    return `<div class="jm-rank-item"><div><span style="font-size:18px;margin-right:6px">${emoji}</span><strong>${r.color}</strong>${intStr}<div class="jm-rank-waves">${wStr}${r.wave_count > 0 ? ' · avg '+r.all_wave_avg.toFixed(1)+'/wave' : ''}</div>${need}</div><div style="font-size:18px">${r.total.toFixed(2)}</div></div>`;
+  }).join('');
+  
+  // Highlight best scores in grid
+  document.querySelectorAll('.jm-score-input').forEach(i => i.classList.remove('best'));
+  results.forEach(r => {
+    const waves = [];
+    for (let w = 0; w < 20; w++) {
+      const inp = document.getElementById(`jm-s${r.idx}-w${w}`);
+      if (inp && inp.value) waves.push({ w, score: parseFloat(inp.value) });
+    }
+    waves.sort((a, b) => b.score - a.score);
+    waves.slice(0, 2).forEach(wv => {
+      const inp = document.getElementById(`jm-s${r.idx}-w${wv.w}`);
+      if (inp) inp.classList.add('best');
+    });
+  });
+}
+
+// PRIORITY
+function jmSendPriority(si) {
+  const h = jmGetHeat();
+  const idx = h.priority_order.indexOf(si);
+  if (idx >= 0) h.priority_order.splice(idx, 1);
+  h.priority_order.push(si);
+  jmSave();
+  jmUpdatePriority();
+}
+
+function jmUpdatePriority() {
+  const h = jmGetHeat();
+  const ordered = new Set(h.priority_order);
+  const tied = [];
+  for (let i = 0; i < 5; i++) { if (!ordered.has(i)) tied.push(i); }
+  
+  const all = [...tied.map(i => ({ idx:i, pos:'TIED' })), ...h.priority_order.map((i, p) => ({ idx:i, pos:tied.length + p + 1 }))];
+  
+  document.getElementById('jmPriority').innerHTML = all.map(item => {
+    const s = h.surfers[item.idx];
+    const cls = item.pos === 'TIED' ? 'tied' : '';
+    return `<div class="jm-pri-item ${cls}" onclick="jmSendPriority(${item.idx})">
+      <div class="jm-pri-num">${item.pos === 'TIED' ? '=' : item.pos}</div>
+      <div class="jm-pri-col">${s.color}</div>
+      <div class="jm-pri-lbl">${item.pos === 'TIED' ? 'tied' : 'priority'}</div>
+    </div>`;
+  }).join('');
+}
+
+// INTERFERENCE
+function jmToggleInt(si) {
+  const h = jmGetHeat();
+  h.surfers[si].interference = (h.surfers[si].interference + 1) % 7;
+  jmSave();
+  jmBuildGrid(h);
+  jmUpdateSequential();
+  jmUpdateRankings();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function jmMarkInt(si, wi) {
+  const h = jmGetHeat();
+  const arr = h.surfers[si].interference_waves;
+  const idx = arr.indexOf(wi);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(wi);
+  jmSave();
+  
+  const inp = document.getElementById(`jm-s${si}-w${wi}`);
+  const tri = document.getElementById(`jm-tri-${si}-${wi}`);
+  if (arr.includes(wi)) { inp.classList.add('int-marked'); tri.style.display = 'block'; }
+  else { inp.classList.remove('int-marked'); tri.style.display = 'none'; }
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
+// CLOSE / REOPEN / RESET
+function jmCloseHeat() {
+  try {
+  const h = jmGetHeat();
+  h.metadata.is_closed = true;
+  jmSave();
+  
+  // Update session tracker
+  const results = jmCalcRankings();
+  const tracker = DB.judgeTracker;
+  h.surfers.forEach(s => {
+    const name = (s.name || '').trim();
+    if (!name) return;
+    if (!tracker[name]) tracker[name] = { heats: [], all_wave_avgs: [], goal: s.goal || 0, athlete_id: s.athlete_id || '' };
+    if (!tracker[name].all_wave_avgs) tracker[name].all_wave_avgs = [];
+    if (!tracker[name].heats) tracker[name].heats = [];
+    const r = results.find(x => x.color === s.color);
+    if (r) {
+      tracker[name].heats.push(r.total);
+      tracker[name].all_wave_avgs.push(r.all_wave_avg);
+    }
+  });
+  DB.judgeTracker = tracker;
+  
+  // Save heat results to athlete profiles
+  try {
+    const athletes = DB.athletes;
+    let updated = false;
+    results.forEach(r => {
+      if (!r.athlete_id || r.athlete_id === '__custom') return;
+      const ath = athletes.find(a => a.id === r.athlete_id);
+      if (!ath) return;
+      if (!ath.heat_history) ath.heat_history = [];
+      ath.heat_history.push({
+        date: new Date().toISOString(),
+        heat_number: h.metadata.heat_number || '',
+        category: h.metadata.category || '',
+        round: h.metadata.round || '',
+        location: h.metadata.location || '',
+        position: r.position,
+        total: r.total,
+        all_wave_avg: r.all_wave_avg,
+        wave_count: r.wave_count,
+        interference: r.interference
+      });
+      updated = true;
+    });
+    if (updated) DB.athletes = athletes;
+  } catch(e2) { console.error('Athlete profile save error:', e2); }
+  
+  document.getElementById('jmCloseBtn').style.display = 'none';
+  document.getElementById('jmCloseRow').style.display = 'none';
+  document.getElementById('jmReopenBtn').style.display = 'inline-block';
+  document.getElementById('jmResults').style.display = 'block';
+  if (jmTimer) { clearInterval(jmTimer); jmTimer = null; }
+  
+  jmDisplayResults();
+  jmDisplayTracker();
+  } catch(e) { alert('Error closing heat: ' + e.message); console.error(e); }
+}
+
+function jmDisplayResults() {
+  const results = jmCalcRankings();
+  document.getElementById('jmResultsContent').innerHTML = results.map(r => {
+    const emoji = r.position === 1 ? '🥇' : r.position === 2 ? '🥈' : r.position === 3 ? '🥉' : r.position + '.';
+    const wStr = r.top_waves.map(w => w.toFixed(2)).join(' + ');
+    const intStr = r.interference > 0 ? ` · ${JM_INT_LABELS[r.interference]}: ${JM_INT_DESC[r.interference]}` : '';
+    const avgStr = r.wave_count > 0 ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Avg all waves: ${r.all_wave_avg.toFixed(2)} (${r.wave_count} olas)</div>` : '';
+    return `<div class="jm-rank-item"><div><span style="font-size:18px;margin-right:6px">${emoji}</span><strong>${r.color}</strong>${r.name ? ' · '+r.name : ''}${intStr}<div class="jm-rank-waves">${wStr}</div>${avgStr}</div><div style="font-size:20px;font-weight:800">${r.total.toFixed(2)}</div></div>`;
+  }).join('');
+}
+
+function jmDisplayTracker() {
+  const tracker = DB.judgeTracker;
+  if (Object.keys(tracker).length === 0) return;
+  
+  let html = '<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn btn-sm btn-outline" onclick="jmExportTracker()" style="width:auto;padding:6px 12px;font-size:11px">📊 Export Tracker CSV</button></div>';
+  html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px"><thead><tr><th style="text-align:left;padding:8px;background:#1e2a3a;color:var(--text-secondary);border-radius:4px 0 0 0">Surfer</th>';
+  for (let i = 1; i <= 6; i++) html += `<th style="padding:8px;background:#1e2a3a;color:var(--text-secondary)">H${i}</th>`;
+  html += '<th style="padding:8px;background:#1e2a3a;color:var(--text-secondary)">Avg Total</th><th style="padding:8px;background:#1e2a3a;color:var(--text-secondary)">Avg/Wave</th><th style="padding:8px;background:#1e2a3a;color:var(--text-secondary);border-radius:0 4px 0 0">Goal</th></tr></thead><tbody>';
+  
+  for (const [name, info] of Object.entries(tracker)) {
+    html += `<tr><td style="padding:8px;font-weight:700;border-bottom:1px solid var(--border)">${name}</td>`;
+    for (let i = 0; i < 6; i++) {
+      const v = info.heats[i];
+      html += `<td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums">${v !== undefined ? v.toFixed(2) : '—'}</td>`;
+    }
+    const valid = info.heats.filter(h => h != null);
+    const avg = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+    // All-wave average across all heats
+    const wAvgs = (info.all_wave_avgs || []).filter(a => a > 0);
+    const allWaveAvg = wAvgs.length > 0 ? wAvgs.reduce((a, b) => a + b, 0) / wAvgs.length : 0;
+    const avgColor = allWaveAvg >= 6 ? 'var(--green)' : allWaveAvg >= 4 ? 'var(--yellow)' : allWaveAvg > 0 ? 'var(--red)' : 'var(--text-secondary)';
+    html += `<td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);font-weight:700;color:var(--accent)">${avg > 0 ? avg.toFixed(2) : '—'}</td>`;
+    html += `<td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);font-weight:700;color:${avgColor}">${allWaveAvg > 0 ? allWaveAvg.toFixed(2) : '—'}</td>`;
+    html += `<td style="padding:8px;text-align:center;border-bottom:1px solid var(--border);color:var(--yellow);font-weight:700">${info.goal > 0 ? info.goal.toFixed(1) : '—'}</td></tr>`;
+  }
+  html += '</tbody></table></div>';
+  
+  document.getElementById('jmTrackerContent').innerHTML = html;
+  document.getElementById('jmTracker').style.display = 'block';
+}
+
+function jmReopenHeat() {
+  const h = jmGetHeat();
+  h.metadata.is_closed = false;
+  jmSave();
+  document.getElementById('jmCloseBtn').style.display = 'inline-block';
+  document.getElementById('jmCloseRow').style.display = 'block';
+  document.getElementById('jmReopenBtn').style.display = 'none';
+  document.getElementById('jmResults').style.display = 'none';
+}
+
+function jmResetHeat() {
+  if (!confirm('Reset all scores and timer?')) return;
+  const h = jmGetHeat();
+  h.surfers.forEach(s => { s.waves = new Array(20).fill(null); s.interference = 0; s.interference_waves = []; });
+  h.metadata.is_closed = false;
+  h.metadata.notes = '';
+  h.priority_order = [];
+  h.started = false;
+  jmSave();
+  jmScoreTimestamps = {};
+  
+  if (jmTimer) { clearInterval(jmTimer); jmTimer = null; }
+  document.getElementById('jmTimerBar').style.display = 'none';
+  document.getElementById('jmCloseRow').style.display = 'none';
+  document.getElementById('jmStartBtn').disabled = false;
+  document.getElementById('jmStartBtn').style.opacity = '1';
+  document.getElementById('jmResults').style.display = 'none';
+  document.getElementById('jmCloseBtn').style.display = 'inline-block';
+  document.getElementById('jmReopenBtn').style.display = 'none';
+  // Clear surfer setup init so dropdowns refresh
+  const sg = document.getElementById('jmSurferSetup');
+  if (sg) delete sg.dataset.init;
+  jmExpandSetup();
+  renderJudge();
+}
+
+function jmNotes() { document.getElementById('jmNotesModal').classList.add('active'); }
+
+// EXPORT CSV
+function jmExportCSV() {
+  const h = jmGetHeat();
+  const results = jmCalcRankings();
+  let csv = `Heat Number,${h.metadata.heat_number}\nCategory,${h.metadata.category}\nRound,${h.metadata.round}\nLocation,${h.metadata.location}\nDuration,${h.metadata.duration} min\n`;
+  if (h.metadata.notes) csv += `Notes,"${h.metadata.notes.replace(/"/g,'""')}"\n`;
+  csv += '\nFULL SCORING GRID\nSurfer,' + Array.from({length:20},(_,i)=>'W'+(i+1)).join(',') + '\n';
+  h.surfers.forEach(s => {
+    csv += s.color + ',' + s.waves.map(w => w !== null ? w.toFixed(2) : '-').join(',') + '\n';
+  });
+  csv += '\nFINAL RESULTS\nPosition,Surfer,Name,Best Wave,2nd Wave,Total,Avg/Wave,Waves,Interference\n';
+  results.forEach(r => {
+    const w = r.top_waves.concat([null,null]).slice(0,2);
+    csv += `${r.position},${r.color},${r.name},${w[0]!==null&&w[0]!==undefined?w[0].toFixed(2):'-'},${w[1]!==null&&w[1]!==undefined?w[1].toFixed(2):'-'},${r.total.toFixed(2)},${r.all_wave_avg>0?r.all_wave_avg.toFixed(2):'-'},${r.wave_count},${JM_INT_LABELS[r.interference]}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const cat = h.metadata.category.replace(/\s/g,'') || 'Heat';
+  const num = h.metadata.heat_number || '0';
+  a.download = `${cat}_H${num}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function jmExportTracker() {
+  const tracker = DB.judgeTracker;
+  if (Object.keys(tracker).length === 0) { alert('No tracker data yet'); return; }
+  
+  const maxHeats = Math.max(...Object.values(tracker).map(t => t.heats.length));
+  let csv = 'Surfer';
+  for (let i = 1; i <= maxHeats; i++) csv += `,Heat ${i} Total`;
+  csv += ',Avg Heat Total,Avg Per Wave,Goal,Status\n';
+  
+  for (const [name, info] of Object.entries(tracker)) {
+    csv += `"${name}"`;
+    for (let i = 0; i < maxHeats; i++) {
+      csv += `,${info.heats[i] !== undefined ? info.heats[i].toFixed(2) : ''}`;
+    }
+    const valid = info.heats.filter(h => h != null);
+    const avgTotal = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+    const wAvgs = (info.all_wave_avgs || []).filter(a => a > 0);
+    const allWaveAvg = wAvgs.length > 0 ? wAvgs.reduce((a, b) => a + b, 0) / wAvgs.length : 0;
+    const best = valid.length > 0 ? Math.max(...valid) : 0;
+    const status = info.goal > 0 ? (best >= info.goal ? 'GOAL HIT' : 'In Progress') : '';
+    csv += `,${avgTotal > 0 ? avgTotal.toFixed(2) : ''},${allWaveAvg > 0 ? allWaveAvg.toFixed(2) : ''},${info.goal > 0 ? info.goal.toFixed(1) : ''},${status}\n`;
+  }
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `KSS_Session_Tracker_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Auto-update lock states periodically
+setInterval(() => { if (currentView === 'judge') jmUpdateSequential(); }, 2000);
+
+// ============================================================
+// INIT
+// ============================================================
+(function init() {
+  // Check for active session
+  const s = DB.activeSession;
+  if (s) {
+    showView('session-hub');
+  } else {
+    renderHome();
+  }
+  
+  // Service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(e => console.log('SW error:', e));
+  }
+  
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+  });
+})();
+</script>
+</body>
+</html>
