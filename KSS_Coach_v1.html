@@ -317,6 +317,42 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .drill-cat-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
 .drill-cat-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);white-space:nowrap;cursor:pointer}
 .drill-cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ===== PHASE 3: TECH LAB ===== */
+.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.lab-video{width:100%;display:block;max-height:50vh}
+.lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.lab-canvas.drawing{pointer-events:auto;cursor:crosshair}
+.lab-controls{display:flex;align-items:center;gap:8px;padding:8px 0}
+.lab-ctrl-btn{width:40px;height:40px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-primary);cursor:pointer}
+.lab-ctrl-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.lab-ctrl-btn:active{transform:scale(.92)}
+.lab-timeline{flex:1;height:6px;background:var(--bg-input);border-radius:3px;cursor:pointer;position:relative;-webkit-appearance:none;appearance:none}
+.lab-timeline::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+.lab-time{font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;min-width:42px;text-align:center}
+.lab-tools{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.lab-tool{padding:8px 12px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-secondary)}
+.lab-tool.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.lab-color-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer}
+.lab-color-dot.active{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+.lab-frames{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.lab-frame{border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative}
+.lab-frame img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.lab-frame-time{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:10px;color:#fff;padding:3px 6px;text-align:center}
+.lab-compare{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px}
+.lab-compare img{width:100%;border-radius:8px;border:1px solid var(--border)}
+.lab-clip{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.lab-clip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lab-clip-name{font-weight:700;font-size:14px}
+.lab-clip-meta{font-size:11px;color:var(--text-muted)}
+
+/* ===== BIOMETRICS ===== */
+.bio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.bio-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.bio-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.bio-lbl{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.bio-trend{display:flex;align-items:flex-end;gap:3px;height:40px;justify-content:center;margin-top:6px}
+.bio-bar{width:6px;border-radius:3px;min-height:3px}
 </style>
 </head>
 <body>
@@ -738,6 +774,28 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div id="pcSessions"></div>
   </div>
 
+  <!-- Biometrics -->
+  <div class="card" style="padding:12px">
+    <div class="card-header flex-between" style="font-size:13px;margin-bottom:8px">
+      <span>📊 Biometrics</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="openBioModal()">+ Registro</button>
+    </div>
+    <div class="bio-grid" id="pcBioGrid"></div>
+    <div id="pcBioHistory" style="display:none">
+      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px">Últimos 7 días</div>
+      <div id="pcBioRows"></div>
+    </div>
+  </div>
+
+  <!-- Tech Lab Frames for this athlete -->
+  <div class="card" id="pcLabCard" style="padding:12px;display:none">
+    <div class="card-header flex-between" style="font-size:13px;margin-bottom:8px">
+      <span>🎥 Tech Lab Frames</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="showView('lab')">Ir al Lab</button>
+    </div>
+    <div class="lab-frames" id="pcLabFrames"></div>
+  </div>
+
   <!-- Actions -->
   <div style="margin-top:16px;display:flex;gap:8px">
     <button class="btn btn-outline" onclick="editAthlete()" style="flex:1">✏️ Editar</button>
@@ -771,6 +829,157 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 </div>
 
+<!-- ==================== BIOMETRICS MODAL ==================== -->
+<div class="modal-overlay" id="modalBio">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📊 Registro Biométrico</div>
+    <div class="field">
+      <label class="field-label">Peso (kg)</label>
+      <input class="field-input" id="bioWeight" type="number" step="0.1" placeholder="70.5">
+    </div>
+    <div class="field">
+      <label class="field-label">Horas de Sueño</label>
+      <input class="field-input" id="bioSleep" type="number" step="0.5" min="0" max="14" placeholder="8">
+    </div>
+    <div class="field">
+      <label class="field-label">Nivel de Energía (1-10)</label>
+      <div class="seg-row" id="bioEnergy" style="flex-wrap:wrap;gap:4px">
+        <button class="seg-btn" data-v="1" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">1</button>
+        <button class="seg-btn" data-v="2" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">2</button>
+        <button class="seg-btn" data-v="3" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">3</button>
+        <button class="seg-btn" data-v="4" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">4</button>
+        <button class="seg-btn" data-v="5" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">5</button>
+        <button class="seg-btn" data-v="6" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">6</button>
+        <button class="seg-btn" data-v="7" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">7</button>
+        <button class="seg-btn selected" data-v="8" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">8</button>
+        <button class="seg-btn" data-v="9" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">9</button>
+        <button class="seg-btn" data-v="10" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">10</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Dolor / Lesión</label>
+      <div class="seg-row" id="bioPain">
+        <button class="seg-btn selected" data-v="none" onclick="segSelect('bioPain',this)">Sin dolor</button>
+        <button class="seg-btn" data-v="mild" onclick="segSelect('bioPain',this)">Leve</button>
+        <button class="seg-btn" data-v="moderate" onclick="segSelect('bioPain',this)">Moderado</button>
+        <button class="seg-btn" data-v="severe" onclick="segSelect('bioPain',this)">Severo</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Zona de dolor (opcional)</label>
+      <input class="field-input" id="bioPainZone" placeholder="Hombro derecho, espalda baja...">
+    </div>
+    <div class="field">
+      <label class="field-label">Notas</label>
+      <input class="field-input" id="bioNotes" placeholder="Cómo me siento hoy...">
+    </div>
+    <button class="btn btn-accent" onclick="saveBio()">Guardar Registro</button>
+    <button class="btn btn-outline" onclick="closeModal('modalBio')" style="margin-top:8px">Cancelar</button>
+  </div>
+</div>
+
+<!-- ==================== TECH LAB (Phase 3) ==================== -->
+<div class="view" id="view-lab">
+  <div style="font-size:20px;font-weight:800;margin-bottom:16px">🎥 Tech Lab</div>
+
+  <!-- Upload / Record -->
+  <div class="card" id="labUploadCard">
+    <div class="card-header" style="margin-bottom:10px">Cargar Video</div>
+    <div style="display:flex;gap:8px">
+      <label class="btn btn-accent" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+        📷 Grabar
+        <input type="file" accept="video/*" capture="environment" onchange="labLoadVideo(this)" style="display:none">
+      </label>
+      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+        📁 Galería
+        <input type="file" accept="video/*" onchange="labLoadVideo(this)" style="display:none">
+      </label>
+    </div>
+    <!-- Athlete selector -->
+    <div class="field" style="margin-top:10px;margin-bottom:0">
+      <label class="field-label">Vincular a Atleta</label>
+      <select class="field-input" id="labAthlete"><option value="">— Sin vincular —</option></select>
+    </div>
+  </div>
+
+  <!-- Video Player + Canvas -->
+  <div id="labPlayerSection" style="display:none">
+    <div class="lab-video-wrap">
+      <video class="lab-video" id="labVideo" playsinline></video>
+      <canvas class="lab-canvas" id="labCanvas"></canvas>
+    </div>
+
+    <!-- Playback controls -->
+    <div class="lab-controls">
+      <button class="lab-ctrl-btn" onclick="labStep(-1)" title="Frame atrás">⏪</button>
+      <button class="lab-ctrl-btn" id="labPlayBtn" onclick="labTogglePlay()">▶️</button>
+      <button class="lab-ctrl-btn" onclick="labStep(1)" title="Frame adelante">⏩</button>
+      <input type="range" class="lab-timeline" id="labTimeline" min="0" max="100" value="0" step="0.1" oninput="labSeek(this.value)">
+      <div class="lab-time" id="labTime">0:00</div>
+    </div>
+
+    <!-- Speed control -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;justify-content:center">
+      <button class="lab-ctrl-btn" onclick="labSpeed(0.25)" style="font-size:11px;width:auto;padding:0 8px">0.25x</button>
+      <button class="lab-ctrl-btn" onclick="labSpeed(0.5)" style="font-size:11px;width:auto;padding:0 8px">0.5x</button>
+      <button class="lab-ctrl-btn active" onclick="labSpeed(1)" style="font-size:11px;width:auto;padding:0 8px" id="labSpeedNormal">1x</button>
+      <button class="lab-ctrl-btn" onclick="labSpeed(2)" style="font-size:11px;width:auto;padding:0 8px">2x</button>
+    </div>
+
+    <!-- Drawing tools -->
+    <div class="lab-tools" id="labTools">
+      <button class="lab-tool" onclick="labSetTool('none',this)">👆 Mover</button>
+      <button class="lab-tool" onclick="labSetTool('pen',this)">✏️ Dibujar</button>
+      <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️ Flecha</button>
+      <button class="lab-tool" onclick="labSetTool('angle',this)">📐 Ángulo</button>
+      <button class="lab-tool" onclick="labClearDraw()">🗑️ Borrar</button>
+      <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸 Capturar</button>
+    </div>
+
+    <!-- Color picker -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+      <span style="font-size:11px;color:var(--text-muted)">Color:</span>
+      <div class="lab-color-dot active" style="background:#ef4444" onclick="labSetColor('#ef4444',this)"></div>
+      <div class="lab-color-dot" style="background:#f59e0b" onclick="labSetColor('#f59e0b',this)"></div>
+      <div class="lab-color-dot" style="background:#22c55e" onclick="labSetColor('#22c55e',this)"></div>
+      <div class="lab-color-dot" style="background:#3b82f6" onclick="labSetColor('#3b82f6',this)"></div>
+      <div class="lab-color-dot" style="background:#ffffff" onclick="labSetColor('#ffffff',this)"></div>
+      <span style="font-size:11px;color:var(--text-muted);margin-left:auto">Grosor:</span>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=2;this.style.borderColor='var(--accent)'" style="font-size:9px;width:28px;height:28px">S</button>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=4;this.style.borderColor='var(--accent)'" style="font-size:11px;width:28px;height:28px;border-color:var(--accent)">M</button>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=7;this.style.borderColor='var(--accent)'" style="font-size:14px;width:28px;height:28px">L</button>
+    </div>
+  </div>
+
+  <!-- Captured Frames -->
+  <div id="labFramesSection" style="display:none">
+    <div class="flex-between" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">📸 Frames Capturados</div>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="labCompareMode()">Comparar</button>
+    </div>
+    <div class="lab-frames" id="labFrames"></div>
+  </div>
+
+  <!-- Compare View -->
+  <div id="labCompareSection" style="display:none">
+    <div class="flex-between" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">🔍 Comparar</div>
+      <button class="text-sm" style="color:var(--text-muted)" onclick="document.getElementById('labCompareSection').style.display='none'">✕ Cerrar</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Selecciona 2 frames para comparar side-by-side</div>
+    <div class="lab-compare" id="labCompare"></div>
+    <div class="lab-frames" id="labCompareSelect"></div>
+  </div>
+
+  <!-- Saved clips list -->
+  <div id="labClipSection">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">🎬 Clips Guardados</div>
+    <div id="labClips"></div>
+    <div id="labClipsEmpty" style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px">No hay clips guardados aún</div>
+  </div>
+</div>
+
 <!-- ==================== SETTINGS ==================== -->
 <div class="view" id="view-settings">
   <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ Configuración</div>
@@ -796,7 +1005,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v2.0 · Phase 2<br>Karibe Surf Score
+    KSS Coach v3.0 · Phase 3<br>Karibe Surf Score
   </div>
 </div>
 
@@ -935,9 +1144,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <svg viewBox="0 0 24 24"><path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
     Judge
   </button>
-  <button class="nav-btn disabled" data-view="drills">
-    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    Drills
+  <button class="nav-btn" data-view="lab" onclick="showView('lab')">
+    <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+    Lab
   </button>
   <button class="nav-btn" data-view="settings" onclick="showView('settings')">
     <svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -990,6 +1199,9 @@ const DB = {
   get judgeTracker() { return this._get('judge_tracker', {}); },
   set judgeTracker(v) { this._set('judge_tracker', v); },
 
+  get labFrames() { return this._get('lab_frames', []); },
+  set labFrames(v) { this._set('lab_frames', v); },
+
   genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 };
 
@@ -1028,6 +1240,7 @@ function showView(id) {
   if (id === 'athletes') renderAthletes();
   if (id === 'player-card') renderPlayerCard();
   if (id === 'drills') renderDrillBank();
+  if (id === 'lab') renderLab();
   if (id === 'settings') renderSettings();
   if (id === 'session-setup') renderSessionSetup();
   if (id === 'session-hub') renderSessionHub();
@@ -1997,6 +2210,12 @@ function renderPlayerCard() {
       return `<div class="pc-hist-item"><div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${d.caught}/${d.paddled} olas · ${d.falls||0} caídas</div></div><div style="font-weight:800;font-size:16px;color:${ratio>=60?'var(--green)':ratio>=40?'var(--yellow)':'var(--red)'}">${ratio}%</div></div>`;
     }).join('');
   } else { sessCard.style.display = 'none'; }
+  
+  // Biometrics
+  renderBiometrics(a);
+  
+  // Lab frames for this athlete
+  renderLabFramesForAthlete(a);
 }
 
 function deleteAthleteFromCard() {
@@ -2150,6 +2369,580 @@ function completeDrill(athId, drillId) {
   renderPlayerCard();
   
   if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+}
+
+// ============================================================
+// PHASE 3: TECH LAB - VIDEO ANALYSIS
+// ============================================================
+let labVideoFile = null;
+let labDrawTool = 'none';
+let labDrawColor = '#ef4444';
+let labStrokeWidth = 4;
+let labDrawing = false;
+let labDrawPoints = [];
+let labAnnotations = [];
+let labAnglePoints = [];
+
+function renderLab() {
+  // Populate athlete dropdown
+  const sel = document.getElementById('labAthlete');
+  const athletes = DB.athletes;
+  sel.innerHTML = '<option value="">— Sin vincular —</option>' +
+    athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+  
+  // Render saved frames
+  renderLabFrames();
+  renderLabClips();
+}
+
+function labLoadVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  labVideoFile = file;
+  
+  const video = document.getElementById('labVideo');
+  const url = URL.createObjectURL(file);
+  video.src = url;
+  video.load();
+  
+  video.onloadedmetadata = () => {
+    document.getElementById('labPlayerSection').style.display = 'block';
+    document.getElementById('labTimeline').max = video.duration;
+    labResizeCanvas();
+    labAnnotations = [];
+  };
+  
+  video.ontimeupdate = () => {
+    if (!video.paused) {
+      document.getElementById('labTimeline').value = video.currentTime;
+      labUpdateTime();
+    }
+  };
+  
+  video.onended = () => {
+    document.getElementById('labPlayBtn').textContent = '▶️';
+  };
+}
+
+function labResizeCanvas() {
+  const video = document.getElementById('labVideo');
+  const canvas = document.getElementById('labCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+}
+
+function labTogglePlay() {
+  const video = document.getElementById('labVideo');
+  const btn = document.getElementById('labPlayBtn');
+  if (video.paused) {
+    video.play();
+    btn.textContent = '⏸️';
+  } else {
+    video.pause();
+    btn.textContent = '▶️';
+  }
+}
+
+function labStep(dir) {
+  const video = document.getElementById('labVideo');
+  video.pause();
+  document.getElementById('labPlayBtn').textContent = '▶️';
+  // ~30fps = 0.033s per frame
+  video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + dir * 0.033));
+  document.getElementById('labTimeline').value = video.currentTime;
+  labUpdateTime();
+}
+
+function labSeek(val) {
+  const video = document.getElementById('labVideo');
+  video.currentTime = parseFloat(val);
+  labUpdateTime();
+}
+
+function labSpeed(rate) {
+  const video = document.getElementById('labVideo');
+  video.playbackRate = rate;
+  document.querySelectorAll('.lab-controls + div .lab-ctrl-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function labUpdateTime() {
+  const video = document.getElementById('labVideo');
+  const t = video.currentTime;
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  const ms = Math.floor((t % 1) * 10);
+  document.getElementById('labTime').textContent = `${m}:${s.toString().padStart(2,'0')}.${ms}`;
+}
+
+function labSetTool(tool, el) {
+  labDrawTool = tool;
+  const canvas = document.getElementById('labCanvas');
+  
+  document.querySelectorAll('.lab-tool').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  if (tool === 'none') {
+    canvas.classList.remove('drawing');
+    canvas.onpointerdown = canvas.onpointermove = canvas.onpointerup = null;
+  } else {
+    canvas.classList.add('drawing');
+    canvas.onpointerdown = labPointerDown;
+    canvas.onpointermove = labPointerMove;
+    canvas.onpointerup = labPointerUp;
+  }
+}
+
+function labGetPos(e) {
+  const canvas = document.getElementById('labCanvas');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) / rect.width * canvas.width,
+    y: (e.clientY - rect.top) / rect.height * canvas.height
+  };
+}
+
+function labPointerDown(e) {
+  e.preventDefault();
+  labDrawing = true;
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen') {
+    labDrawPoints = [pos];
+  } else if (labDrawTool === 'arrow') {
+    labDrawPoints = [pos];
+  } else if (labDrawTool === 'angle') {
+    labAnglePoints.push(pos);
+    if (labAnglePoints.length === 3) {
+      labAnnotations.push({ type: 'angle', points: [...labAnglePoints], color: labDrawColor, width: labStrokeWidth });
+      labAnglePoints = [];
+      labRedraw();
+    } else {
+      labRedraw();
+    }
+    labDrawing = false;
+    return;
+  }
+}
+
+function labPointerMove(e) {
+  if (!labDrawing) return;
+  e.preventDefault();
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen') {
+    labDrawPoints.push(pos);
+    labRedraw();
+    // Draw current stroke
+    const ctx = document.getElementById('labCanvas').getContext('2d');
+    ctx.beginPath();
+    ctx.strokeStyle = labDrawColor;
+    ctx.lineWidth = labStrokeWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    labDrawPoints.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  } else if (labDrawTool === 'arrow') {
+    labRedraw();
+    const ctx = document.getElementById('labCanvas').getContext('2d');
+    labDrawArrow(ctx, labDrawPoints[0], pos, labDrawColor, labStrokeWidth);
+  }
+}
+
+function labPointerUp(e) {
+  if (!labDrawing) return;
+  labDrawing = false;
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen' && labDrawPoints.length > 1) {
+    labAnnotations.push({ type: 'pen', points: [...labDrawPoints], color: labDrawColor, width: labStrokeWidth });
+  } else if (labDrawTool === 'arrow') {
+    labAnnotations.push({ type: 'arrow', from: labDrawPoints[0], to: pos, color: labDrawColor, width: labStrokeWidth });
+  }
+  labDrawPoints = [];
+  labRedraw();
+}
+
+function labDrawArrow(ctx, from, to, color, width) {
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.moveTo(from.x, from.y);
+  ctx.lineTo(to.x, to.y);
+  ctx.stroke();
+  
+  // Arrowhead
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
+  const headLen = 15 + width * 2;
+  ctx.beginPath();
+  ctx.moveTo(to.x, to.y);
+  ctx.lineTo(to.x - headLen * Math.cos(angle - Math.PI / 6), to.y - headLen * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(to.x - headLen * Math.cos(angle + Math.PI / 6), to.y - headLen * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function labRedraw() {
+  const canvas = document.getElementById('labCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  labAnnotations.forEach(a => {
+    if (a.type === 'pen') {
+      ctx.beginPath();
+      ctx.strokeStyle = a.color;
+      ctx.lineWidth = a.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      a.points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+      ctx.stroke();
+    } else if (a.type === 'arrow') {
+      labDrawArrow(ctx, a.from, a.to, a.color, a.width);
+    } else if (a.type === 'angle') {
+      const [p1, p2, p3] = a.points;
+      ctx.beginPath();
+      ctx.strokeStyle = a.color;
+      ctx.lineWidth = a.width;
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.stroke();
+      
+      // Calculate and display angle
+      const a1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+      const a2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+      let deg = Math.abs((a2 - a1) * 180 / Math.PI);
+      if (deg > 180) deg = 360 - deg;
+      
+      // Arc
+      ctx.beginPath();
+      ctx.arc(p2.x, p2.y, 30, Math.min(a1, a2), Math.max(a1, a2));
+      ctx.stroke();
+      
+      // Label
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = a.color;
+      ctx.fillText(Math.round(deg) + '°', p2.x + 35, p2.y - 10);
+      
+      // Dots on vertices
+      [p1, p2, p3].forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = a.color;
+        ctx.fill();
+      });
+    }
+  });
+  
+  // Draw angle points in progress
+  if (labAnglePoints.length > 0) {
+    ctx.fillStyle = labDrawColor;
+    labAnglePoints.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    if (labAnglePoints.length === 2) {
+      ctx.beginPath();
+      ctx.strokeStyle = labDrawColor;
+      ctx.lineWidth = labStrokeWidth;
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(labAnglePoints[0].x, labAnglePoints[0].y);
+      ctx.lineTo(labAnglePoints[1].x, labAnglePoints[1].y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+}
+
+function labClearDraw() {
+  labAnnotations = [];
+  labAnglePoints = [];
+  const canvas = document.getElementById('labCanvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function labSetColor(color, el) {
+  labDrawColor = color;
+  document.querySelectorAll('.lab-color-dot').forEach(d => d.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function labCapture() {
+  const video = document.getElementById('labVideo');
+  const canvas = document.getElementById('labCanvas');
+  
+  // Create composite: video frame + annotations
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = video.videoWidth;
+  tmpCanvas.height = video.videoHeight;
+  const ctx = tmpCanvas.getContext('2d');
+  
+  // Draw video frame
+  ctx.drawImage(video, 0, 0);
+  
+  // Draw annotations on top
+  ctx.drawImage(canvas, 0, 0);
+  
+  // Convert to data URL (compressed)
+  const dataUrl = tmpCanvas.toDataURL('image/jpeg', 0.7);
+  
+  const athId = document.getElementById('labAthlete').value;
+  const frame = {
+    id: DB.genId(),
+    athlete_id: athId || null,
+    timestamp: video.currentTime,
+    image: dataUrl,
+    created_at: new Date().toISOString()
+  };
+  
+  try {
+    const frames = DB.labFrames;
+    frames.push(frame);
+    DB.labFrames = frames;
+  } catch(e) {
+    // localStorage might be full
+    alert('Error guardando frame. Storage puede estar lleno. Intenta eliminar frames antiguos.');
+    console.error(e);
+    return;
+  }
+  
+  renderLabFrames();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function renderLabFrames() {
+  const frames = DB.labFrames;
+  const section = document.getElementById('labFramesSection');
+  
+  if (frames.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  
+  document.getElementById('labFrames').innerHTML = frames.slice().reverse().map(f => {
+    const t = f.timestamp || 0;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    const timeStr = `${m}:${s.toString().padStart(2,'0')}`;
+    const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
+    return `<div class="lab-frame" onclick="labFrameActions('${f.id}')">
+      <img src="${f.image}" loading="lazy">
+      <div class="lab-frame-time">${timeStr} ${ath ? '· '+ath : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function labFrameActions(id) {
+  const action = confirm('¿Eliminar este frame?\n\nOK = Eliminar\nCancel = Mantener');
+  if (action) {
+    DB.labFrames = DB.labFrames.filter(f => f.id !== id);
+    renderLabFrames();
+  }
+}
+
+function labCompareMode() {
+  const frames = DB.labFrames;
+  if (frames.length < 2) { alert('Necesitas al menos 2 frames para comparar'); return; }
+  
+  const section = document.getElementById('labCompareSection');
+  section.style.display = 'block';
+  
+  window._labCompare = [];
+  
+  document.getElementById('labCompare').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;grid-column:span 2">Selecciona 2 frames abajo</div>';
+  
+  document.getElementById('labCompareSelect').innerHTML = frames.slice().reverse().map(f => {
+    const t = f.timestamp || 0;
+    const timeStr = `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`;
+    return `<div class="lab-frame" onclick="labSelectCompare('${f.id}')" style="border-color:var(--border)">
+      <img src="${f.image}" loading="lazy">
+      <div class="lab-frame-time">${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function labSelectCompare(id) {
+  const frames = DB.labFrames;
+  const f = frames.find(x => x.id === id);
+  if (!f) return;
+  
+  if (!window._labCompare) window._labCompare = [];
+  if (window._labCompare.length >= 2) window._labCompare = [];
+  window._labCompare.push(f);
+  
+  if (window._labCompare.length === 2) {
+    document.getElementById('labCompare').innerHTML = window._labCompare.map(f => 
+      `<img src="${f.image}">`
+    ).join('');
+  }
+}
+
+function renderLabClips() {
+  const frames = DB.labFrames;
+  const empty = document.getElementById('labClipsEmpty');
+  const container = document.getElementById('labClips');
+  
+  if (frames.length === 0) {
+    empty.style.display = 'block';
+    container.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+  
+  // Group by athlete
+  const byAth = {};
+  frames.forEach(f => {
+    const key = f.athlete_id || '_unlinked';
+    if (!byAth[key]) byAth[key] = [];
+    byAth[key].push(f);
+  });
+  
+  container.innerHTML = Object.entries(byAth).map(([athId, aFrames]) => {
+    const name = athId === '_unlinked' ? 'Sin vincular' : (DB.athletes.find(a => a.id === athId)?.name || 'Atleta');
+    return `<div class="lab-clip">
+      <div class="lab-clip-header"><span class="lab-clip-name">${name}</span><span class="lab-clip-meta">${aFrames.length} frames</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// PHASE 3: BIOMETRICS
+// ============================================================
+function openBioModal() {
+  document.getElementById('bioWeight').value = '';
+  document.getElementById('bioSleep').value = '';
+  document.getElementById('bioPainZone').value = '';
+  document.getElementById('bioNotes').value = '';
+  segSelect('bioEnergy', document.querySelector('#bioEnergy .seg-btn[data-v="8"]'));
+  segSelect('bioPain', document.querySelector('#bioPain .seg-btn[data-v="none"]'));
+  document.getElementById('modalBio').classList.add('active');
+}
+
+function saveBio() {
+  const weight = parseFloat(document.getElementById('bioWeight').value) || null;
+  const sleep = parseFloat(document.getElementById('bioSleep').value) || null;
+  const energy = parseInt(getSegValue('bioEnergy')) || 8;
+  const pain = getSegValue('bioPain') || 'none';
+  const painZone = document.getElementById('bioPainZone').value.trim();
+  const notes = document.getElementById('bioNotes').value.trim();
+  
+  if (!weight && !sleep) { alert('Ingresa al menos peso o horas de sueño'); return; }
+  
+  const entry = {
+    id: DB.genId(),
+    date: new Date().toISOString(),
+    weight, sleep, energy, pain, painZone, notes
+  };
+  
+  const a = DB.athletes.find(x => x.id === _pcAthleteId);
+  if (!a) { alert('No se encontró el atleta'); return; }
+  
+  const athletes = DB.athletes;
+  const ath = athletes.find(x => x.id === _pcAthleteId);
+  if (!ath.biometrics) ath.biometrics = [];
+  ath.biometrics.push(entry);
+  
+  // XP for tracking biometrics
+  ath.xp_total = (ath.xp_total || 0) + 10;
+  
+  DB.athletes = athletes;
+  closeModal('modalBio');
+  renderPlayerCard();
+  
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function renderBiometrics(a) {
+  const bio = a.biometrics || [];
+  const grid = document.getElementById('pcBioGrid');
+  const histSection = document.getElementById('pcBioHistory');
+  
+  if (bio.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 2;font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Sin registros. Toca "+ Registro" para empezar.</div>';
+    histSection.style.display = 'none';
+    return;
+  }
+  
+  const latest = bio[bio.length - 1];
+  const last7 = bio.slice(-7);
+  
+  const painEmoji = { none: '✅', mild: '🟡', moderate: '🟠', severe: '🔴' };
+  const painLabel = { none: 'Sin dolor', mild: 'Leve', moderate: 'Moderado', severe: 'Severo' };
+  
+  // Grid cards with mini trends
+  const avgEnergy = last7.reduce((s, b) => s + (b.energy || 0), 0) / last7.length;
+  const avgSleep = last7.filter(b => b.sleep).reduce((s, b) => s + b.sleep, 0) / (last7.filter(b => b.sleep).length || 1);
+  
+  grid.innerHTML = `
+    <div class="bio-card">
+      <div class="bio-val">${latest.weight ? latest.weight + '<span style="font-size:12px">kg</span>' : '—'}</div>
+      <div class="bio-lbl">Peso</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = b.weight ? Math.max(5, (b.weight / 120) * 40) : 3;
+        return `<div class="bio-bar" style="height:${h}px;background:var(--accent)"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val">${latest.sleep ? latest.sleep + '<span style="font-size:12px">h</span>' : '—'}</div>
+      <div class="bio-lbl">Sueño</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = b.sleep ? Math.max(5, (b.sleep / 10) * 40) : 3;
+        const c = b.sleep >= 7 ? 'var(--green)' : b.sleep >= 5 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="bio-bar" style="height:${h}px;background:${c}"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val" style="color:${avgEnergy>=7?'var(--green)':avgEnergy>=5?'var(--yellow)':'var(--red)'}">${latest.energy}/10</div>
+      <div class="bio-lbl">Energía</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = Math.max(5, (b.energy / 10) * 40);
+        const c = b.energy >= 7 ? 'var(--green)' : b.energy >= 5 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="bio-bar" style="height:${h}px;background:${c}"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val">${painEmoji[latest.pain] || '✅'}</div>
+      <div class="bio-lbl">${painLabel[latest.pain] || 'Sin dolor'}</div>
+      ${latest.painZone ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">${latest.painZone}</div>` : ''}
+    </div>
+  `;
+  
+  // History rows
+  if (bio.length > 1) {
+    histSection.style.display = 'block';
+    document.getElementById('pcBioRows').innerHTML = bio.slice().reverse().slice(0, 7).map(b => {
+      const d = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(b.date));
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:var(--text-muted);width:50px">${d}</span>
+        <span>${b.weight ? b.weight+'kg' : '—'}</span>
+        <span>${b.sleep ? b.sleep+'h' : '—'}</span>
+        <span>⚡${b.energy}</span>
+        <span>${painEmoji[b.pain]||'✅'}</span>
+      </div>`;
+    }).join('');
+  } else { histSection.style.display = 'none'; }
+}
+
+function renderLabFramesForAthlete(a) {
+  const frames = DB.labFrames.filter(f => f.athlete_id === a.id);
+  const card = document.getElementById('pcLabCard');
+  
+  if (frames.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  
+  document.getElementById('pcLabFrames').innerHTML = frames.slice(-6).reverse().map(f => {
+    const t = f.timestamp || 0;
+    const timeStr = `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`;
+    return `<div class="lab-frame"><img src="${f.image}" loading="lazy"><div class="lab-frame-time">${timeStr}</div></div>`;
+  }).join('');
 }
 
 // ============================================================
