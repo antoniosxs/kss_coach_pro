@@ -2041,6 +2041,7 @@ function evalSet(field, el, color) {
   parent.querySelectorAll('.eval-btn').forEach(b => b.className = 'eval-btn');
   el.classList.add('sel-' + color);
   if (window._pendingWave) window._pendingWave[field] = el.dataset.v;
+  if (window._pendingBio) window._pendingBio[field] = el.dataset.v;
 }
 
 function tagToggle(el) {
@@ -2683,79 +2684,107 @@ function exportSessionCSV() {
   const s = sessions[sessions.length - 1];
   const athletes = DB.athletes;
   
-  let csv = 'KSS Coach - Session Export\n';
-  csv += `Date,${s.date}\n`;
-  csv += `Spot,${s.spot}\n`;
-  csv += `Wave Size,${s.wave_size}\n`;
-  csv += `Wave Quality,${s.wave_quality}\n`;
-  csv += `Wind,${s.wind_condition}\n`;
-  csv += `Crowd,${s.crowd_factor}\n`;
-  csv += `Focus,${s.focus_area}\n`;
-  csv += `Duration (min),${s.duration_min || ''}\n`;
-  csv += `Coach Notes,"${(s.coach_notes || '').replace(/"/g, '""')}"\n`;
-  csv += `Rating,${s.coach_rating || ''}\n\n`;
+  // Flat BI-ready format: one row per athlete, all data as columns
+  const headers = [
+    'timestamp','spot','wave_size','wave_quality','wind','crowd','focus','duration_min','coach_rating',
+    'athlete','paddled','caught','falls','catch_ratio',
+    'waves_total','maneuvers',
+    'selection_poor','selection_normal','selection_excellent',
+    'position_poor','position_normal','position_excellent',
+    'commit_poor','commit_normal','commit_excellent',
+    'xp',
+    'bio_evals','bio_shoulders_good_pct','bio_knees_good_pct','bio_arms_good_pct',
+    'bio_compression_good_pct','bio_head_good_pct','bio_backfoot_good_pct','bio_weight_good_pct',
+    'bio_avg_flow','bio_notes',
+    'workout_total','workout_completed','workout_good','workout_regular','workout_poor',
+    'coach_notes'
+  ];
   
-  // Tactical IQ data
-  csv += '--- TACTICAL IQ ---\n';
-  csv += 'Athlete,Paddled,Caught,Falls,Catch Ratio,Waves,Maneuvers,Selection,Position,Commitment,XP\n';
+  let csv = headers.join(',') + '\n';
   
   Object.keys(s.athlete_data).forEach(id => {
     const a = athletes.find(x => x.id === id);
     const d = s.athlete_data[id];
     const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
     
+    // Tactical aggregates
     const maneuvers = {};
-    let selCounts = { poor: 0, normal: 0, excellent: 0 };
-    let posCounts = { poor: 0, normal: 0, excellent: 0 };
-    let comCounts = { poor: 0, normal: 0, excellent: 0 };
-    
+    let sel = { poor: 0, normal: 0, excellent: 0 };
+    let pos = { poor: 0, normal: 0, excellent: 0 };
+    let com = { poor: 0, normal: 0, excellent: 0 };
     d.waves.forEach(w => {
       if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1);
-      if (w.selection) selCounts[w.selection]++;
-      if (w.position) posCounts[w.position]++;
-      if (w.commit) comCounts[w.commit]++;
+      if (w.selection) sel[w.selection] = (sel[w.selection] || 0) + 1;
+      if (w.position) pos[w.position] = (pos[w.position] || 0) + 1;
+      if (w.commit) com[w.commit] = (com[w.commit] || 0) + 1;
     });
-    
     let xp = 10;
     if (ratio >= 70) xp += 25;
     if (d.falls === 0 && d.caught > 0) xp += 40;
     xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
-    
     const manStr = Object.entries(maneuvers).map(([m, c]) => `${m}:${c}`).join(';');
-    const selStr = `P:${selCounts.poor} N:${selCounts.normal} E:${selCounts.excellent}`;
-    const posStr = `P:${posCounts.poor} N:${posCounts.normal} E:${posCounts.excellent}`;
-    const comStr = `P:${comCounts.poor} N:${comCounts.normal} E:${comCounts.excellent}`;
     
-    csv += `"${a ? a.name : id}",${d.paddled},${d.caught},${d.falls},${ratio}%,${d.waves.length},"${manStr}","${selStr}","${posStr}","${comStr}",${xp}\n`;
+    // Biomechanics aggregates
+    const bio = d.biomech || [];
+    const bioGoodPct = (field) => {
+      const vals = bio.map(b => b[field]).filter(Boolean);
+      const good = vals.filter(v => v === 'good' || v === 'full').length;
+      return vals.length > 0 ? Math.round(good / vals.length * 100) : '';
+    };
+    const flows = bio.map(b => parseInt(b.bio_flow)).filter(n => !isNaN(n));
+    const avgFlow = flows.length > 0 ? (flows.reduce((a,b)=>a+b,0)/flows.length).toFixed(1) : '';
+    const bioNotes = bio.map(b => b.notes).filter(Boolean).join(' | ');
+    
+    // Workout aggregates
+    const wo = d.workouts || [];
+    const woDone = wo.filter(w => w.completed).length;
+    const woGood = wo.filter(w => w.quality === 'good').length;
+    const woReg = wo.filter(w => w.quality === 'regular').length;
+    const woPoor = wo.filter(w => w.quality === 'poor').length;
+    
+    const esc = (v) => `"${String(v || '').replace(/"/g, '""')}"`;
+    
+    const row = [
+      s.date || s.started_at,
+      esc(s.spot),
+      s.wave_size,
+      s.wave_quality,
+      s.wind_condition,
+      s.crowd_factor,
+      esc(s.focus_area || ''),
+      s.duration_min || '',
+      s.coach_rating || '',
+      esc(a ? a.name : id),
+      d.paddled,
+      d.caught,
+      d.falls,
+      ratio,
+      d.waves.length,
+      esc(manStr),
+      sel.poor, sel.normal, sel.excellent,
+      pos.poor, pos.normal, pos.excellent,
+      com.poor, com.normal, com.excellent,
+      xp,
+      bio.length,
+      bioGoodPct('bio_shoulders'),
+      bioGoodPct('bio_knees'),
+      bioGoodPct('bio_arms'),
+      bioGoodPct('bio_compression'),
+      bioGoodPct('bio_head'),
+      bioGoodPct('bio_backfoot'),
+      bioGoodPct('bio_weight'),
+      avgFlow,
+      esc(bioNotes),
+      wo.length,
+      woDone,
+      woGood,
+      woReg,
+      woPoor,
+      esc(s.coach_notes || '')
+    ];
+    
+    csv += row.join(',') + '\n';
   });
-  
-  // Biomechanics data
-  const hasBio = Object.values(s.athlete_data).some(d => (d.biomech || []).length > 0);
-  if (hasBio) {
-    csv += '\n--- BIOMECHANICS ---\n';
-    csv += 'Athlete,Wave#,Shoulders,Knees,Arms,Compression,Head,BackFoot,WeightTransfer,Flow,Notes\n';
-    Object.keys(s.athlete_data).forEach(id => {
-      const a = athletes.find(x => x.id === id);
-      const bio = s.athlete_data[id].biomech || [];
-      bio.forEach(b => {
-        csv += `"${a ? a.name : id}",${b.wave_num},${b.bio_shoulders || ''},${b.bio_knees || ''},${b.bio_arms || ''},${b.bio_compression || ''},${b.bio_head || ''},${b.bio_backfoot || ''},${b.bio_weight || ''},${b.bio_flow || ''},"${(b.notes || '').replace(/"/g, '""')}"\n`;
-      });
-    });
-  }
-  
-  // Workout data
-  const hasWorkout = Object.values(s.athlete_data).some(d => (d.workouts || []).length > 0);
-  if (hasWorkout) {
-    csv += '\n--- WORKOUT ---\n';
-    csv += 'Athlete,Exercise,Completed,Quality,Notes\n';
-    Object.keys(s.athlete_data).forEach(id => {
-      const a = athletes.find(x => x.id === id);
-      const wo = s.athlete_data[id].workouts || [];
-      wo.forEach(w => {
-        csv += `"${a ? a.name : id}","${w.name}",${w.completed ? 'Yes' : 'No'},${w.quality || ''},"${(w.notes || '').replace(/"/g, '""')}"\n`;
-      });
-    });
-  }
   
   // Download
   const blob = new Blob([csv], { type: 'text/csv' });
