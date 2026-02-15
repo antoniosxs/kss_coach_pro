@@ -321,8 +321,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* ===== PHASE 3: TECH LAB ===== */
 .lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px}
 .lab-video{width:100%;display:block;max-height:50vh}
-.lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-.lab-canvas.drawing{pointer-events:auto;cursor:crosshair}
+.lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;touch-action:none}
+.lab-canvas.drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
 .lab-controls{display:flex;align-items:center;gap:8px;padding:8px 0}
 .lab-ctrl-btn{width:40px;height:40px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-primary);cursor:pointer}
 .lab-ctrl-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -383,6 +383,21 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 .db-chart{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
 .db-chart canvas{width:100%;height:120px}
+
+/* ===== WORKOUT MODULE ===== */
+.wo-ath-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.wo-ath-name{font-weight:700;font-size:14px;margin-bottom:8px}
+.wo-drill-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.wo-drill-row:last-child{border-bottom:none}
+.wo-drill-name{flex:1;font-weight:600}
+.wo-check{width:36px;height:36px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.wo-check:active{transform:scale(.9)}
+.wo-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.wo-check.fail{background:var(--red);border-color:var(--red);color:#fff}
+.wo-quality{display:flex;gap:6px}
+.wo-q-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg-input);-webkit-tap-highlight-color:transparent}
+.wo-q-btn:active{transform:scale(.9)}
+.wo-q-btn.active{font-weight:800;border-width:2px}
 </style>
 </head>
 <body>
@@ -546,13 +561,21 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- Mode selection -->
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-    <button class="btn" onclick="showView('tactical')" style="padding:20px;font-size:16px;background:linear-gradient(135deg,var(--green),#059669);text-align:left;display:flex;align-items:center;gap:14px">
-      <span style="font-size:32px">🏄</span>
-      <div><div style="font-weight:800">Tactical IQ</div><div style="font-size:12px;font-weight:500;opacity:.85;margin-top:2px">Tracking de remadas, atrapadas, caídas</div></div>
+    <button class="btn" onclick="showView('tactical')" style="padding:16px;font-size:15px;background:linear-gradient(135deg,var(--green),#059669);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">🏄</span>
+      <div><div style="font-weight:800">Tactical IQ</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Olas + Biomecánica</div></div>
     </button>
-    <button class="btn" onclick="hubEnterJudge()" style="padding:20px;font-size:16px;background:linear-gradient(135deg,#6366f1,#4f46e5);text-align:left;display:flex;align-items:center;gap:14px">
-      <span style="font-size:32px">⚖️</span>
-      <div><div style="font-weight:800">Judge Heat</div><div style="font-size:12px;font-weight:500;opacity:.85;margin-top:2px">Scoring ISA 0-10, rankings, interferencia</div></div>
+    <button class="btn" onclick="hubEnterJudge()" style="padding:16px;font-size:15px;background:linear-gradient(135deg,#6366f1,#4f46e5);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">⚖️</span>
+      <div><div style="font-weight:800">Judge Heat</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Scoring ISA 0-10</div></div>
+    </button>
+    <button class="btn" onclick="showView('workout')" style="padding:16px;font-size:15px;background:linear-gradient(135deg,#f59e0b,#d97706);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">💪</span>
+      <div><div style="font-weight:800">Workout</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Ejercicios y condición física</div></div>
+    </button>
+    <button class="btn" onclick="showView('lab')" style="padding:16px;font-size:15px;background:linear-gradient(135deg,#ec4899,#be185d);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">🎥</span>
+      <div><div style="font-weight:800">Tech Lab</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Video análisis y corrección</div></div>
     </button>
   </div>
 
@@ -580,40 +603,48 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="padding:12px 16px">
-    <!-- Catch Ratio -->
-    <div class="tac-catch mid" id="tacCatch">
-      <div id="tacCatchVal">—%</div>
-      <div class="tac-catch-label">Catch Ratio</div>
+    <!-- MODE TOGGLE: Waves vs Biomechanics -->
+    <div style="display:flex;gap:4px;margin-bottom:14px;background:var(--bg-input);border-radius:8px;padding:3px" id="tacModeToggle">
+      <button class="seg-btn selected" data-v="waves" onclick="tacSwitchMode('waves',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🌊 Olas</button>
+      <button class="seg-btn" data-v="biomech" onclick="tacSwitchMode('biomech',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🦴 Biomecánica</button>
     </div>
 
-    <!-- Stats -->
-    <div class="tac-stat-row">
-      <div class="tac-stat"><div class="tac-stat-val" id="tacPaddled" style="color:var(--accent)">0</div><div class="tac-stat-label">Remadas</div></div>
-      <div class="tac-stat"><div class="tac-stat-val" id="tacCaught" style="color:var(--green)">0</div><div class="tac-stat-label">Atrapadas</div></div>
-    </div>
+    <!-- ===== WAVE MODE (existing) ===== -->
+    <div id="tacWaveMode">
+      <!-- Catch Ratio -->
+      <div class="tac-catch mid" id="tacCatch">
+        <div id="tacCatchVal">—%</div>
+        <div class="tac-catch-label">Catch Ratio</div>
+      </div>
 
-    <!-- BIG COUNTER BUTTONS -->
-    <div class="counter-row">
-      <button class="counter-btn c-paddle" onclick="tacCount('paddle')">
-        <span class="cnt-icon">🏊</span>
-        <span style="font-size:11px">REMÓ</span>
-        <span class="cnt-val" id="tacPaddleBtn">+1</span>
-      </button>
-      <button class="counter-btn c-catch" onclick="tacCount('catch')">
-        <span class="cnt-icon">✅</span>
-        <span style="font-size:11px">ATRAPÓ</span>
-        <span class="cnt-val" id="tacCatchBtn">+1</span>
-      </button>
-      <button class="counter-btn c-fall" onclick="tacCount('fall')">
-        <span class="cnt-icon">💥</span>
-        <span style="font-size:11px">CAÍDA</span>
-        <span class="cnt-val" id="tacFallBtn">+1</span>
-      </button>
-    </div>
+      <!-- Stats -->
+      <div class="tac-stat-row">
+        <div class="tac-stat"><div class="tac-stat-val" id="tacPaddled" style="color:var(--accent)">0</div><div class="tac-stat-label">Remadas</div></div>
+        <div class="tac-stat"><div class="tac-stat-val" id="tacCaught" style="color:var(--green)">0</div><div class="tac-stat-label">Atrapadas</div></div>
+      </div>
 
-    <!-- Quick Eval (only visible after catching a wave) -->
-    <div id="tacEvalSection" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Evaluación Rápida — Última Ola</div>
+      <!-- BIG COUNTER BUTTONS -->
+      <div class="counter-row">
+        <button class="counter-btn c-paddle" onclick="tacCount('paddle')">
+          <span class="cnt-icon">🏊</span>
+          <span style="font-size:11px">REMÓ</span>
+          <span class="cnt-val" id="tacPaddleBtn">+1</span>
+        </button>
+        <button class="counter-btn c-catch" onclick="tacCount('catch')">
+          <span class="cnt-icon">✅</span>
+          <span style="font-size:11px">ATRAPÓ</span>
+          <span class="cnt-val" id="tacCatchBtn">+1</span>
+        </button>
+        <button class="counter-btn c-fall" onclick="tacCount('fall')">
+          <span class="cnt-icon">💥</span>
+          <span style="font-size:11px">CAÍDA</span>
+          <span class="cnt-val" id="tacFallBtn">+1</span>
+        </button>
+      </div>
+
+      <!-- Quick Eval (only visible after catching a wave) -->
+      <div id="tacEvalSection" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Evaluación Rápida — Última Ola</div>
       
       <!-- Set or Interset -->
       <div class="eval-section">
@@ -684,6 +715,113 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <div class="tac-stat"><div class="tac-stat-val" id="tacFalls" style="color:var(--red)">0</div><div class="tac-stat-label">Caídas</div></div>
       <div class="tac-stat"><div class="tac-stat-val" id="tacWaves" style="color:var(--text-primary)">0</div><div class="tac-stat-label">Total Olas</div></div>
     </div>
+    </div><!-- end tacWaveMode -->
+
+    <!-- ===== BIOMECHANICS MODE ===== -->
+    <div id="tacBioMode" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🦴 Evaluación Biomecánica en Agua</div>
+
+      <!-- Wave counter for biomech -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-accent" onclick="bioNewWave()" style="flex:1;padding:14px;font-size:15px;font-weight:800">🏄 Nueva Ola para Evaluar</button>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--accent);text-align:center;margin-bottom:14px" id="bioWaveCount">Ola #0</div>
+
+      <div id="bioEvalForm" style="display:none">
+        <!-- Shoulders -->
+        <div class="eval-section">
+          <div class="eval-label">Hombros Paralelos</div>
+          <div class="eval-row" id="bioShoulders">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_shoulders',this,'r')">🔴 Desalineados</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_shoulders',this,'y')">🟡 Parcial</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_shoulders',this,'g')">🟢 Paralelos</button>
+          </div>
+        </div>
+
+        <!-- Knees -->
+        <div class="eval-section">
+          <div class="eval-label">Rodillas (dirección)</div>
+          <div class="eval-row" id="bioKnees">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_knees',this,'r')">🔴 Cerradas/Abiertas</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_knees',this,'y')">🟡 Parcial</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_knees',this,'g')">🟢 Hacia adelante</button>
+          </div>
+        </div>
+
+        <!-- Arms -->
+        <div class="eval-section">
+          <div class="eval-label">Brazos (dirección y guía)</div>
+          <div class="eval-row" id="bioArms">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_arms',this,'r')">🔴 Sin guía</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_arms',this,'y')">🟡 Parcial</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_arms',this,'g')">🟢 Guían bien</button>
+          </div>
+        </div>
+
+        <!-- Compression / Bottom Turn -->
+        <div class="eval-section">
+          <div class="eval-label">Compresión en Bottom Turn</div>
+          <div class="eval-row" id="bioCompression">
+            <button class="eval-btn" data-v="none" onclick="evalSet('bio_compression',this,'r')">🔴 Sin compresión</button>
+            <button class="eval-btn" data-v="partial" onclick="evalSet('bio_compression',this,'y')">🟡 Parcial</button>
+            <button class="eval-btn" data-v="full" onclick="evalSet('bio_compression',this,'g')">🟢 Full compress</button>
+          </div>
+        </div>
+
+        <!-- Head Position -->
+        <div class="eval-section">
+          <div class="eval-label">Cabeza / Mirada</div>
+          <div class="eval-row" id="bioHead">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_head',this,'r')">🔴 Mirando abajo</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_head',this,'y')">🟡 Inconsistente</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_head',this,'g')">🟢 Mira al destino</button>
+          </div>
+        </div>
+
+        <!-- Back Foot -->
+        <div class="eval-section">
+          <div class="eval-label">Pie Trasero (posición en tail)</div>
+          <div class="eval-row" id="bioBackFoot">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_backfoot',this,'r')">🔴 Centrado</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_backfoot',this,'y')">🟡 Cerca</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_backfoot',this,'g')">🟢 Sobre el tail</button>
+          </div>
+        </div>
+
+        <!-- Weight Transfer -->
+        <div class="eval-section">
+          <div class="eval-label">⚖️ Transferencia de Peso</div>
+          <div class="eval-row" id="bioWeight">
+            <button class="eval-btn" data-v="poor" onclick="evalSet('bio_weight',this,'r')">🔴 Estático</button>
+            <button class="eval-btn" data-v="ok" onclick="evalSet('bio_weight',this,'y')">🟡 Parcial</button>
+            <button class="eval-btn" data-v="good" onclick="evalSet('bio_weight',this,'g')">🟢 Fluida</button>
+          </div>
+        </div>
+
+        <!-- Overall Flow -->
+        <div class="eval-section">
+          <div class="eval-label">Fluidez General</div>
+          <div class="eval-row" id="bioFlow">
+            <button class="eval-btn" data-v="1" onclick="evalSet('bio_flow',this,'r')">1</button>
+            <button class="eval-btn" data-v="2" onclick="evalSet('bio_flow',this,'r')">2</button>
+            <button class="eval-btn" data-v="3" onclick="evalSet('bio_flow',this,'y')">3</button>
+            <button class="eval-btn" data-v="4" onclick="evalSet('bio_flow',this,'y')">4</button>
+            <button class="eval-btn" data-v="5" onclick="evalSet('bio_flow',this,'g')">5</button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="eval-section">
+          <div class="eval-label">📝 Notas de Corrección</div>
+          <textarea class="field-input" id="bioNotes" rows="3" placeholder="Ej: Hombro delantero cae en el cutback, necesita rotar más las caderas..."></textarea>
+        </div>
+
+        <button class="btn btn-sm" onclick="bioConfirmWave()" style="margin-top:10px;background:#f97316;color:#fff;font-weight:800;font-size:16px;padding:16px;box-shadow:0 0 20px rgba(249,115,22,.5);border:2px solid #fb923c;letter-spacing:.03em;width:100%">✓ CONFIRMAR EVALUACIÓN</button>
+      </div>
+
+      <!-- Biomech History for current session -->
+      <div id="bioHistory" style="margin-top:16px"></div>
+    </div><!-- end tacBioMode -->
 
     <div style="margin-top:20px;display:flex;gap:8px">
       <button class="btn btn-outline btn-sm" onclick="showView('overview')" style="flex:1">👥 Ver Todos</button>
@@ -705,6 +843,60 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div id="ovAvg" style="font-size:32px;font-weight:800;color:var(--accent)">—%</div>
   </div>
   <button class="btn btn-sm" style="margin-top:16px;background:var(--red);color:#fff" onclick="endSession()">■ Cerrar Sesión</button>
+</div>
+
+<!-- ==================== WORKOUT MODULE ==================== -->
+<div class="view" id="view-workout">
+  <div class="flex-between mb-4" style="padding:0 4px">
+    <button class="text-sm text-muted" onclick="showView('session-hub')">← Hub</button>
+    <div style="font-size:17px;font-weight:800">💪 Workout</div>
+    <div style="width:60px"></div>
+  </div>
+
+  <!-- Assign drill to all or individual -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn btn-accent btn-sm" onclick="woAssignAll()" style="flex:1">📋 Asignar a Todos</button>
+    <button class="btn btn-outline btn-sm" onclick="woAssignOne()" style="flex:1">👤 Asignar Individual</button>
+  </div>
+
+  <!-- Athletes workout table -->
+  <div id="woAthleteList"></div>
+
+  <!-- Summary -->
+  <div class="card" id="woSummary" style="display:none;margin-top:14px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📊 Resumen Workout</div>
+    <div id="woSummaryContent"></div>
+  </div>
+</div>
+
+<!-- Workout Assign Modal -->
+<div class="modal-overlay" id="modalWoAssign" onclick="if(event.target===this)this.classList.remove('active')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:800" id="woAssignTitle">Asignar Ejercicio</div>
+      <button onclick="document.getElementById('modalWoAssign').classList.remove('active')" style="font-size:20px;padding:4px 8px;color:var(--text-muted)">✕</button>
+    </div>
+    <div id="woAssignTarget" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px"></div>
+    
+    <!-- Pick from library or custom -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;background:var(--bg-input);border-radius:8px;padding:3px">
+      <button class="seg-btn selected" onclick="woAssignTab('library',this)" style="flex:1;border-radius:6px;padding:8px;font-size:13px">📚 Biblioteca</button>
+      <button class="seg-btn" onclick="woAssignTab('custom',this)" style="flex:1;border-radius:6px;padding:8px;font-size:13px">✏️ Personalizado</button>
+    </div>
+    
+    <div id="woLibraryTab">
+      <div class="drill-cat-filter" id="woCatFilter"></div>
+      <div id="woLibraryList" style="max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+    </div>
+    
+    <div id="woCustomTab" style="display:none">
+      <div class="field"><label class="field-label">Nombre</label><input class="field-input" id="woCustomName" placeholder="Ej: Sprint en arena" autocomplete="off"></div>
+      <div class="field"><label class="field-label">Descripción (opcional)</label><input class="field-input" id="woCustomDesc" placeholder="Descripción breve" autocomplete="off"></div>
+      <div class="field"><label class="field-label">Duración</label><input class="field-input" id="woCustomDur" placeholder="Ej: 3 series x 10" autocomplete="off"></div>
+      <button class="btn btn-accent" onclick="woAssignCustom()" style="padding:14px;font-size:15px">✅ Asignar</button>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== DEBRIEF ==================== -->
@@ -817,6 +1009,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <div class="card" id="pcSessionCard" style="padding:0;overflow:hidden;display:none">
     <div class="card-header" style="font-size:13px;padding:12px 12px 8px">🏄 Session History</div>
     <div id="pcSessions"></div>
+  </div>
+
+  <!-- Biomechanics Summary -->
+  <div class="card" id="pcBioCard" style="padding:12px;display:none">
+    <div class="card-header" style="font-size:13px;margin-bottom:8px">🦴 Biomecánica</div>
+    <div id="pcBioContent"></div>
   </div>
 
   <!-- Biometrics -->
@@ -1046,7 +1244,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <div class="card">
     <div class="card-header">🏋️ Drill Bank</div>
-    <button class="btn btn-outline btn-sm" onclick="window._drillReturnView='settings';showView('drills')">Explorar Ejercicios</button>
+    <button class="btn btn-outline btn-sm" onclick="window._drillReturnView='settings';showView('drills')" style="margin-bottom:8px">Explorar Ejercicios</button>
+    <div id="setCustomDrills"></div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <input class="field-input" id="setNewDrillName" placeholder="Nombre del ejercicio" style="flex:1">
+      <button class="btn btn-accent btn-sm" onclick="addCustomDrill()" style="width:auto;padding:8px 12px">+ Agregar</button>
+    </div>
   </div>
 
   <div class="card">
@@ -1056,7 +1259,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v4.0 · Phase 4<br>Karibe Surf Score
+    KSS Coach v4.1 · Phase 4+<br>Karibe Surf Score
   </div>
 </div>
 
@@ -1256,6 +1459,9 @@ const DB = {
   get templates() { return this._get('templates', []); },
   set templates(v) { this._set('templates', v); },
 
+  get customDrills() { return this._get('custom_drills', []); },
+  set customDrills(v) { this._set('custom_drills', v); },
+
   genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 };
 
@@ -1267,11 +1473,8 @@ let sessionTimer = null;
 let sessionStartTime = null;
 
 function showView(id) {
-  // Guard: if session active, restrict nav
+  // Session bar visible across all views during active session
   const s = DB.activeSession;
-  if (s && !['tactical', 'overview', 'debrief', 'judge', 'session-hub'].includes(id)) {
-    if (!confirm('Tienes una sesión activa. ¿Salir del tracking?')) return;
-  }
   
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const el = document.getElementById('view-' + id);
@@ -1282,6 +1485,9 @@ function showView(id) {
   if (nav) nav.classList.add('active');
   
   currentView = id;
+  
+  // Close any open modals
+  document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
   
   // Clean up hub timer when leaving hub
   if (id !== 'session-hub' && typeof hubTimerInterval !== 'undefined' && hubTimerInterval) {
@@ -1302,6 +1508,7 @@ function showView(id) {
   if (id === 'overview') renderOverview();
   if (id === 'debrief') renderDebrief();
   if (id === 'judge') renderJudge();
+  if (id === 'workout') renderWorkout();
   
   // Session bar
   updateSessionBar();
@@ -1310,7 +1517,7 @@ function showView(id) {
 function updateSessionBar() {
   const bar = document.getElementById('sessionBar');
   const s = DB.activeSession;
-  if (s && ['tactical', 'overview'].includes(currentView)) {
+  if (s) {
     const sizeNames = { 1: 'Flat', 2: '1-2ft', 3: '2-4ft', 4: '4-6ft', 5: '+6ft' };
     bar.querySelector('#sbInfo').textContent = `${s.spot} · ${sizeNames[s.wave_size] || ''} · ${s.wind_condition}`;
     bar.classList.add('active');
@@ -1318,6 +1525,45 @@ function updateSessionBar() {
   } else {
     bar.classList.remove('active');
   }
+  
+  // Dynamic nav: swap Home/Athletes for Hub/Track during session
+  updateNavBar(!!s);
+}
+
+function updateNavBar(hasSession) {
+  const nav = document.querySelector('.bottom-nav');
+  if (!nav) return;
+  const btns = nav.querySelectorAll('.nav-btn');
+  
+  if (hasSession) {
+    // Slot 0: Hub (was Home)
+    btns[0].setAttribute('data-view', 'session-hub');
+    btns[0].onclick = () => showView('session-hub');
+    btns[0].querySelector('svg').innerHTML = '<path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>';
+    btns[0].lastChild.textContent = 'Hub';
+    
+    // Slot 1: Track (was Athletes)
+    btns[1].setAttribute('data-view', 'tactical');
+    btns[1].onclick = () => showView('tactical');
+    btns[1].querySelector('svg').innerHTML = '<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>';
+    btns[1].lastChild.textContent = 'Track';
+  } else {
+    // Restore defaults
+    btns[0].setAttribute('data-view', 'home');
+    btns[0].onclick = () => showView('home');
+    btns[0].querySelector('svg').innerHTML = '<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/>';
+    btns[0].lastChild.textContent = 'Home';
+    
+    btns[1].setAttribute('data-view', 'athletes');
+    btns[1].onclick = () => showView('athletes');
+    btns[1].querySelector('svg').innerHTML = '<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>';
+    btns[1].lastChild.textContent = 'Atletas';
+  }
+  
+  // Highlight active
+  nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const active = nav.querySelector(`.nav-btn[data-view="${currentView}"]`);
+  if (active) active.classList.add('active');
 }
 
 function startSessionTimer() {
@@ -1825,6 +2071,357 @@ function resetEvalUI() {
   document.querySelectorAll('#tacTags .tag-btn').forEach(b => b.classList.remove('selected'));
 }
 
+// ============================================================
+// TACTICAL IQ: MODE SWITCH & BIOMECHANICS
+// ============================================================
+window._tacMode = 'waves';
+window._bioWaveCount = 0;
+window._pendingBio = null;
+
+function tacSwitchMode(mode, el) {
+  window._tacMode = mode;
+  // Toggle buttons
+  document.querySelectorAll('#tacModeToggle .seg-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  
+  document.getElementById('tacWaveMode').style.display = mode === 'waves' ? 'block' : 'none';
+  document.getElementById('tacBioMode').style.display = mode === 'biomech' ? 'block' : 'none';
+  
+  if (mode === 'biomech') renderBioHistory();
+}
+
+function bioNewWave() {
+  window._bioWaveCount++;
+  document.getElementById('bioWaveCount').textContent = `Ola #${window._bioWaveCount}`;
+  document.getElementById('bioEvalForm').style.display = 'block';
+  
+  // Reset all bio eval buttons
+  ['bioShoulders','bioKnees','bioArms','bioCompression','bioHead','bioBackFoot','bioWeight','bioFlow'].forEach(id => {
+    document.querySelectorAll(`#${id} .eval-btn`).forEach(b => b.className = 'eval-btn');
+  });
+  document.getElementById('bioNotes').value = '';
+  
+  window._pendingBio = {
+    wave_num: window._bioWaveCount,
+    timestamp: new Date().toISOString(),
+    bio_shoulders: null,
+    bio_knees: null,
+    bio_arms: null,
+    bio_compression: null,
+    bio_head: null,
+    bio_backfoot: null,
+    bio_weight: null,
+    bio_flow: null,
+    notes: ''
+  };
+  
+  if (navigator.vibrate) navigator.vibrate(50);
+}
+
+function bioConfirmWave() {
+  if (!window._pendingBio) return;
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  const ids = Object.keys(s.athlete_data);
+  const currentId = ids[window._tacIdx];
+  if (!currentId) return;
+  
+  // Save notes
+  window._pendingBio.notes = document.getElementById('bioNotes').value.trim();
+  
+  // Ensure biomech array exists
+  if (!s.athlete_data[currentId].biomech) s.athlete_data[currentId].biomech = [];
+  s.athlete_data[currentId].biomech.push({ ...window._pendingBio });
+  
+  window._pendingBio = null;
+  document.getElementById('bioEvalForm').style.display = 'none';
+  saveSession();
+  renderBioHistory();
+  
+  if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+}
+
+function renderBioHistory() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const ids = Object.keys(s.athlete_data);
+  const currentId = ids[window._tacIdx];
+  if (!currentId) return;
+  
+  const biomech = s.athlete_data[currentId].biomech || [];
+  const div = document.getElementById('bioHistory');
+  
+  if (biomech.length === 0) {
+    div.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:12px">Sin evaluaciones aún. Toca "Nueva Ola" para comenzar.</div>';
+    return;
+  }
+  
+  const colorMap = { poor: '🔴', ok: '🟡', good: '🟢', none: '🔴', partial: '🟡', full: '🟢' };
+  const numColor = v => { const n = parseInt(v); return n >= 4 ? '🟢' : n >= 3 ? '🟡' : '🔴'; };
+  
+  div.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Historial Biomecánica</div>' +
+    biomech.slice().reverse().map(b => {
+      const checks = [
+        b.bio_shoulders ? `Hombros ${colorMap[b.bio_shoulders] || '⚪'}` : null,
+        b.bio_knees ? `Rodillas ${colorMap[b.bio_knees] || '⚪'}` : null,
+        b.bio_arms ? `Brazos ${colorMap[b.bio_arms] || '⚪'}` : null,
+        b.bio_compression ? `Compresión ${colorMap[b.bio_compression] || '⚪'}` : null,
+        b.bio_head ? `Cabeza ${colorMap[b.bio_head] || '⚪'}` : null,
+        b.bio_backfoot ? `Pie trasero ${colorMap[b.bio_backfoot] || '⚪'}` : null,
+        b.bio_weight ? `Peso ${colorMap[b.bio_weight] || '⚪'}` : null,
+        b.bio_flow ? `Fluidez ${numColor(b.bio_flow)} ${b.bio_flow}/5` : null,
+      ].filter(Boolean);
+      
+      return `<div class="card" style="padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">🏄 Ola #${b.wave_num}</div>
+        <div style="font-size:12px;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:6px">${checks.map(c => `<span style="background:var(--bg-input);padding:2px 6px;border-radius:4px">${c}</span>`).join('')}</div>
+        ${b.notes ? `<div style="font-size:12px;color:var(--text-primary);margin-top:6px;padding:6px 8px;background:var(--bg-input);border-radius:6px;line-height:1.4">📝 ${b.notes}</div>` : ''}
+      </div>`;
+    }).join('');
+}
+
+// ============================================================
+// DEBRIEF SUMMARY HELPERS
+// ============================================================
+function renderBioSummaryHTML(ad) {
+  const bio = ad.biomech || [];
+  if (bio.length === 0) return '';
+  
+  const colorEmoji = v => v === 'good' || v === 'full' ? '🟢' : v === 'ok' || v === 'partial' ? '🟡' : v ? '🔴' : '⚪';
+  const fields = ['bio_shoulders','bio_knees','bio_arms','bio_compression','bio_head','bio_backfoot','bio_weight'];
+  const labels = ['Hombros','Rodillas','Brazos','Compresión','Cabeza','Pie','Peso'];
+  
+  // Aggregate: count good/ok/poor per field
+  let summary = fields.map((f, i) => {
+    const vals = bio.map(b => b[f]).filter(Boolean);
+    const good = vals.filter(v => v === 'good' || v === 'full').length;
+    const pct = vals.length > 0 ? Math.round(good / vals.length * 100) : 0;
+    return `<span style="font-size:11px">${labels[i]} ${pct >= 60 ? '🟢' : pct >= 40 ? '🟡' : '🔴'}${pct}%</span>`;
+  }).join(' · ');
+  
+  // Average flow
+  const flows = bio.map(b => parseInt(b.bio_flow)).filter(n => !isNaN(n));
+  const avgFlow = flows.length > 0 ? (flows.reduce((a,b)=>a+b,0)/flows.length).toFixed(1) : '—';
+  
+  // Collect all notes
+  const notes = bio.map(b => b.notes).filter(Boolean);
+  
+  return `<div style="margin-top:8px;padding:8px;background:var(--bg-input);border-radius:8px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:4px">🦴 Biomecánica (${bio.length} olas)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${summary}</div>
+    <div style="font-size:12px;margin-top:4px">Fluidez promedio: <strong>${avgFlow}/5</strong></div>
+    ${notes.length > 0 ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${notes.map(n => `📝 ${n}`).join('<br>')}</div>` : ''}
+  </div>`;
+}
+
+function renderWorkoutSummaryHTML(ad) {
+  const wo = ad.workouts || [];
+  if (wo.length === 0) return '';
+  
+  const done = wo.filter(w => w.completed).length;
+  const total = wo.length;
+  const goodQ = wo.filter(w => w.quality === 'good').length;
+  
+  return `<div style="margin-top:8px;padding:8px;background:var(--bg-input);border-radius:8px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:4px">💪 Workout</div>
+    <div style="font-size:12px">${done}/${total} completados ${goodQ > 0 ? `· ${goodQ} buenos` : ''}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">${wo.map(w => {
+      const icon = w.completed ? (w.quality === 'good' ? '🟢' : w.quality === 'regular' ? '🟡' : '🔴') : '⬜';
+      return `<span style="font-size:11px;background:var(--bg-card);padding:2px 6px;border-radius:4px">${icon} ${w.name}</span>`;
+    }).join('')}</div>
+  </div>`;
+}
+
+// ============================================================
+// WORKOUT MODULE
+// ============================================================
+window._woAssignTarget = 'all'; // 'all' or athlete id
+window._woActiveCat = 'Todos';
+
+function renderWorkout() {
+  const s = DB.activeSession;
+  if (!s) { showView('home'); return; }
+  
+  const athletes = DB.athletes;
+  const ids = Object.keys(s.athlete_data);
+  const container = document.getElementById('woAthleteList');
+  
+  let html = '';
+  ids.forEach(id => {
+    const a = athletes.find(x => x.id === id);
+    const ad = s.athlete_data[id];
+    if (!ad.workouts) ad.workouts = [];
+    
+    html += `<div class="wo-ath-card">
+      <div class="wo-ath-name">${a ? a.name : 'Atleta'} 
+        <button style="float:right;font-size:11px;color:var(--accent);font-weight:700" onclick="woAssignOne('${id}')">+ Ejercicio</button>
+      </div>`;
+    
+    if (ad.workouts.length === 0) {
+      html += `<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Sin ejercicios asignados</div>`;
+    } else {
+      ad.workouts.forEach((w, wi) => {
+        const checkClass = w.completed ? (w.quality === 'poor' ? 'fail' : 'done') : '';
+        html += `<div class="wo-drill-row">
+          <div class="wo-check ${checkClass}" onclick="woToggleComplete('${id}',${wi})">${w.completed ? '✓' : ''}</div>
+          <div class="wo-drill-name">${w.name}${w.duration ? `<br><span style="font-size:10px;color:var(--text-muted)">${w.duration}</span>` : ''}</div>
+          <div class="wo-quality">
+            <div class="wo-q-btn ${w.quality === 'good' ? 'active' : ''}" onclick="woSetQuality('${id}',${wi},'good')" style="${w.quality === 'good' ? 'background:var(--green);color:#fff;border-color:var(--green)' : ''}">👍</div>
+            <div class="wo-q-btn ${w.quality === 'regular' ? 'active' : ''}" onclick="woSetQuality('${id}',${wi},'regular')" style="${w.quality === 'regular' ? 'background:var(--yellow);color:#fff;border-color:var(--yellow)' : ''}">👌</div>
+            <div class="wo-q-btn ${w.quality === 'poor' ? 'active' : ''}" onclick="woSetQuality('${id}',${wi},'poor')" style="${w.quality === 'poor' ? 'background:var(--red);color:#fff;border-color:var(--red)' : ''}">👎</div>
+          </div>
+        </div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  
+  container.innerHTML = html || '<div style="text-align:center;color:var(--text-muted);padding:20px">No hay atletas en sesión</div>';
+  
+  // Summary
+  const allWorkouts = ids.flatMap(id => (s.athlete_data[id].workouts || []));
+  const sumDiv = document.getElementById('woSummary');
+  if (allWorkouts.length > 0) {
+    sumDiv.style.display = 'block';
+    const done = allWorkouts.filter(w => w.completed).length;
+    document.getElementById('woSummaryContent').innerHTML = `
+      <div style="font-size:14px;font-weight:700">${done}/${allWorkouts.length} ejercicios completados</div>
+      <div style="height:8px;background:var(--bg-input);border-radius:4px;margin-top:8px;overflow:hidden">
+        <div style="height:100%;width:${allWorkouts.length > 0 ? Math.round(done/allWorkouts.length*100) : 0}%;background:var(--green);border-radius:4px;transition:width .3s"></div>
+      </div>
+    `;
+  } else { sumDiv.style.display = 'none'; }
+}
+
+function woAssignAll() {
+  window._woAssignTarget = 'all';
+  document.getElementById('woAssignTitle').textContent = 'Asignar a Todos';
+  document.getElementById('woAssignTarget').textContent = 'Se asignará a todos los atletas de la sesión';
+  woRenderLibrary();
+  document.getElementById('modalWoAssign').classList.add('active');
+}
+
+function woAssignOne(athleteId) {
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  if (!athleteId) {
+    // Prompt to pick athlete
+    const ids = Object.keys(s.athlete_data);
+    const athletes = DB.athletes;
+    if (ids.length === 1) { athleteId = ids[0]; }
+    else {
+      const names = ids.map(id => { const a = athletes.find(x => x.id === id); return a ? a.name : id; });
+      const choice = prompt('Atleta:\n' + ids.map((id, i) => `${i+1}. ${names[i]}`).join('\n') + '\n\nEscribe el número:');
+      if (!choice) return;
+      athleteId = ids[parseInt(choice) - 1];
+      if (!athleteId) return;
+    }
+  }
+  
+  window._woAssignTarget = athleteId;
+  const a = DB.athletes.find(x => x.id === athleteId);
+  document.getElementById('woAssignTitle').textContent = 'Asignar Ejercicio';
+  document.getElementById('woAssignTarget').textContent = `Para: ${a ? a.name : 'Atleta'}`;
+  woRenderLibrary();
+  document.getElementById('modalWoAssign').classList.add('active');
+}
+
+function woAssignTab(tab, el) {
+  document.querySelectorAll('#modalWoAssign .seg-btn').forEach(b => b.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+  document.getElementById('woLibraryTab').style.display = tab === 'library' ? 'block' : 'none';
+  document.getElementById('woCustomTab').style.display = tab === 'custom' ? 'block' : 'none';
+}
+
+function woRenderLibrary() {
+  const allDrills = [...DRILL_LIBRARY, ...DB.customDrills];
+  const cats = ['Todos', ...new Set(allDrills.map(d => d.cat))];
+  
+  document.getElementById('woCatFilter').innerHTML = cats.map(c =>
+    `<button class="drill-cat-btn ${c === window._woActiveCat ? 'active' : ''}" onclick="woFilterCat('${c}')">${c}</button>`
+  ).join('');
+  
+  const filtered = window._woActiveCat === 'Todos' ? allDrills : allDrills.filter(d => d.cat === window._woActiveCat);
+  document.getElementById('woLibraryList').innerHTML = filtered.map(d => {
+    const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const safeDur = (d.duration || '').replace(/'/g, "\\'");
+    return `<div style="padding:14px 12px;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="woSelectDrill('${d.id}','${safeName}','${safeDur}')" ontouchstart="this.style.background='var(--bg-input)'" ontouchend="this.style.background=''">
+      <div style="font-weight:700;font-size:14px">${d.icon || '🏋️'} ${d.name}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${d.duration || ''} · ${d.cat}</div>
+    </div>`;
+  }).join('');
+}
+
+function woFilterCat(cat) {
+  window._woActiveCat = cat;
+  woRenderLibrary();
+}
+
+function woSelectDrill(drillId, name, duration) {
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  const workout = { id: DB.genId(), drill_id: drillId, name, duration, completed: false, quality: null, notes: '' };
+  
+  if (window._woAssignTarget === 'all') {
+    Object.keys(s.athlete_data).forEach(id => {
+      if (!s.athlete_data[id].workouts) s.athlete_data[id].workouts = [];
+      s.athlete_data[id].workouts.push({ ...workout, id: DB.genId() });
+    });
+  } else {
+    if (!s.athlete_data[window._woAssignTarget].workouts) s.athlete_data[window._woAssignTarget].workouts = [];
+    s.athlete_data[window._woAssignTarget].workouts.push(workout);
+  }
+  
+  saveSession();
+  document.getElementById('modalWoAssign').classList.remove('active');
+  renderWorkout();
+}
+
+function woAssignCustom() {
+  const name = document.getElementById('woCustomName').value.trim();
+  if (!name) { alert('Nombre requerido'); return; }
+  const desc = document.getElementById('woCustomDesc').value.trim();
+  const dur = document.getElementById('woCustomDur').value.trim();
+  
+  // Save to custom drills library
+  const custom = DB.customDrills;
+  const newDrill = { id: 'custom_' + DB.genId(), name, desc, duration: dur, cat: 'Custom', icon: '⭐', level: 'Todos' };
+  custom.push(newDrill);
+  DB.customDrills = custom;
+  
+  // Assign to session
+  woSelectDrill(newDrill.id, name, dur);
+  
+  // Reset form
+  document.getElementById('woCustomName').value = '';
+  document.getElementById('woCustomDesc').value = '';
+  document.getElementById('woCustomDur').value = '';
+}
+
+function woToggleComplete(athId, woIdx) {
+  const s = DB.activeSession;
+  if (!s) return;
+  const w = s.athlete_data[athId].workouts[woIdx];
+  w.completed = !w.completed;
+  if (!w.completed) w.quality = null;
+  saveSession();
+  renderWorkout();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function woSetQuality(athId, woIdx, quality) {
+  const s = DB.activeSession;
+  if (!s) return;
+  const w = s.athlete_data[athId].workouts[woIdx];
+  w.quality = quality;
+  w.completed = true;
+  saveSession();
+  renderWorkout();
+}
+
 function saveSession() {
   DB.saveActive();
 }
@@ -1938,6 +2535,8 @@ function renderDebrief() {
       </div>
       ${ad.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${ad.falls} caída${ad.falls > 1 ? 's' : ''}</div>` : ''}
       ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}
+      ${renderBioSummaryHTML(ad)}
+      ${renderWorkoutSummaryHTML(ad)}
       <div class="db-xp">✨ +${xp} XP</div>
     </div>`;
   });
@@ -2096,6 +2695,8 @@ function exportSessionCSV() {
   csv += `Coach Notes,"${(s.coach_notes || '').replace(/"/g, '""')}"\n`;
   csv += `Rating,${s.coach_rating || ''}\n\n`;
   
+  // Tactical IQ data
+  csv += '--- TACTICAL IQ ---\n';
   csv += 'Athlete,Paddled,Caught,Falls,Catch Ratio,Waves,Maneuvers,Selection,Position,Commitment,XP\n';
   
   Object.keys(s.athlete_data).forEach(id => {
@@ -2127,6 +2728,34 @@ function exportSessionCSV() {
     
     csv += `"${a ? a.name : id}",${d.paddled},${d.caught},${d.falls},${ratio}%,${d.waves.length},"${manStr}","${selStr}","${posStr}","${comStr}",${xp}\n`;
   });
+  
+  // Biomechanics data
+  const hasBio = Object.values(s.athlete_data).some(d => (d.biomech || []).length > 0);
+  if (hasBio) {
+    csv += '\n--- BIOMECHANICS ---\n';
+    csv += 'Athlete,Wave#,Shoulders,Knees,Arms,Compression,Head,BackFoot,WeightTransfer,Flow,Notes\n';
+    Object.keys(s.athlete_data).forEach(id => {
+      const a = athletes.find(x => x.id === id);
+      const bio = s.athlete_data[id].biomech || [];
+      bio.forEach(b => {
+        csv += `"${a ? a.name : id}",${b.wave_num},${b.bio_shoulders || ''},${b.bio_knees || ''},${b.bio_arms || ''},${b.bio_compression || ''},${b.bio_head || ''},${b.bio_backfoot || ''},${b.bio_weight || ''},${b.bio_flow || ''},"${(b.notes || '').replace(/"/g, '""')}"\n`;
+      });
+    });
+  }
+  
+  // Workout data
+  const hasWorkout = Object.values(s.athlete_data).some(d => (d.workouts || []).length > 0);
+  if (hasWorkout) {
+    csv += '\n--- WORKOUT ---\n';
+    csv += 'Athlete,Exercise,Completed,Quality,Notes\n';
+    Object.keys(s.athlete_data).forEach(id => {
+      const a = athletes.find(x => x.id === id);
+      const wo = s.athlete_data[id].workouts || [];
+      wo.forEach(w => {
+        csv += `"${a ? a.name : id}","${w.name}",${w.completed ? 'Yes' : 'No'},${w.quality || ''},"${(w.notes || '').replace(/"/g, '""')}"\n`;
+      });
+    });
+  }
   
   // Download
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -2432,6 +3061,35 @@ function renderPlayerCard() {
     }).join('');
   } else { sessCard.style.display = 'none'; }
   
+  // Biomechanics history across sessions
+  const allBio = athSess.flatMap(s => (s.athlete_data[a.id].biomech || []).map(b => ({ ...b, spot: s.spot, date: s.date || s.started_at })));
+  const bioCard = document.getElementById('pcBioCard');
+  if (bioCard) {
+    if (allBio.length > 0) {
+      bioCard.style.display = 'block';
+      const fields = ['bio_shoulders','bio_knees','bio_arms','bio_compression','bio_head','bio_backfoot','bio_weight'];
+      const labels = ['Hombros','Rodillas','Brazos','Compresión','Cabeza','Pie Trasero','Trans. Peso'];
+      const goodVals = ['good', 'full'];
+      
+      let barsHtml = fields.map((f, i) => {
+        const vals = allBio.map(b => b[f]).filter(Boolean);
+        const good = vals.filter(v => goodVals.includes(v)).length;
+        const pct = vals.length > 0 ? Math.round(good / vals.length * 100) : 0;
+        const color = pct >= 60 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="pc-bar-row"><div class="pc-bar-label">${labels[i]}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="pc-bar-val">${pct}%</div></div>`;
+      }).join('');
+      
+      const flows = allBio.map(b => parseInt(b.bio_flow)).filter(n => !isNaN(n));
+      const avgFlow = flows.length > 0 ? (flows.reduce((a,b)=>a+b,0)/flows.length).toFixed(1) : '—';
+      
+      document.getElementById('pcBioContent').innerHTML = `
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">${allBio.length} evaluaciones biomecánicas</div>
+        ${barsHtml}
+        <div style="font-size:13px;margin-top:8px">Fluidez promedio: <strong>${avgFlow}/5</strong></div>
+      `;
+    } else { bioCard.style.display = 'none'; }
+  }
+  
   // Biometrics
   renderBiometrics(a);
   
@@ -2705,15 +3363,29 @@ function labSetTool(tool, el) {
   document.querySelectorAll('.lab-tool').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
   
+  // Remove all listeners
+  canvas.onmousedown = canvas.onmousemove = canvas.onmouseup = null;
+  canvas.ontouchstart = canvas.ontouchmove = canvas.ontouchend = canvas.ontouchcancel = null;
+  
   if (tool === 'none') {
     canvas.classList.remove('drawing');
-    canvas.onpointerdown = canvas.onpointermove = canvas.onpointerup = null;
   } else {
     canvas.classList.add('drawing');
-    canvas.onpointerdown = labPointerDown;
-    canvas.onpointermove = labPointerMove;
-    canvas.onpointerup = labPointerUp;
+    // Mouse events
+    canvas.onmousedown = labPointerDown;
+    canvas.onmousemove = labPointerMove;
+    canvas.onmouseup = labPointerUp;
+    // Touch events (iOS/tablet)
+    canvas.ontouchstart = (e) => { e.preventDefault(); labPointerDown(labTouchToMouse(e)); };
+    canvas.ontouchmove = (e) => { e.preventDefault(); labPointerMove(labTouchToMouse(e)); };
+    canvas.ontouchend = (e) => { e.preventDefault(); labPointerUp(labTouchToMouse(e)); };
+    canvas.ontouchcancel = (e) => { labDrawing = false; };
   }
+}
+
+function labTouchToMouse(te) {
+  const t = te.touches[0] || te.changedTouches[0];
+  return { clientX: t.clientX, clientY: t.clientY, preventDefault: () => {} };
 }
 
 function labGetPos(e) {
@@ -3194,6 +3866,16 @@ function renderSettings() {
     tplEmpty.style.display = 'block';
     tplList.innerHTML = '';
   }
+  
+  // Custom drills
+  const customs = DB.customDrills;
+  document.getElementById('setCustomDrills').innerHTML = customs.length > 0 ? 
+    customs.map((d, i) => 
+      `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px">⭐ ${d.name}</span>
+        <button onclick="removeCustomDrill(${i})" style="color:var(--text-muted);font-size:16px;padding:4px 8px">×</button>
+      </div>`
+    ).join('') : '<div style="font-size:12px;color:var(--text-muted);padding:4px 0">Sin ejercicios personalizados</div>';
 }
 
 function addSpot() {
@@ -3211,6 +3893,24 @@ function removeSpot(i) {
   if (spots.length <= 1) { alert('Necesitas al menos un spot'); return; }
   spots.splice(i, 1);
   DB.spots = spots;
+  renderSettings();
+}
+
+function addCustomDrill() {
+  const input = document.getElementById('setNewDrillName');
+  const name = input.value.trim();
+  if (!name) return;
+  const customs = DB.customDrills;
+  customs.push({ id: 'custom_' + DB.genId(), name, desc: '', duration: '', cat: 'Custom', icon: '⭐', level: 'Todos' });
+  DB.customDrills = customs;
+  input.value = '';
+  renderSettings();
+}
+
+function removeCustomDrill(i) {
+  const customs = DB.customDrills;
+  customs.splice(i, 1);
+  DB.customDrills = customs;
   renderSettings();
 }
 
