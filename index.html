@@ -268,6 +268,91 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .jm-notes-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:center;justify-content:center}
 .jm-notes-modal.active{display:flex}
 .jm-notes-box{background:var(--bg-card);border-radius:12px;padding:20px;width:90%;max-width:500px;border:1px solid var(--border)}
+
+/* ===== PHASE 2: PLAYER CARD ===== */
+.pc-header{text-align:center;padding:20px 0 16px}
+.pc-avi{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6366f1);display:inline-flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;margin-bottom:8px}
+.pc-name{font-size:22px;font-weight:800}
+.pc-sub{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.pc-level-tag{display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;margin-top:6px;letter-spacing:.04em}
+.pc-xp-bar{height:6px;background:var(--bg-input);border-radius:3px;margin:8px auto 0;width:70%;overflow:hidden}
+.pc-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#6366f1);border-radius:3px;transition:width .4s}
+.pc-xp-text{font-size:10px;color:var(--text-muted);margin-top:4px}
+
+.pc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.pc-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 4px;text-align:center}
+.pc-stat-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.pc-stat-lbl{font-size:10px;color:var(--text-secondary);margin-top:2px;text-transform:uppercase;letter-spacing:.03em}
+
+.pc-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.pc-badge{display:flex;align-items:center;gap:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px}
+.pc-badge.earned{border-color:var(--yellow);background:rgba(245,158,11,.08)}
+.pc-badge-icon{font-size:20px}
+.pc-badge-info{text-align:left}
+.pc-badge-name{font-weight:700;font-size:11px}
+.pc-badge-desc{font-size:10px;color:var(--text-muted)}
+.pc-badge.locked{opacity:.4}
+
+.pc-chart{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.pc-chart-title{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.pc-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.pc-bar-label{width:50px;text-align:right;color:var(--text-secondary);font-size:11px;flex-shrink:0}
+.pc-bar-track{flex:1;height:14px;background:var(--bg-input);border-radius:7px;overflow:hidden}
+.pc-bar-fill{height:100%;border-radius:7px;min-width:2px}
+.pc-bar-val{width:35px;font-weight:700;font-variant-numeric:tabular-nums;font-size:11px}
+
+.pc-history{margin-bottom:16px}
+.pc-hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.pc-hist-item:last-child{border-bottom:none}
+
+/* ===== DRILL BANK ===== */
+.drill-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.drill-card.assigned{border-color:var(--accent);border-width:2px}
+.drill-header{display:flex;justify-content:space-between;align-items:center}
+.drill-name{font-weight:700;font-size:14px}
+.drill-cat{font-size:10px;color:var(--text-secondary);background:var(--bg-input);padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+.drill-desc{font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.4}
+.drill-meta{display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--text-muted)}
+.drill-actions{display:flex;gap:6px;margin-top:10px}
+.drill-cat-filter{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.drill-cat-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);white-space:nowrap;cursor:pointer}
+.drill-cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ===== PHASE 3: TECH LAB ===== */
+.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.lab-video{width:100%;display:block;max-height:50vh}
+.lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.lab-canvas.drawing{pointer-events:auto;cursor:crosshair}
+.lab-controls{display:flex;align-items:center;gap:8px;padding:8px 0}
+.lab-ctrl-btn{width:40px;height:40px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-primary);cursor:pointer}
+.lab-ctrl-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.lab-ctrl-btn:active{transform:scale(.92)}
+.lab-timeline{flex:1;height:6px;background:var(--bg-input);border-radius:3px;cursor:pointer;position:relative;-webkit-appearance:none;appearance:none}
+.lab-timeline::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+.lab-time{font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;min-width:42px;text-align:center}
+.lab-tools{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.lab-tool{padding:8px 12px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-secondary)}
+.lab-tool.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.lab-color-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer}
+.lab-color-dot.active{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+.lab-frames{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.lab-frame{border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative}
+.lab-frame img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.lab-frame-time{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:10px;color:#fff;padding:3px 6px;text-align:center}
+.lab-compare{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px}
+.lab-compare img{width:100%;border-radius:8px;border:1px solid var(--border)}
+.lab-clip{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.lab-clip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lab-clip-name{font-weight:700;font-size:14px}
+.lab-clip-meta{font-size:11px;color:var(--text-muted)}
+
+/* ===== BIOMETRICS ===== */
+.bio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.bio-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.bio-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.bio-lbl{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.bio-trend{display:flex;align-items:flex-end;gap:3px;height:40px;justify-content:center;margin-top:6px}
+.bio-bar{width:6px;border-radius:3px;min-height:3px}
 </style>
 </head>
 <body>
@@ -634,6 +719,267 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 </div>
 
+<!-- ==================== PLAYER CARD (Phase 2) ==================== -->
+<div class="view" id="view-player-card">
+  <button class="text-sm text-muted" onclick="showView('athletes')" style="margin-bottom:8px">← Mis Atletas</button>
+  
+  <div class="pc-header">
+    <div class="pc-avi" id="pcAvi">—</div>
+    <div class="pc-name" id="pcName">—</div>
+    <div class="pc-sub" id="pcSub">—</div>
+    <div class="pc-level-tag" id="pcLevel">—</div>
+    <div class="pc-xp-bar"><div class="pc-xp-fill" id="pcXpFill" style="width:0%"></div></div>
+    <div class="pc-xp-text" id="pcXpText">0 / 100 XP</div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="pc-stats" id="pcStats"></div>
+
+  <!-- Badges -->
+  <div class="card" style="padding:12px">
+    <div class="card-header" style="font-size:13px;margin-bottom:8px">🏆 Badges</div>
+    <div class="pc-badges" id="pcBadges"></div>
+  </div>
+
+  <!-- Catch Ratio Trend (Sessions) -->
+  <div class="pc-chart" id="pcCatchChart" style="display:none">
+    <div class="pc-chart-title">📈 Catch Ratio por Sesión</div>
+    <div id="pcCatchBars"></div>
+  </div>
+
+  <!-- Wave Score Distribution (Judge) -->
+  <div class="pc-chart" id="pcScoreChart" style="display:none">
+    <div class="pc-chart-title">⚖️ Distribución de Scores</div>
+    <div id="pcScoreBars"></div>
+  </div>
+
+  <!-- Active Drills -->
+  <div class="card" id="pcDrillsCard" style="padding:12px;display:none">
+    <div class="card-header flex-between" style="font-size:13px;margin-bottom:8px">
+      <span>🏋️ Drills Asignados</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="openDrillPicker()">+ Asignar</button>
+    </div>
+    <div id="pcDrills"></div>
+  </div>
+
+  <!-- Heat History -->
+  <div class="card" id="pcHeatCard" style="padding:0;overflow:hidden;display:none">
+    <div class="card-header" style="font-size:13px;padding:12px 12px 8px">⚖️ Heat History</div>
+    <div id="pcHeats"></div>
+  </div>
+
+  <!-- Session History -->
+  <div class="card" id="pcSessionCard" style="padding:0;overflow:hidden;display:none">
+    <div class="card-header" style="font-size:13px;padding:12px 12px 8px">🏄 Session History</div>
+    <div id="pcSessions"></div>
+  </div>
+
+  <!-- Biometrics -->
+  <div class="card" style="padding:12px">
+    <div class="card-header flex-between" style="font-size:13px;margin-bottom:8px">
+      <span>📊 Biometrics</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="openBioModal()">+ Registro</button>
+    </div>
+    <div class="bio-grid" id="pcBioGrid"></div>
+    <div id="pcBioHistory" style="display:none">
+      <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px">Últimos 7 días</div>
+      <div id="pcBioRows"></div>
+    </div>
+  </div>
+
+  <!-- Tech Lab Frames for this athlete -->
+  <div class="card" id="pcLabCard" style="padding:12px;display:none">
+    <div class="card-header flex-between" style="font-size:13px;margin-bottom:8px">
+      <span>🎥 Tech Lab Frames</span>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="showView('lab')">Ir al Lab</button>
+    </div>
+    <div class="lab-frames" id="pcLabFrames"></div>
+  </div>
+
+  <!-- Actions -->
+  <div style="margin-top:16px;display:flex;gap:8px">
+    <button class="btn btn-outline" onclick="editAthlete()" style="flex:1">✏️ Editar</button>
+    <button class="btn" onclick="deleteAthleteFromCard()" style="flex:1;background:var(--bg-card);border:1px solid var(--red);color:var(--red)">🗑️ Eliminar</button>
+  </div>
+</div>
+
+<!-- ==================== DRILL BANK (Phase 2) ==================== -->
+<div class="view" id="view-drills">
+  <div class="flex-between mb-4">
+    <button class="text-sm text-muted" onclick="showView(window._drillReturnView||'athletes')">← Volver</button>
+    <div style="font-size:17px;font-weight:800">🏋️ Drill Bank</div>
+    <div style="width:50px"></div>
+  </div>
+  
+  <!-- Category filter -->
+  <div class="drill-cat-filter" id="drillCatFilter"></div>
+  
+  <!-- Drill list -->
+  <div id="drillList"></div>
+</div>
+
+<!-- ==================== DRILL PICKER MODAL ==================== -->
+<div class="modal-overlay" id="modalDrillPicker">
+  <div class="modal-sheet" style="max-height:80vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Asignar Drill</div>
+    <div class="drill-cat-filter" id="dpCatFilter" style="margin-bottom:8px"></div>
+    <div id="dpDrillList"></div>
+    <button class="btn btn-outline" onclick="closeModal('modalDrillPicker')" style="margin-top:12px">Cerrar</button>
+  </div>
+</div>
+
+<!-- ==================== BIOMETRICS MODAL ==================== -->
+<div class="modal-overlay" id="modalBio">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📊 Registro Biométrico</div>
+    <div class="field">
+      <label class="field-label">Peso (kg)</label>
+      <input class="field-input" id="bioWeight" type="number" step="0.1" placeholder="70.5">
+    </div>
+    <div class="field">
+      <label class="field-label">Horas de Sueño</label>
+      <input class="field-input" id="bioSleep" type="number" step="0.5" min="0" max="14" placeholder="8">
+    </div>
+    <div class="field">
+      <label class="field-label">Nivel de Energía (1-10)</label>
+      <div class="seg-row" id="bioEnergy" style="flex-wrap:wrap;gap:4px">
+        <button class="seg-btn" data-v="1" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">1</button>
+        <button class="seg-btn" data-v="2" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">2</button>
+        <button class="seg-btn" data-v="3" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">3</button>
+        <button class="seg-btn" data-v="4" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">4</button>
+        <button class="seg-btn" data-v="5" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">5</button>
+        <button class="seg-btn" data-v="6" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">6</button>
+        <button class="seg-btn" data-v="7" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">7</button>
+        <button class="seg-btn selected" data-v="8" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">8</button>
+        <button class="seg-btn" data-v="9" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">9</button>
+        <button class="seg-btn" data-v="10" onclick="segSelect('bioEnergy',this)" style="min-width:32px;padding:8px 4px">10</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Dolor / Lesión</label>
+      <div class="seg-row" id="bioPain">
+        <button class="seg-btn selected" data-v="none" onclick="segSelect('bioPain',this)">Sin dolor</button>
+        <button class="seg-btn" data-v="mild" onclick="segSelect('bioPain',this)">Leve</button>
+        <button class="seg-btn" data-v="moderate" onclick="segSelect('bioPain',this)">Moderado</button>
+        <button class="seg-btn" data-v="severe" onclick="segSelect('bioPain',this)">Severo</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Zona de dolor (opcional)</label>
+      <input class="field-input" id="bioPainZone" placeholder="Hombro derecho, espalda baja...">
+    </div>
+    <div class="field">
+      <label class="field-label">Notas</label>
+      <input class="field-input" id="bioNotes" placeholder="Cómo me siento hoy...">
+    </div>
+    <button class="btn btn-accent" onclick="saveBio()">Guardar Registro</button>
+    <button class="btn btn-outline" onclick="closeModal('modalBio')" style="margin-top:8px">Cancelar</button>
+  </div>
+</div>
+
+<!-- ==================== TECH LAB (Phase 3) ==================== -->
+<div class="view" id="view-lab">
+  <div style="font-size:20px;font-weight:800;margin-bottom:16px">🎥 Tech Lab</div>
+
+  <!-- Upload / Record -->
+  <div class="card" id="labUploadCard">
+    <div class="card-header" style="margin-bottom:10px">Cargar Video</div>
+    <div style="display:flex;gap:8px">
+      <label class="btn btn-accent" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+        📷 Grabar
+        <input type="file" accept="video/*" capture="environment" onchange="labLoadVideo(this)" style="display:none">
+      </label>
+      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+        📁 Galería
+        <input type="file" accept="video/*" onchange="labLoadVideo(this)" style="display:none">
+      </label>
+    </div>
+    <!-- Athlete selector -->
+    <div class="field" style="margin-top:10px;margin-bottom:0">
+      <label class="field-label">Vincular a Atleta</label>
+      <select class="field-input" id="labAthlete"><option value="">— Sin vincular —</option></select>
+    </div>
+  </div>
+
+  <!-- Video Player + Canvas -->
+  <div id="labPlayerSection" style="display:none">
+    <div class="lab-video-wrap">
+      <video class="lab-video" id="labVideo" playsinline></video>
+      <canvas class="lab-canvas" id="labCanvas"></canvas>
+    </div>
+
+    <!-- Playback controls -->
+    <div class="lab-controls">
+      <button class="lab-ctrl-btn" onclick="labStep(-1)" title="Frame atrás">⏪</button>
+      <button class="lab-ctrl-btn" id="labPlayBtn" onclick="labTogglePlay()">▶️</button>
+      <button class="lab-ctrl-btn" onclick="labStep(1)" title="Frame adelante">⏩</button>
+      <input type="range" class="lab-timeline" id="labTimeline" min="0" max="100" value="0" step="0.1" oninput="labSeek(this.value)">
+      <div class="lab-time" id="labTime">0:00</div>
+    </div>
+
+    <!-- Speed control -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;justify-content:center">
+      <button class="lab-ctrl-btn" onclick="labSpeed(0.25)" style="font-size:11px;width:auto;padding:0 8px">0.25x</button>
+      <button class="lab-ctrl-btn" onclick="labSpeed(0.5)" style="font-size:11px;width:auto;padding:0 8px">0.5x</button>
+      <button class="lab-ctrl-btn active" onclick="labSpeed(1)" style="font-size:11px;width:auto;padding:0 8px" id="labSpeedNormal">1x</button>
+      <button class="lab-ctrl-btn" onclick="labSpeed(2)" style="font-size:11px;width:auto;padding:0 8px">2x</button>
+    </div>
+
+    <!-- Drawing tools -->
+    <div class="lab-tools" id="labTools">
+      <button class="lab-tool" onclick="labSetTool('none',this)">👆 Mover</button>
+      <button class="lab-tool" onclick="labSetTool('pen',this)">✏️ Dibujar</button>
+      <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️ Flecha</button>
+      <button class="lab-tool" onclick="labSetTool('angle',this)">📐 Ángulo</button>
+      <button class="lab-tool" onclick="labClearDraw()">🗑️ Borrar</button>
+      <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸 Capturar</button>
+    </div>
+
+    <!-- Color picker -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+      <span style="font-size:11px;color:var(--text-muted)">Color:</span>
+      <div class="lab-color-dot active" style="background:#ef4444" onclick="labSetColor('#ef4444',this)"></div>
+      <div class="lab-color-dot" style="background:#f59e0b" onclick="labSetColor('#f59e0b',this)"></div>
+      <div class="lab-color-dot" style="background:#22c55e" onclick="labSetColor('#22c55e',this)"></div>
+      <div class="lab-color-dot" style="background:#3b82f6" onclick="labSetColor('#3b82f6',this)"></div>
+      <div class="lab-color-dot" style="background:#ffffff" onclick="labSetColor('#ffffff',this)"></div>
+      <span style="font-size:11px;color:var(--text-muted);margin-left:auto">Grosor:</span>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=2;this.style.borderColor='var(--accent)'" style="font-size:9px;width:28px;height:28px">S</button>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=4;this.style.borderColor='var(--accent)'" style="font-size:11px;width:28px;height:28px;border-color:var(--accent)">M</button>
+      <button class="lab-ctrl-btn" onclick="labStrokeWidth=7;this.style.borderColor='var(--accent)'" style="font-size:14px;width:28px;height:28px">L</button>
+    </div>
+  </div>
+
+  <!-- Captured Frames -->
+  <div id="labFramesSection" style="display:none">
+    <div class="flex-between" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">📸 Frames Capturados</div>
+      <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="labCompareMode()">Comparar</button>
+    </div>
+    <div class="lab-frames" id="labFrames"></div>
+  </div>
+
+  <!-- Compare View -->
+  <div id="labCompareSection" style="display:none">
+    <div class="flex-between" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700">🔍 Comparar</div>
+      <button class="text-sm" style="color:var(--text-muted)" onclick="document.getElementById('labCompareSection').style.display='none'">✕ Cerrar</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">Selecciona 2 frames para comparar side-by-side</div>
+    <div class="lab-compare" id="labCompare"></div>
+    <div class="lab-frames" id="labCompareSelect"></div>
+  </div>
+
+  <!-- Saved clips list -->
+  <div id="labClipSection">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">🎬 Clips Guardados</div>
+    <div id="labClips"></div>
+    <div id="labClipsEmpty" style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px">No hay clips guardados aún</div>
+  </div>
+</div>
+
 <!-- ==================== SETTINGS ==================== -->
 <div class="view" id="view-settings">
   <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ Configuración</div>
@@ -648,13 +994,18 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div class="card">
+    <div class="card-header">🏋️ Drill Bank</div>
+    <button class="btn btn-outline btn-sm" onclick="window._drillReturnView='settings';showView('drills')">Explorar Ejercicios</button>
+  </div>
+
+  <div class="card">
     <div class="card-header">📊 Datos</div>
     <button class="btn btn-outline btn-sm" onclick="exportAllData()" style="margin-bottom:8px">📥 Exportar Todos los Datos (CSV)</button>
     <button class="btn btn-sm" style="background:var(--red);color:#fff" onclick="confirmClearData()">🗑️ Borrar Todos los Datos</button>
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v1.0 · Phase 1<br>Karibe Surf Score
+    KSS Coach v3.0 · Phase 3<br>Karibe Surf Score
   </div>
 </div>
 
@@ -793,9 +1144,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <svg viewBox="0 0 24 24"><path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
     Judge
   </button>
-  <button class="nav-btn disabled" data-view="drills">
-    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    Drills
+  <button class="nav-btn" data-view="lab" onclick="showView('lab')">
+    <svg viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+    Lab
   </button>
   <button class="nav-btn" data-view="settings" onclick="showView('settings')">
     <svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -848,6 +1199,9 @@ const DB = {
   get judgeTracker() { return this._get('judge_tracker', {}); },
   set judgeTracker(v) { this._set('judge_tracker', v); },
 
+  get labFrames() { return this._get('lab_frames', []); },
+  set labFrames(v) { this._set('lab_frames', v); },
+
   genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 };
 
@@ -884,6 +1238,9 @@ function showView(id) {
   // Lifecycle hooks
   if (id === 'home') renderHome();
   if (id === 'athletes') renderAthletes();
+  if (id === 'player-card') renderPlayerCard();
+  if (id === 'drills') renderDrillBank();
+  if (id === 'lab') renderLab();
   if (id === 'settings') renderSettings();
   if (id === 'session-setup') renderSessionSetup();
   if (id === 'session-hub') renderSessionHub();
@@ -1591,28 +1948,20 @@ function renderAthletes() {
   }
   empty.style.display = 'none';
   
-  const sessions = DB.sessions;
-  
   container.innerHTML = '<div class="card" style="padding:0;overflow:hidden">' + athletes.map(a => {
     const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const level = a.level || 1;
     const xp = a.xp_total || 0;
+    const lvl = calcLevel(xp);
     const sessCount = a.sessions_count || 0;
+    const heatCount = (a.heat_history || []).length;
     
-    // Calculate level from XP
-    const thresholds = [0, 100, 400, 1000, 2000, 3500, 5700, 8700, 12700, 18200];
-    let calcLevel = 1;
-    for (let i = 1; i < thresholds.length; i++) {
-      if (xp >= thresholds[i]) calcLevel = i + 1;
-    }
-    
-    return `<div class="ath-item">
+    return `<div class="ath-item" onclick="openPlayerCard('${a.id}')" style="cursor:pointer">
       <div class="ath-avi">${initials}</div>
       <div class="ath-info">
         <div class="ath-name">${a.name}</div>
-        <div class="ath-sub">Nivel ${calcLevel} · ${a.stance || 'Regular'} · ${sessCount} sesiones · ${xp} XP</div>
+        <div class="ath-sub">${LEVEL_NAMES[lvl.level]} (Lv${lvl.level}) · ${a.stance || 'Regular'} · ${sessCount}s ${heatCount}h · ${xp} XP</div>
       </div>
-      <button onclick="deleteAthlete('${a.id}')" style="color:var(--text-muted);font-size:18px;padding:8px">×</button>
+      <span style="color:var(--text-muted);font-size:14px">›</span>
     </div>`;
   }).join('') + '</div>';
 }
@@ -1620,6 +1969,7 @@ function renderAthletes() {
 function openAddAthleteModal() {
   document.getElementById('maName').value = '';
   document.getElementById('maAge').value = '';
+  window._editAthleteId = null;
   segSelect('maStance', document.querySelector('#maStance .seg-btn[data-v="regular"]'));
   document.getElementById('modalAddAthlete').classList.add('active');
   setTimeout(() => document.getElementById('maName').focus(), 300);
@@ -1637,28 +1987,962 @@ function saveNewAthlete() {
   const age = parseInt(document.getElementById('maAge').value) || null;
   
   const athletes = DB.athletes;
-  athletes.push({
-    id: DB.genId(),
-    name,
-    stance,
-    age,
-    level: 1,
-    xp_total: 0,
-    sessions_count: 0,
-    created_at: new Date().toISOString()
-  });
+  
+  if (window._editAthleteId) {
+    // Edit mode
+    const a = athletes.find(x => x.id === window._editAthleteId);
+    if (a) { a.name = name; a.stance = stance; a.age = age; }
+    window._editAthleteId = null;
+  } else {
+    // New athlete
+    athletes.push({
+      id: DB.genId(),
+      name,
+      stance,
+      age,
+      level: 1,
+      xp_total: 0,
+      sessions_count: 0,
+      drills_completed: 0,
+      assigned_drills: [],
+      heat_history: [],
+      created_at: new Date().toISOString()
+    });
+  }
   DB.athletes = athletes;
   
   closeModal('modalAddAthlete');
   
   if (currentView === 'athletes') renderAthletes();
   if (currentView === 'session-setup') renderSSAthletes();
+  if (currentView === 'player-card') renderPlayerCard();
 }
 
 function deleteAthlete(id) {
   if (!confirm('¿Eliminar este atleta?')) return;
   DB.athletes = DB.athletes.filter(a => a.id !== id);
   renderAthletes();
+}
+
+// ============================================================
+// PHASE 2: GAMIFICATION ENGINE
+// ============================================================
+const XP_THRESHOLDS = [0, 100, 400, 1000, 2000, 3500, 5700, 8700, 12700, 18200];
+const LEVEL_NAMES = { 1:'Kook', 2:'Grom', 3:'Grom+', 4:'Ripper', 5:'Ripper+', 6:'Charger', 7:'Charger+', 8:'Pro', 9:'Pro+', 10:'Legend' };
+const LEVEL_COLORS = { 1:'#94a3b8', 2:'#38bdf8', 3:'#38bdf8', 4:'#22c55e', 5:'#22c55e', 6:'#f59e0b', 7:'#f59e0b', 8:'#a855f7', 9:'#a855f7', 10:'#ef4444' };
+
+function calcLevel(xp) {
+  let level = 1;
+  for (let i = 1; i < XP_THRESHOLDS.length; i++) {
+    if (xp >= XP_THRESHOLDS[i]) level = i + 1;
+  }
+  const curr = XP_THRESHOLDS[level - 1] || 0;
+  const next = XP_THRESHOLDS[level] || XP_THRESHOLDS[XP_THRESHOLDS.length - 1] + 5000;
+  const pct = Math.min(100, ((xp - curr) / (next - curr)) * 100);
+  return { level, name: LEVEL_NAMES[level], xp, curr, next, pct };
+}
+
+const BADGE_DEFS = [
+  { id:'first_session', icon:'🌊', name:'Primera Sesión', desc:'Completa tu primera sesión', check: a => (a.sessions_count||0) >= 1 },
+  { id:'ten_sessions', icon:'🔟', name:'10 Sesiones', desc:'Completa 10 sesiones', check: a => (a.sessions_count||0) >= 10 },
+  { id:'wave_hunter', icon:'🏄', name:'Cazador de Olas', desc:'Atrapa 50 olas', check: a => getTotalCaught(a) >= 50 },
+  { id:'wave_machine', icon:'🌊', name:'Máquina de Olas', desc:'Atrapa 200 olas', check: a => getTotalCaught(a) >= 200 },
+  { id:'sharp_eye', icon:'👁️', name:'Ojo Agudo', desc:'Catch ratio > 60%', check: a => getOverallCatchRatio(a) > 60 },
+  { id:'sniper', icon:'🎯', name:'Sniper', desc:'Catch ratio > 80%', check: a => getOverallCatchRatio(a) > 80 },
+  { id:'competitor', icon:'⚖️', name:'Competidor', desc:'Completa tu primer heat', check: a => (a.heat_history||[]).length >= 1 },
+  { id:'heat_veteran', icon:'🏅', name:'Veterano', desc:'Completa 10 heats', check: a => (a.heat_history||[]).length >= 10 },
+  { id:'podium', icon:'🥇', name:'Podio', desc:'Termina 1ro en un heat', check: a => (a.heat_history||[]).some(h => h.position === 1) },
+  { id:'high_scorer', icon:'💎', name:'High Scorer', desc:'Avg por ola > 6.0', check: a => getAvgWaveScore(a) > 6 },
+  { id:'drill_starter', icon:'🏋️', name:'Entrenador', desc:'Completa tu primer drill', check: a => (a.drills_completed||0) >= 1 },
+  { id:'drill_master', icon:'💪', name:'Drill Master', desc:'Completa 20 drills', check: a => (a.drills_completed||0) >= 20 },
+];
+
+function getTotalCaught(a) {
+  const sessions = DB.sessions;
+  let total = 0;
+  sessions.forEach(s => { if (s.athlete_data && s.athlete_data[a.id]) total += s.athlete_data[a.id].caught || 0; });
+  return total;
+}
+
+function getTotalPaddled(a) {
+  const sessions = DB.sessions;
+  let total = 0;
+  sessions.forEach(s => { if (s.athlete_data && s.athlete_data[a.id]) total += s.athlete_data[a.id].paddled || 0; });
+  return total;
+}
+
+function getOverallCatchRatio(a) {
+  const p = getTotalPaddled(a);
+  return p > 0 ? Math.round(getTotalCaught(a) / p * 100) : 0;
+}
+
+function getAvgWaveScore(a) {
+  const heats = a.heat_history || [];
+  const avgs = heats.filter(h => h.all_wave_avg > 0).map(h => h.all_wave_avg);
+  return avgs.length > 0 ? avgs.reduce((s, v) => s + v, 0) / avgs.length : 0;
+}
+
+function getEarnedBadges(a) {
+  return BADGE_DEFS.map(b => ({ ...b, earned: b.check(a) }));
+}
+
+// ============================================================
+// PHASE 2: PLAYER CARD
+// ============================================================
+let _pcAthleteId = null;
+
+function openPlayerCard(id) {
+  _pcAthleteId = id;
+  showView('player-card');
+}
+
+function renderPlayerCard() {
+  const a = DB.athletes.find(x => x.id === _pcAthleteId);
+  if (!a) { showView('athletes'); return; }
+  
+  const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const lvl = calcLevel(a.xp_total || 0);
+  
+  // Header
+  document.getElementById('pcAvi').textContent = initials;
+  document.getElementById('pcName').textContent = a.name;
+  document.getElementById('pcSub').textContent = `${a.stance || 'Regular'} · ${a.age ? a.age + ' años' : ''}`;
+  document.getElementById('pcLevel').textContent = `${lvl.name} · Nivel ${lvl.level}`;
+  document.getElementById('pcLevel').style.background = `linear-gradient(135deg,${LEVEL_COLORS[lvl.level]},${LEVEL_COLORS[Math.min(10,lvl.level+1)]})`;
+  document.getElementById('pcXpFill').style.width = lvl.pct + '%';
+  document.getElementById('pcXpText').textContent = `${lvl.xp} / ${lvl.next} XP`;
+  
+  // Stats
+  const sessCount = a.sessions_count || 0;
+  const heatCount = (a.heat_history || []).length;
+  const totalCaught = getTotalCaught(a);
+  const catchRatio = getOverallCatchRatio(a);
+  const avgScore = getAvgWaveScore(a);
+  
+  document.getElementById('pcStats').innerHTML = [
+    { val: sessCount, lbl: 'Sesiones', color: 'var(--accent)' },
+    { val: totalCaught, lbl: 'Olas', color: 'var(--green)' },
+    { val: catchRatio + '%', lbl: 'Catch %', color: catchRatio >= 60 ? 'var(--green)' : catchRatio >= 40 ? 'var(--yellow)' : 'var(--red)' },
+    { val: avgScore > 0 ? avgScore.toFixed(1) : '—', lbl: 'Avg Score', color: avgScore >= 6 ? 'var(--green)' : avgScore >= 4 ? 'var(--yellow)' : 'var(--text-primary)' },
+  ].map(s => `<div class="pc-stat"><div class="pc-stat-val" style="color:${s.color}">${s.val}</div><div class="pc-stat-lbl">${s.lbl}</div></div>`).join('');
+  
+  // Badges
+  const badges = getEarnedBadges(a);
+  const earned = badges.filter(b => b.earned);
+  const locked = badges.filter(b => !b.earned);
+  document.getElementById('pcBadges').innerHTML = 
+    earned.map(b => `<div class="pc-badge earned"><span class="pc-badge-icon">${b.icon}</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('') +
+    locked.slice(0, 4).map(b => `<div class="pc-badge locked"><span class="pc-badge-icon">🔒</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('');
+  
+  // Catch Ratio Chart (from sessions)
+  const sessions = DB.sessions;
+  const athSessions = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]).slice(-8);
+  const catchChart = document.getElementById('pcCatchChart');
+  if (athSessions.length > 0) {
+    catchChart.style.display = 'block';
+    document.getElementById('pcCatchBars').innerHTML = athSessions.map((s, i) => {
+      const d = s.athlete_data[a.id];
+      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      const label = s.spot.split(' ')[0].slice(0, 6);
+      return `<div class="pc-bar-row"><div class="pc-bar-label">${label}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${ratio}%;background:${color}"></div></div><div class="pc-bar-val">${ratio}%</div></div>`;
+    }).join('');
+  } else { catchChart.style.display = 'none'; }
+  
+  // Score Distribution Chart (from heats)
+  const heats = a.heat_history || [];
+  const scoreChart = document.getElementById('pcScoreChart');
+  if (heats.length > 0) {
+    scoreChart.style.display = 'block';
+    const recent = heats.slice(-8);
+    document.getElementById('pcScoreBars').innerHTML = recent.map(h => {
+      const pct = Math.min(100, (h.total / 20) * 100);
+      const avgPct = h.all_wave_avg > 0 ? Math.min(100, (h.all_wave_avg / 10) * 100) : 0;
+      const color = h.all_wave_avg >= 6 ? 'var(--green)' : h.all_wave_avg >= 4 ? 'var(--yellow)' : 'var(--red)';
+      const label = `H${h.heat_number||'?'}`;
+      return `<div class="pc-bar-row"><div class="pc-bar-label">${label}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="pc-bar-val">${h.total.toFixed(1)}</div></div>
+      <div class="pc-bar-row" style="margin-top:-2px"><div class="pc-bar-label" style="font-size:9px">avg/w</div><div class="pc-bar-track" style="height:8px"><div class="pc-bar-fill" style="width:${avgPct}%;background:${color};height:100%"></div></div><div class="pc-bar-val" style="font-size:10px">${h.all_wave_avg.toFixed(1)}</div></div>`;
+    }).join('');
+  } else { scoreChart.style.display = 'none'; }
+  
+  // Active Drills
+  const drills = a.assigned_drills || [];
+  const drillsCard = document.getElementById('pcDrillsCard');
+  drillsCard.style.display = 'block';
+  if (drills.length > 0) {
+    document.getElementById('pcDrills').innerHTML = drills.map(d => {
+      const def = DRILL_LIBRARY.find(x => x.id === d.drill_id);
+      if (!def) return '';
+      return `<div class="drill-card" style="margin-bottom:6px;padding:10px">
+        <div class="drill-header"><span class="drill-name">${def.icon} ${def.name}</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm" onclick="completeDrill('${a.id}','${d.drill_id}')" style="width:auto;padding:4px 10px;font-size:11px;background:var(--green)">✓</button>
+          <button class="btn btn-sm" onclick="unassignDrill('${a.id}','${d.drill_id}')" style="width:auto;padding:4px 8px;font-size:11px;background:var(--bg-input)">×</button>
+        </div></div>
+        <div class="drill-desc">${def.desc}</div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('pcDrills').innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:4px 0">Sin drills asignados</div>';
+  }
+  
+  // Heat History
+  const heatCard = document.getElementById('pcHeatCard');
+  if (heats.length > 0) {
+    heatCard.style.display = 'block';
+    document.getElementById('pcHeats').innerHTML = heats.slice().reverse().slice(0, 10).map(h => {
+      const posEmoji = h.position === 1 ? '🥇' : h.position === 2 ? '🥈' : h.position === 3 ? '🥉' : h.position + 'th';
+      const d = new Date(h.date);
+      const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(d);
+      return `<div class="pc-hist-item"><div><strong>${posEmoji}</strong> H${h.heat_number||'?'} · ${h.category||'?'} · ${h.round||'?'}<div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${h.location||'?'} · avg ${h.all_wave_avg?.toFixed(1)||'?'}/wave</div></div><div style="font-weight:800;font-size:16px">${h.total.toFixed(2)}</div></div>`;
+    }).join('');
+  } else { heatCard.style.display = 'none'; }
+  
+  // Session History
+  const athSess = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]);
+  const sessCard = document.getElementById('pcSessionCard');
+  if (athSess.length > 0) {
+    sessCard.style.display = 'block';
+    document.getElementById('pcSessions').innerHTML = athSess.slice().reverse().slice(0, 10).map(s => {
+      const d = s.athlete_data[a.id];
+      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(s.date || s.started_at));
+      return `<div class="pc-hist-item"><div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${d.caught}/${d.paddled} olas · ${d.falls||0} caídas</div></div><div style="font-weight:800;font-size:16px;color:${ratio>=60?'var(--green)':ratio>=40?'var(--yellow)':'var(--red)'}">${ratio}%</div></div>`;
+    }).join('');
+  } else { sessCard.style.display = 'none'; }
+  
+  // Biometrics
+  renderBiometrics(a);
+  
+  // Lab frames for this athlete
+  renderLabFramesForAthlete(a);
+}
+
+function deleteAthleteFromCard() {
+  if (!confirm('¿Eliminar este atleta y todo su historial?')) return;
+  DB.athletes = DB.athletes.filter(a => a.id !== _pcAthleteId);
+  showView('athletes');
+}
+
+function editAthlete() {
+  const a = DB.athletes.find(x => x.id === _pcAthleteId);
+  if (!a) return;
+  document.getElementById('maName').value = a.name;
+  document.getElementById('maAge').value = a.age || '';
+  segSelect('maStance', document.querySelector(`#maStance .seg-btn[data-v="${a.stance||'regular'}"]`));
+  window._editAthleteId = _pcAthleteId;
+  document.getElementById('modalAddAthlete').classList.add('active');
+}
+
+// ============================================================
+// PHASE 2: DRILL BANK
+// ============================================================
+const DRILL_LIBRARY = [
+  // PADDLING
+  { id:'d01', cat:'Paddling', icon:'🏊', name:'Sprint Paddle', desc:'5 sprints de 20 seg con 10 seg descanso. Enfócate en la cadencia y mantener la cabeza baja.', duration:'5 min', level:'Todos' },
+  { id:'d02', cat:'Paddling', icon:'🏊', name:'Duck Dive Drill', desc:'Practica duck dive en espuma con tabla grande. Repite 10 veces sin perder ritmo de remada.', duration:'10 min', level:'Grom+' },
+  { id:'d03', cat:'Paddling', icon:'🏊', name:'Endurance Paddle', desc:'Rema continuo por 15 min manteniendo postura. Ideal como calentamiento.', duration:'15 min', level:'Todos' },
+  
+  // POP-UP
+  { id:'d04', cat:'Pop-up', icon:'🤸', name:'Pop-up en Arena', desc:'20 repeticiones de pop-up en la arena. Tiempo objetivo: < 1 segundo. Enfócate en un movimiento fluido.', duration:'10 min', level:'Kook' },
+  { id:'d05', cat:'Pop-up', icon:'🤸', name:'Pop-up con Giro', desc:'Pop-up + giro inmediato 45°. Simula el take-off en olas con ángulo. 15 reps por lado.', duration:'10 min', level:'Grom+' },
+  
+  // BOTTOM TURN
+  { id:'d06', cat:'Bottom Turn', icon:'💪', name:'BT Compression', desc:'En espuma: enfócate en flexionar las rodillas y comprimir al fondo de la ola antes de subir. 10 olas.', duration:'20 min', level:'Grom+' },
+  { id:'d07', cat:'Bottom Turn', icon:'💪', name:'BT Rail Engage', desc:'Toma 5 olas concentrándote solo en hundir el rail durante el bottom turn. Mano trasera toca el agua.', duration:'20 min', level:'Ripper' },
+  
+  // MANEUVERS
+  { id:'d08', cat:'Maniobras', icon:'🔥', name:'Cutback Drill', desc:'Toma 5 olas y enfócate en hacer cutback completo volviendo a la espuma. Prioriza el arco.', duration:'25 min', level:'Ripper' },
+  { id:'d09', cat:'Maniobras', icon:'🔥', name:'Snap Practice', desc:'En sección vertical, practica snaps con máxima rotación. 5 olas enfocado solo en el snap.', duration:'20 min', level:'Ripper+' },
+  { id:'d10', cat:'Maniobras', icon:'🔥', name:'Floater Line', desc:'Busca secciones cerrando para practicar floaters. Enfócate en timing y aterrizaje. 5 intentos.', duration:'20 min', level:'Ripper' },
+  { id:'d11', cat:'Maniobras', icon:'🔥', name:'Re-entry Drill', desc:'En olas con labio definido, practica re-entries. Enfócate en el timing del lip.', duration:'20 min', level:'Charger' },
+  
+  // WAVE READING
+  { id:'d12', cat:'Lectura', icon:'👁️', name:'Set Prediction', desc:'Desde la orilla, predice cuál ola del set será la mejor. Cuenta sets por 15 min. Anota aciertos.', duration:'15 min', level:'Todos' },
+  { id:'d13', cat:'Lectura', icon:'👁️', name:'Lineup Study', desc:'Observa el lineup 10 min antes de entrar. Identifica: pico, corriente, sección más larga, frecuencia de sets.', duration:'10 min', level:'Todos' },
+  { id:'d14', cat:'Lectura', icon:'👁️', name:'Priority Game', desc:'En sesión con amigos, practica reglas de prioridad ISA. Trabaja posicionamiento sin interferir.', duration:'30 min', level:'Grom+' },
+  
+  // FITNESS
+  { id:'d15', cat:'Fitness', icon:'🏋️', name:'Indo Board 5min', desc:'5 minutos de balance en Indo Board o similar. Trabaja front/backside shifts.', duration:'5 min', level:'Todos' },
+  { id:'d16', cat:'Fitness', icon:'🏋️', name:'Core Circuit', desc:'30s plank + 15 V-ups + 20 russian twists + 10 superman. 3 rondas.', duration:'15 min', level:'Todos' },
+  { id:'d17', cat:'Fitness', icon:'🏋️', name:'Squat Series', desc:'20 squats + 10 jump squats + 10 pistol squats (por pierna). Potencia para bottom turns.', duration:'10 min', level:'Grom+' },
+  
+  // MENTAL
+  { id:'d18', cat:'Mental', icon:'🧠', name:'Visualización', desc:'Cierra los ojos y visualiza tu sesión ideal: el take-off perfecto, la maniobra, la salida. 5 minutos.', duration:'5 min', level:'Todos' },
+  { id:'d19', cat:'Mental', icon:'🧠', name:'Heat Simulation', desc:'Antes de competir: visualiza tu heat. Prioridad, selección de olas, combinación de scores.', duration:'10 min', level:'Ripper+' },
+];
+
+const DRILL_CATS = ['Todos', 'Paddling', 'Pop-up', 'Bottom Turn', 'Maniobras', 'Lectura', 'Fitness', 'Mental'];
+
+function renderDrillBank() {
+  let activeCat = window._drillCat || 'Todos';
+  
+  // Category filters
+  document.getElementById('drillCatFilter').innerHTML = DRILL_CATS.map(c =>
+    `<button class="drill-cat-btn ${c === activeCat ? 'active' : ''}" onclick="filterDrills('${c}')">${c}</button>`
+  ).join('');
+  
+  // Filtered drills
+  const filtered = activeCat === 'Todos' ? DRILL_LIBRARY : DRILL_LIBRARY.filter(d => d.cat === activeCat);
+  
+  document.getElementById('drillList').innerHTML = filtered.map(d => {
+    return `<div class="drill-card">
+      <div class="drill-header"><span class="drill-name">${d.icon} ${d.name}</span><span class="drill-cat">${d.cat}</span></div>
+      <div class="drill-desc">${d.desc}</div>
+      <div class="drill-meta"><span>⏱️ ${d.duration}</span><span>📊 ${d.level}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function filterDrills(cat) {
+  window._drillCat = cat;
+  renderDrillBank();
+}
+
+function openDrillPicker() {
+  const a = DB.athletes.find(x => x.id === _pcAthleteId);
+  if (!a) return;
+  const assigned = (a.assigned_drills || []).map(d => d.drill_id);
+  let activeCat = 'Todos';
+  
+  function render(cat) {
+    activeCat = cat;
+    document.getElementById('dpCatFilter').innerHTML = DRILL_CATS.map(c =>
+      `<button class="drill-cat-btn ${c === activeCat ? 'active' : ''}" onclick="dpFilter('${c}')">${c}</button>`
+    ).join('');
+    
+    const filtered = activeCat === 'Todos' ? DRILL_LIBRARY : DRILL_LIBRARY.filter(d => d.cat === activeCat);
+    document.getElementById('dpDrillList').innerHTML = filtered.map(d => {
+      const isAssigned = assigned.includes(d.id);
+      return `<div class="drill-card ${isAssigned ? 'assigned' : ''}" style="padding:10px">
+        <div class="drill-header">
+          <span class="drill-name" style="font-size:13px">${d.icon} ${d.name}</span>
+          ${isAssigned ? '<span style="color:var(--green);font-size:12px;font-weight:700">✓ Asignado</span>' : 
+            `<button class="btn btn-sm" onclick="assignDrill('${a.id}','${d.id}')" style="width:auto;padding:4px 10px;font-size:11px;background:var(--accent)">+ Asignar</button>`}
+        </div>
+        <div class="drill-desc" style="font-size:11px">${d.desc}</div>
+      </div>`;
+    }).join('');
+  }
+  
+  window.dpFilter = (cat) => render(cat);
+  render('Todos');
+  document.getElementById('modalDrillPicker').classList.add('active');
+}
+
+function assignDrill(athId, drillId) {
+  const athletes = DB.athletes;
+  const a = athletes.find(x => x.id === athId);
+  if (!a) return;
+  if (!a.assigned_drills) a.assigned_drills = [];
+  if (a.assigned_drills.some(d => d.drill_id === drillId)) return;
+  a.assigned_drills.push({ drill_id: drillId, assigned_at: new Date().toISOString() });
+  DB.athletes = athletes;
+  openDrillPicker(); // Refresh picker
+  renderPlayerCard(); // Refresh card
+}
+
+function unassignDrill(athId, drillId) {
+  const athletes = DB.athletes;
+  const a = athletes.find(x => x.id === athId);
+  if (!a) return;
+  a.assigned_drills = (a.assigned_drills || []).filter(d => d.drill_id !== drillId);
+  DB.athletes = athletes;
+  renderPlayerCard();
+}
+
+function completeDrill(athId, drillId) {
+  const athletes = DB.athletes;
+  const a = athletes.find(x => x.id === athId);
+  if (!a) return;
+  
+  // Remove from assigned
+  a.assigned_drills = (a.assigned_drills || []).filter(d => d.drill_id !== drillId);
+  
+  // Track completion
+  a.drills_completed = (a.drills_completed || 0) + 1;
+  
+  // Award XP
+  a.xp_total = (a.xp_total || 0) + 25;
+  
+  DB.athletes = athletes;
+  renderPlayerCard();
+  
+  if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+}
+
+// ============================================================
+// PHASE 3: TECH LAB - VIDEO ANALYSIS
+// ============================================================
+let labVideoFile = null;
+let labDrawTool = 'none';
+let labDrawColor = '#ef4444';
+let labStrokeWidth = 4;
+let labDrawing = false;
+let labDrawPoints = [];
+let labAnnotations = [];
+let labAnglePoints = [];
+
+function renderLab() {
+  // Populate athlete dropdown
+  const sel = document.getElementById('labAthlete');
+  const athletes = DB.athletes;
+  sel.innerHTML = '<option value="">— Sin vincular —</option>' +
+    athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+  
+  // Render saved frames
+  renderLabFrames();
+  renderLabClips();
+}
+
+function labLoadVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  labVideoFile = file;
+  
+  const video = document.getElementById('labVideo');
+  const url = URL.createObjectURL(file);
+  video.src = url;
+  video.load();
+  
+  video.onloadedmetadata = () => {
+    document.getElementById('labPlayerSection').style.display = 'block';
+    document.getElementById('labTimeline').max = video.duration;
+    labResizeCanvas();
+    labAnnotations = [];
+  };
+  
+  video.ontimeupdate = () => {
+    if (!video.paused) {
+      document.getElementById('labTimeline').value = video.currentTime;
+      labUpdateTime();
+    }
+  };
+  
+  video.onended = () => {
+    document.getElementById('labPlayBtn').textContent = '▶️';
+  };
+}
+
+function labResizeCanvas() {
+  const video = document.getElementById('labVideo');
+  const canvas = document.getElementById('labCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+}
+
+function labTogglePlay() {
+  const video = document.getElementById('labVideo');
+  const btn = document.getElementById('labPlayBtn');
+  if (video.paused) {
+    video.play();
+    btn.textContent = '⏸️';
+  } else {
+    video.pause();
+    btn.textContent = '▶️';
+  }
+}
+
+function labStep(dir) {
+  const video = document.getElementById('labVideo');
+  video.pause();
+  document.getElementById('labPlayBtn').textContent = '▶️';
+  // ~30fps = 0.033s per frame
+  video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + dir * 0.033));
+  document.getElementById('labTimeline').value = video.currentTime;
+  labUpdateTime();
+}
+
+function labSeek(val) {
+  const video = document.getElementById('labVideo');
+  video.currentTime = parseFloat(val);
+  labUpdateTime();
+}
+
+function labSpeed(rate) {
+  const video = document.getElementById('labVideo');
+  video.playbackRate = rate;
+  document.querySelectorAll('.lab-controls + div .lab-ctrl-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function labUpdateTime() {
+  const video = document.getElementById('labVideo');
+  const t = video.currentTime;
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  const ms = Math.floor((t % 1) * 10);
+  document.getElementById('labTime').textContent = `${m}:${s.toString().padStart(2,'0')}.${ms}`;
+}
+
+function labSetTool(tool, el) {
+  labDrawTool = tool;
+  const canvas = document.getElementById('labCanvas');
+  
+  document.querySelectorAll('.lab-tool').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  if (tool === 'none') {
+    canvas.classList.remove('drawing');
+    canvas.onpointerdown = canvas.onpointermove = canvas.onpointerup = null;
+  } else {
+    canvas.classList.add('drawing');
+    canvas.onpointerdown = labPointerDown;
+    canvas.onpointermove = labPointerMove;
+    canvas.onpointerup = labPointerUp;
+  }
+}
+
+function labGetPos(e) {
+  const canvas = document.getElementById('labCanvas');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) / rect.width * canvas.width,
+    y: (e.clientY - rect.top) / rect.height * canvas.height
+  };
+}
+
+function labPointerDown(e) {
+  e.preventDefault();
+  labDrawing = true;
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen') {
+    labDrawPoints = [pos];
+  } else if (labDrawTool === 'arrow') {
+    labDrawPoints = [pos];
+  } else if (labDrawTool === 'angle') {
+    labAnglePoints.push(pos);
+    if (labAnglePoints.length === 3) {
+      labAnnotations.push({ type: 'angle', points: [...labAnglePoints], color: labDrawColor, width: labStrokeWidth });
+      labAnglePoints = [];
+      labRedraw();
+    } else {
+      labRedraw();
+    }
+    labDrawing = false;
+    return;
+  }
+}
+
+function labPointerMove(e) {
+  if (!labDrawing) return;
+  e.preventDefault();
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen') {
+    labDrawPoints.push(pos);
+    labRedraw();
+    // Draw current stroke
+    const ctx = document.getElementById('labCanvas').getContext('2d');
+    ctx.beginPath();
+    ctx.strokeStyle = labDrawColor;
+    ctx.lineWidth = labStrokeWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    labDrawPoints.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    ctx.stroke();
+  } else if (labDrawTool === 'arrow') {
+    labRedraw();
+    const ctx = document.getElementById('labCanvas').getContext('2d');
+    labDrawArrow(ctx, labDrawPoints[0], pos, labDrawColor, labStrokeWidth);
+  }
+}
+
+function labPointerUp(e) {
+  if (!labDrawing) return;
+  labDrawing = false;
+  const pos = labGetPos(e);
+  
+  if (labDrawTool === 'pen' && labDrawPoints.length > 1) {
+    labAnnotations.push({ type: 'pen', points: [...labDrawPoints], color: labDrawColor, width: labStrokeWidth });
+  } else if (labDrawTool === 'arrow') {
+    labAnnotations.push({ type: 'arrow', from: labDrawPoints[0], to: pos, color: labDrawColor, width: labStrokeWidth });
+  }
+  labDrawPoints = [];
+  labRedraw();
+}
+
+function labDrawArrow(ctx, from, to, color, width) {
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.moveTo(from.x, from.y);
+  ctx.lineTo(to.x, to.y);
+  ctx.stroke();
+  
+  // Arrowhead
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
+  const headLen = 15 + width * 2;
+  ctx.beginPath();
+  ctx.moveTo(to.x, to.y);
+  ctx.lineTo(to.x - headLen * Math.cos(angle - Math.PI / 6), to.y - headLen * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(to.x - headLen * Math.cos(angle + Math.PI / 6), to.y - headLen * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function labRedraw() {
+  const canvas = document.getElementById('labCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  labAnnotations.forEach(a => {
+    if (a.type === 'pen') {
+      ctx.beginPath();
+      ctx.strokeStyle = a.color;
+      ctx.lineWidth = a.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      a.points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+      ctx.stroke();
+    } else if (a.type === 'arrow') {
+      labDrawArrow(ctx, a.from, a.to, a.color, a.width);
+    } else if (a.type === 'angle') {
+      const [p1, p2, p3] = a.points;
+      ctx.beginPath();
+      ctx.strokeStyle = a.color;
+      ctx.lineWidth = a.width;
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.stroke();
+      
+      // Calculate and display angle
+      const a1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+      const a2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+      let deg = Math.abs((a2 - a1) * 180 / Math.PI);
+      if (deg > 180) deg = 360 - deg;
+      
+      // Arc
+      ctx.beginPath();
+      ctx.arc(p2.x, p2.y, 30, Math.min(a1, a2), Math.max(a1, a2));
+      ctx.stroke();
+      
+      // Label
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = a.color;
+      ctx.fillText(Math.round(deg) + '°', p2.x + 35, p2.y - 10);
+      
+      // Dots on vertices
+      [p1, p2, p3].forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = a.color;
+        ctx.fill();
+      });
+    }
+  });
+  
+  // Draw angle points in progress
+  if (labAnglePoints.length > 0) {
+    ctx.fillStyle = labDrawColor;
+    labAnglePoints.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    if (labAnglePoints.length === 2) {
+      ctx.beginPath();
+      ctx.strokeStyle = labDrawColor;
+      ctx.lineWidth = labStrokeWidth;
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(labAnglePoints[0].x, labAnglePoints[0].y);
+      ctx.lineTo(labAnglePoints[1].x, labAnglePoints[1].y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+}
+
+function labClearDraw() {
+  labAnnotations = [];
+  labAnglePoints = [];
+  const canvas = document.getElementById('labCanvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function labSetColor(color, el) {
+  labDrawColor = color;
+  document.querySelectorAll('.lab-color-dot').forEach(d => d.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function labCapture() {
+  const video = document.getElementById('labVideo');
+  const canvas = document.getElementById('labCanvas');
+  
+  // Create composite: video frame + annotations
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = video.videoWidth;
+  tmpCanvas.height = video.videoHeight;
+  const ctx = tmpCanvas.getContext('2d');
+  
+  // Draw video frame
+  ctx.drawImage(video, 0, 0);
+  
+  // Draw annotations on top
+  ctx.drawImage(canvas, 0, 0);
+  
+  // Convert to data URL (compressed)
+  const dataUrl = tmpCanvas.toDataURL('image/jpeg', 0.7);
+  
+  const athId = document.getElementById('labAthlete').value;
+  const frame = {
+    id: DB.genId(),
+    athlete_id: athId || null,
+    timestamp: video.currentTime,
+    image: dataUrl,
+    created_at: new Date().toISOString()
+  };
+  
+  try {
+    const frames = DB.labFrames;
+    frames.push(frame);
+    DB.labFrames = frames;
+  } catch(e) {
+    // localStorage might be full
+    alert('Error guardando frame. Storage puede estar lleno. Intenta eliminar frames antiguos.');
+    console.error(e);
+    return;
+  }
+  
+  renderLabFrames();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function renderLabFrames() {
+  const frames = DB.labFrames;
+  const section = document.getElementById('labFramesSection');
+  
+  if (frames.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  
+  document.getElementById('labFrames').innerHTML = frames.slice().reverse().map(f => {
+    const t = f.timestamp || 0;
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    const timeStr = `${m}:${s.toString().padStart(2,'0')}`;
+    const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
+    return `<div class="lab-frame" onclick="labFrameActions('${f.id}')">
+      <img src="${f.image}" loading="lazy">
+      <div class="lab-frame-time">${timeStr} ${ath ? '· '+ath : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function labFrameActions(id) {
+  const action = confirm('¿Eliminar este frame?\n\nOK = Eliminar\nCancel = Mantener');
+  if (action) {
+    DB.labFrames = DB.labFrames.filter(f => f.id !== id);
+    renderLabFrames();
+  }
+}
+
+function labCompareMode() {
+  const frames = DB.labFrames;
+  if (frames.length < 2) { alert('Necesitas al menos 2 frames para comparar'); return; }
+  
+  const section = document.getElementById('labCompareSection');
+  section.style.display = 'block';
+  
+  window._labCompare = [];
+  
+  document.getElementById('labCompare').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px;grid-column:span 2">Selecciona 2 frames abajo</div>';
+  
+  document.getElementById('labCompareSelect').innerHTML = frames.slice().reverse().map(f => {
+    const t = f.timestamp || 0;
+    const timeStr = `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`;
+    return `<div class="lab-frame" onclick="labSelectCompare('${f.id}')" style="border-color:var(--border)">
+      <img src="${f.image}" loading="lazy">
+      <div class="lab-frame-time">${timeStr}</div>
+    </div>`;
+  }).join('');
+}
+
+function labSelectCompare(id) {
+  const frames = DB.labFrames;
+  const f = frames.find(x => x.id === id);
+  if (!f) return;
+  
+  if (!window._labCompare) window._labCompare = [];
+  if (window._labCompare.length >= 2) window._labCompare = [];
+  window._labCompare.push(f);
+  
+  if (window._labCompare.length === 2) {
+    document.getElementById('labCompare').innerHTML = window._labCompare.map(f => 
+      `<img src="${f.image}">`
+    ).join('');
+  }
+}
+
+function renderLabClips() {
+  const frames = DB.labFrames;
+  const empty = document.getElementById('labClipsEmpty');
+  const container = document.getElementById('labClips');
+  
+  if (frames.length === 0) {
+    empty.style.display = 'block';
+    container.innerHTML = '';
+    return;
+  }
+  empty.style.display = 'none';
+  
+  // Group by athlete
+  const byAth = {};
+  frames.forEach(f => {
+    const key = f.athlete_id || '_unlinked';
+    if (!byAth[key]) byAth[key] = [];
+    byAth[key].push(f);
+  });
+  
+  container.innerHTML = Object.entries(byAth).map(([athId, aFrames]) => {
+    const name = athId === '_unlinked' ? 'Sin vincular' : (DB.athletes.find(a => a.id === athId)?.name || 'Atleta');
+    return `<div class="lab-clip">
+      <div class="lab-clip-header"><span class="lab-clip-name">${name}</span><span class="lab-clip-meta">${aFrames.length} frames</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// PHASE 3: BIOMETRICS
+// ============================================================
+function openBioModal() {
+  document.getElementById('bioWeight').value = '';
+  document.getElementById('bioSleep').value = '';
+  document.getElementById('bioPainZone').value = '';
+  document.getElementById('bioNotes').value = '';
+  segSelect('bioEnergy', document.querySelector('#bioEnergy .seg-btn[data-v="8"]'));
+  segSelect('bioPain', document.querySelector('#bioPain .seg-btn[data-v="none"]'));
+  document.getElementById('modalBio').classList.add('active');
+}
+
+function saveBio() {
+  const weight = parseFloat(document.getElementById('bioWeight').value) || null;
+  const sleep = parseFloat(document.getElementById('bioSleep').value) || null;
+  const energy = parseInt(getSegValue('bioEnergy')) || 8;
+  const pain = getSegValue('bioPain') || 'none';
+  const painZone = document.getElementById('bioPainZone').value.trim();
+  const notes = document.getElementById('bioNotes').value.trim();
+  
+  if (!weight && !sleep) { alert('Ingresa al menos peso o horas de sueño'); return; }
+  
+  const entry = {
+    id: DB.genId(),
+    date: new Date().toISOString(),
+    weight, sleep, energy, pain, painZone, notes
+  };
+  
+  const a = DB.athletes.find(x => x.id === _pcAthleteId);
+  if (!a) { alert('No se encontró el atleta'); return; }
+  
+  const athletes = DB.athletes;
+  const ath = athletes.find(x => x.id === _pcAthleteId);
+  if (!ath.biometrics) ath.biometrics = [];
+  ath.biometrics.push(entry);
+  
+  // XP for tracking biometrics
+  ath.xp_total = (ath.xp_total || 0) + 10;
+  
+  DB.athletes = athletes;
+  closeModal('modalBio');
+  renderPlayerCard();
+  
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function renderBiometrics(a) {
+  const bio = a.biometrics || [];
+  const grid = document.getElementById('pcBioGrid');
+  const histSection = document.getElementById('pcBioHistory');
+  
+  if (bio.length === 0) {
+    grid.innerHTML = '<div style="grid-column:span 2;font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Sin registros. Toca "+ Registro" para empezar.</div>';
+    histSection.style.display = 'none';
+    return;
+  }
+  
+  const latest = bio[bio.length - 1];
+  const last7 = bio.slice(-7);
+  
+  const painEmoji = { none: '✅', mild: '🟡', moderate: '🟠', severe: '🔴' };
+  const painLabel = { none: 'Sin dolor', mild: 'Leve', moderate: 'Moderado', severe: 'Severo' };
+  
+  // Grid cards with mini trends
+  const avgEnergy = last7.reduce((s, b) => s + (b.energy || 0), 0) / last7.length;
+  const avgSleep = last7.filter(b => b.sleep).reduce((s, b) => s + b.sleep, 0) / (last7.filter(b => b.sleep).length || 1);
+  
+  grid.innerHTML = `
+    <div class="bio-card">
+      <div class="bio-val">${latest.weight ? latest.weight + '<span style="font-size:12px">kg</span>' : '—'}</div>
+      <div class="bio-lbl">Peso</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = b.weight ? Math.max(5, (b.weight / 120) * 40) : 3;
+        return `<div class="bio-bar" style="height:${h}px;background:var(--accent)"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val">${latest.sleep ? latest.sleep + '<span style="font-size:12px">h</span>' : '—'}</div>
+      <div class="bio-lbl">Sueño</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = b.sleep ? Math.max(5, (b.sleep / 10) * 40) : 3;
+        const c = b.sleep >= 7 ? 'var(--green)' : b.sleep >= 5 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="bio-bar" style="height:${h}px;background:${c}"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val" style="color:${avgEnergy>=7?'var(--green)':avgEnergy>=5?'var(--yellow)':'var(--red)'}">${latest.energy}/10</div>
+      <div class="bio-lbl">Energía</div>
+      <div class="bio-trend">${last7.map(b => {
+        const h = Math.max(5, (b.energy / 10) * 40);
+        const c = b.energy >= 7 ? 'var(--green)' : b.energy >= 5 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="bio-bar" style="height:${h}px;background:${c}"></div>`;
+      }).join('')}</div>
+    </div>
+    <div class="bio-card">
+      <div class="bio-val">${painEmoji[latest.pain] || '✅'}</div>
+      <div class="bio-lbl">${painLabel[latest.pain] || 'Sin dolor'}</div>
+      ${latest.painZone ? `<div style="font-size:10px;color:var(--text-muted);margin-top:4px">${latest.painZone}</div>` : ''}
+    </div>
+  `;
+  
+  // History rows
+  if (bio.length > 1) {
+    histSection.style.display = 'block';
+    document.getElementById('pcBioRows').innerHTML = bio.slice().reverse().slice(0, 7).map(b => {
+      const d = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(b.date));
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <span style="color:var(--text-muted);width:50px">${d}</span>
+        <span>${b.weight ? b.weight+'kg' : '—'}</span>
+        <span>${b.sleep ? b.sleep+'h' : '—'}</span>
+        <span>⚡${b.energy}</span>
+        <span>${painEmoji[b.pain]||'✅'}</span>
+      </div>`;
+    }).join('');
+  } else { histSection.style.display = 'none'; }
+}
+
+function renderLabFramesForAthlete(a) {
+  const frames = DB.labFrames.filter(f => f.athlete_id === a.id);
+  const card = document.getElementById('pcLabCard');
+  
+  if (frames.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  
+  document.getElementById('pcLabFrames').innerHTML = frames.slice(-6).reverse().map(f => {
+    const t = f.timestamp || 0;
+    const timeStr = `${Math.floor(t/60)}:${Math.floor(t%60).toString().padStart(2,'0')}`;
+    return `<div class="lab-frame"><img src="${f.image}" loading="lazy"><div class="lab-frame-time">${timeStr}</div></div>`;
+  }).join('');
 }
 
 // ============================================================
