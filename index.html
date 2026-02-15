@@ -353,6 +353,36 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .bio-lbl{font-size:10px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
 .bio-trend{display:flex;align-items:flex-end;gap:3px;height:40px;justify-content:center;margin-top:6px}
 .bio-bar{width:6px;border-radius:3px;min-height:3px}
+
+/* ===== PHASE 4: DASHBOARD ===== */
+.dash-hero{text-align:center;padding:12px 0 16px}
+.dash-hero-title{font-size:28px;font-weight:800;letter-spacing:-.03em}
+.dash-hero-sub{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.dash-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.dash-kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
+.dash-kpi-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.dash-kpi-lbl{font-size:9px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.dash-section{margin-bottom:14px}
+.dash-section-title{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.dash-feed-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.dash-feed-item:last-child{border-bottom:none}
+.dash-feed-icon{font-size:18px;margin-top:1px}
+.dash-feed-text{font-size:13px;line-height:1.4}
+.dash-feed-time{font-size:11px;color:var(--text-muted)}
+.dash-ath-mini{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.dash-ath-chip{flex-shrink:0;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center;min-width:80px;cursor:pointer}
+.dash-ath-chip:active{transform:scale(.96)}
+.dash-ath-avi{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6366f1);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;margin-bottom:4px}
+.dash-ath-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px}
+.dash-ath-stat{font-size:10px;color:var(--text-muted)}
+
+.tpl-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
+.tpl-card:active{transform:scale(.98)}
+.tpl-card-name{font-weight:700;font-size:14px}
+.tpl-card-meta{font-size:11px;color:var(--text-secondary);margin-top:3px}
+
+.db-chart{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.db-chart canvas{width:100%;height:120px}
 </style>
 </head>
 <body>
@@ -369,23 +399,40 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== HOME ==================== -->
 <div class="view active" id="view-home">
-  <div style="text-align:center;margin:20px 0 24px">
-    <div style="font-size:28px;font-weight:800;letter-spacing:-.03em">KSS Coach</div>
-    <div style="font-size:13px;color:var(--text-secondary);margin-top:2px" id="homeGreeting">Surf Coaching System</div>
+  <div class="dash-hero">
+    <div class="dash-hero-title">KSS Coach</div>
+    <div class="dash-hero-sub" id="homeGreeting">Surf Coaching System</div>
   </div>
 
-  <button class="btn btn-accent" onclick="startNewSession()" id="homeStartBtn" style="margin-bottom:20px;font-size:17px;padding:18px">
+  <button class="btn btn-accent" onclick="startNewSession()" id="homeStartBtn" style="margin-bottom:16px;font-size:17px;padding:18px">
     ⚡ Nueva Sesión
   </button>
 
-  <div class="card" id="homeLastSession" style="display:none">
-    <div class="card-header"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Última Sesión</div>
-    <div id="homeLastContent"></div>
+  <!-- KPI Row -->
+  <div class="dash-row" id="homeKPIs" style="display:none"></div>
+
+  <!-- Quick Athletes Strip -->
+  <div class="dash-section" id="homeAthSection" style="display:none">
+    <div class="dash-section-title">👥 Equipo</div>
+    <div class="dash-ath-mini" id="homeAthStrip"></div>
   </div>
 
-  <div class="card" id="homeHighlights" style="display:none">
-    <div class="card-header"><svg viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>Highlights</div>
-    <div id="homeHighContent"></div>
+  <!-- Templates -->
+  <div class="dash-section" id="homeTplSection" style="display:none">
+    <div class="dash-section-title">📋 Templates <button class="text-sm" style="color:var(--accent);font-weight:700;margin-left:auto" onclick="showView('settings')">Gestionar</button></div>
+    <div id="homeTplList"></div>
+  </div>
+
+  <!-- Needs Attention -->
+  <div class="dash-section" id="homeAttentionSection" style="display:none">
+    <div class="dash-section-title">⚠️ Necesitan Atención</div>
+    <div id="homeAttention"></div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="dash-section" id="homeFeedSection" style="display:none">
+    <div class="dash-section-title">📰 Actividad Reciente</div>
+    <div class="card" style="padding:10px 12px" id="homeFeed"></div>
   </div>
 
   <div id="homeEmpty" class="empty-state" style="margin-top:20px">
@@ -577,15 +624,6 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </div>
       </div>
 
-      <!-- Set vs Interset -->
-      <div class="eval-section">
-        <div class="eval-label">Tipo de Ola</div>
-        <div class="eval-row" id="evalWaveType">
-          <button class="eval-btn" data-v="set" onclick="evalSet('wave_type',this,'a')" style="flex:1">🌊 Set</button>
-          <button class="eval-btn" data-v="interset" onclick="evalSet('wave_type',this,'y')" style="flex:1">〰️ Interset</button>
-        </div>
-      </div>
-
       <!-- Wave Quality -->
       <div class="eval-section">
         <div class="eval-label">Calidad de la Ola</div>
@@ -686,6 +724,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <div id="dbAthletes"></div>
 
+  <!-- Visual Chart -->
+  <div class="db-chart" id="dbChart" style="display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📊 Catch Ratio Comparado</div>
+    <div id="dbChartBars"></div>
+  </div>
+
   <div class="field" style="margin-top:16px">
     <label class="field-label">📝 Nota General</label>
     <textarea class="field-input" id="dbNotes" rows="3" placeholder="Notas sobre la sesión..."></textarea>
@@ -704,6 +748,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <button class="btn btn-accent" onclick="saveAndExport()" style="margin-bottom:10px">💾 Guardar y Exportar CSV</button>
   <button class="btn btn-outline" onclick="saveDebrief(); showView('home')">Guardar sin Exportar</button>
+  <button class="btn btn-outline" onclick="saveTemplate()" style="margin-top:8px;border-color:var(--accent);color:var(--accent)">📋 Guardar como Template</button>
 </div>
 
 <!-- ==================== ATHLETES ==================== -->
@@ -994,6 +1039,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div class="card">
+    <div class="card-header">📋 Session Templates</div>
+    <div id="setTplList"></div>
+    <div id="setTplEmpty" style="font-size:12px;color:var(--text-muted);padding:4px 0">Sin templates guardados. Crea uno desde el debrief de una sesión.</div>
+  </div>
+
+  <div class="card">
     <div class="card-header">🏋️ Drill Bank</div>
     <button class="btn btn-outline btn-sm" onclick="window._drillReturnView='settings';showView('drills')">Explorar Ejercicios</button>
   </div>
@@ -1005,7 +1056,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v3.0 · Phase 3<br>Karibe Surf Score
+    KSS Coach v4.0 · Phase 4<br>Karibe Surf Score
   </div>
 </div>
 
@@ -1202,6 +1253,9 @@ const DB = {
   get labFrames() { return this._get('lab_frames', []); },
   set labFrames(v) { this._set('lab_frames', v); },
 
+  get templates() { return this._get('templates', []); },
+  set templates(v) { this._set('templates', v); },
+
   genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 };
 
@@ -1289,6 +1343,13 @@ function renderHome() {
   const sessions = DB.sessions;
   const athletes = DB.athletes;
   const s = DB.activeSession;
+  const templates = DB.templates;
+  
+  // Greeting based on time
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches';
+  const coach = DB.coach;
+  document.getElementById('homeGreeting').textContent = `${greeting}${coach.name !== 'Coach' ? ', ' + coach.name : ''}`;
   
   // If active session, change button
   const btn = document.getElementById('homeStartBtn');
@@ -1300,45 +1361,122 @@ function renderHome() {
     btn.onclick = () => startNewSession();
   }
   
-  // Last session
-  const lastDiv = document.getElementById('homeLastSession');
-  if (sessions.length > 0) {
-    const last = sessions[sessions.length - 1];
-    const d = new Date(last.date);
-    const totalCaught = Object.values(last.athlete_data).reduce((s, a) => s + a.caught, 0);
-    const totalPaddled = Object.values(last.athlete_data).reduce((s, a) => s + a.paddled, 0);
-    const ratio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
-    document.getElementById('homeLastContent').innerHTML = `
-      <div style="font-size:14px;font-weight:700">${last.spot} · ${new Intl.DateTimeFormat('es',{day:'numeric',month:'short'}).format(d)}</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${Object.keys(last.athlete_data).length} atletas · Catch ratio: ${ratio}%</div>
-    `;
-    lastDiv.style.display = 'block';
-  } else {
-    lastDiv.style.display = 'none';
-  }
+  // KPIs
+  const kpiDiv = document.getElementById('homeKPIs');
+  if (sessions.length > 0 || athletes.length > 0) {
+    kpiDiv.style.display = 'grid';
+    const totalWaves = sessions.reduce((sum, s) => sum + Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.caught || 0), 0), 0);
+    const totalHeats = athletes.reduce((sum, a) => sum + (a.heat_history || []).length, 0);
+    
+    kpiDiv.innerHTML = [
+      { val: sessions.length, lbl: 'Sesiones', color: 'var(--accent)' },
+      { val: totalWaves, lbl: 'Olas', color: 'var(--green)' },
+      { val: totalHeats, lbl: 'Heats', color: '#a855f7' },
+    ].map(k => `<div class="dash-kpi"><div class="dash-kpi-val" style="color:${k.color}">${k.val}</div><div class="dash-kpi-lbl">${k.lbl}</div></div>`).join('');
+  } else { kpiDiv.style.display = 'none'; }
   
-  // Highlights
-  const hlDiv = document.getElementById('homeHighlights');
-  if (athletes.length > 0 && sessions.length > 0) {
-    // Find best catch ratio athlete from last session
-    const last = sessions[sessions.length - 1];
-    let best = null, bestRatio = 0;
-    for (const [id, data] of Object.entries(last.athlete_data)) {
-      const r = data.paddled > 0 ? data.caught / data.paddled : 0;
-      if (r > bestRatio) { bestRatio = r; best = id; }
-    }
-    const bestAthlete = athletes.find(a => a.id === best);
-    let html = '';
-    if (bestAthlete) {
-      html += `<div style="font-size:13px;margin-bottom:6px">🏆 Mejor catch ratio: <strong>${bestAthlete.name}</strong> (${Math.round(bestRatio * 100)}%)</div>`;
-    }
-    // Total sessions count
-    html += `<div style="font-size:13px;color:var(--text-secondary)">📊 ${sessions.length} sesiones registradas</div>`;
-    document.getElementById('homeHighContent').innerHTML = html;
-    hlDiv.style.display = 'block';
-  } else {
-    hlDiv.style.display = 'none';
-  }
+  // Athletes strip
+  const athSection = document.getElementById('homeAthSection');
+  if (athletes.length > 0) {
+    athSection.style.display = 'block';
+    document.getElementById('homeAthStrip').innerHTML = athletes.map(a => {
+      const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const lvl = calcLevel(a.xp_total || 0);
+      return `<div class="dash-ath-chip" onclick="openPlayerCard('${a.id}')">
+        <div class="dash-ath-avi">${initials}</div>
+        <div class="dash-ath-name">${a.name.split(' ')[0]}</div>
+        <div class="dash-ath-stat">${LEVEL_NAMES[lvl.level]}</div>
+      </div>`;
+    }).join('');
+  } else { athSection.style.display = 'none'; }
+  
+  // Templates
+  const tplSection = document.getElementById('homeTplSection');
+  if (templates.length > 0) {
+    tplSection.style.display = 'block';
+    document.getElementById('homeTplList').innerHTML = templates.slice(0, 3).map(t => {
+      const athNames = (t.athlete_ids || []).map(id => {
+        const a = athletes.find(x => x.id === id);
+        return a ? a.name.split(' ')[0] : '?';
+      }).join(', ');
+      return `<div class="tpl-card" onclick="loadTemplate('${t.id}')">
+        <div class="tpl-card-name">📋 ${t.name}</div>
+        <div class="tpl-card-meta">📍 ${t.spot} · 🌊 ${t.wave_size || '?'}ft · ${athNames || 'Sin atletas'}</div>
+      </div>`;
+    }).join('');
+  } else { tplSection.style.display = 'none'; }
+  
+  // Needs Attention
+  const attSection = document.getElementById('homeAttentionSection');
+  if (athletes.length > 0 && sessions.length >= 2) {
+    const alerts = [];
+    athletes.forEach(a => {
+      // Declining catch ratio
+      const athSessions = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]).slice(-3);
+      if (athSessions.length >= 2) {
+        const ratios = athSessions.map(s => {
+          const d = s.athlete_data[a.id];
+          return d.paddled > 0 ? d.caught / d.paddled * 100 : 0;
+        });
+        const trend = ratios[ratios.length - 1] - ratios[0];
+        if (trend < -15) {
+          alerts.push({ icon: '📉', text: `${a.name.split(' ')[0]}: catch ratio cayó ${Math.abs(Math.round(trend))}% en últimas sesiones`, color: 'var(--red)' });
+        }
+      }
+      // Pain reported
+      const bio = a.biometrics || [];
+      if (bio.length > 0) {
+        const last = bio[bio.length - 1];
+        if (last.pain === 'moderate' || last.pain === 'severe') {
+          alerts.push({ icon: '🩹', text: `${a.name.split(' ')[0]}: reportó dolor ${last.pain === 'severe' ? 'severo' : 'moderado'}${last.painZone ? ' en ' + last.painZone : ''}`, color: 'var(--yellow)' });
+        }
+      }
+      // Low energy
+      if ((a.biometrics || []).length > 0) {
+        const last = a.biometrics[a.biometrics.length - 1];
+        if (last.energy <= 4) {
+          alerts.push({ icon: '🔋', text: `${a.name.split(' ')[0]}: energía baja (${last.energy}/10)`, color: 'var(--yellow)' });
+        }
+      }
+    });
+    
+    if (alerts.length > 0) {
+      attSection.style.display = 'block';
+      document.getElementById('homeAttention').innerHTML = '<div class="card" style="padding:10px 12px">' +
+        alerts.slice(0, 4).map(a => `<div style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border)"><span>${a.icon}</span><span style="color:${a.color}">${a.text}</span></div>`).join('') + '</div>';
+    } else { attSection.style.display = 'none'; }
+  } else { attSection.style.display = 'none'; }
+  
+  // Activity Feed
+  const feedSection = document.getElementById('homeFeedSection');
+  if (sessions.length > 0) {
+    feedSection.style.display = 'block';
+    const feed = [];
+    
+    // Last 5 sessions
+    sessions.slice(-5).reverse().forEach(s => {
+      const d = new Date(s.date || s.started_at);
+      const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(d);
+      const totalCaught = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.caught || 0), 0);
+      const totalPaddled = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.paddled || 0), 0);
+      const ratio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
+      feed.push({ icon: '🏄', text: `<strong>${s.spot}</strong> · ${Object.keys(s.athlete_data || {}).length} atletas · ${totalCaught} olas · ${ratio}% catch`, time: dateStr });
+    });
+    
+    // Last 3 heats from athletes
+    const allHeats = [];
+    athletes.forEach(a => (a.heat_history || []).forEach(h => allHeats.push({ ...h, athlete: a.name })));
+    allHeats.sort((a, b) => new Date(b.date) - new Date(a.date));
+    allHeats.slice(0, 3).forEach(h => {
+      const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(h.date));
+      const pos = h.position === 1 ? '🥇' : h.position === 2 ? '🥈' : h.position === 3 ? '🥉' : `${h.position}th`;
+      feed.push({ icon: '⚖️', text: `<strong>${h.athlete.split(' ')[0]}</strong> · Heat ${h.heat_number || '?'} · ${pos} · ${h.total.toFixed(1)}pts`, time: dateStr });
+    });
+    
+    document.getElementById('homeFeed').innerHTML = feed.slice(0, 6).map(f =>
+      `<div class="dash-feed-item"><span class="dash-feed-icon">${f.icon}</span><div><div class="dash-feed-text">${f.text}</div><div class="dash-feed-time">${f.time}</div></div></div>`
+    ).join('') || '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">Sin actividad reciente</div>';
+  } else { feedSection.style.display = 'none'; }
   
   // Empty state
   document.getElementById('homeEmpty').style.display = sessions.length === 0 && athletes.length === 0 ? 'block' : 'none';
@@ -1804,6 +1942,19 @@ function renderDebrief() {
     </div>`;
   });
   document.getElementById('dbAthletes').innerHTML = athHtml;
+  
+  // Visual catch ratio chart
+  if (ids.length > 0) {
+    const chart = document.getElementById('dbChart');
+    chart.style.display = 'block';
+    document.getElementById('dbChartBars').innerHTML = ids.map(id => {
+      const a = athletes.find(x => x.id === id);
+      const ad = s.athlete_data[id];
+      const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
+      const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      return `<div class="pc-bar-row"><div class="pc-bar-label">${(a ? a.name.split(' ')[0] : '?').slice(0,6)}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${ratio}%;background:${color}"></div></div><div class="pc-bar-val">${ratio}%</div></div>`;
+    }).join('');
+  }
 }
 
 function saveDebrief() {
@@ -1852,6 +2003,76 @@ function saveAndExport() {
   saveDebrief();
   exportSessionCSV();
   showView('home');
+}
+
+function saveTemplate() {
+  const s = DB.activeSession || DB.sessions[DB.sessions.length - 1];
+  if (!s) { alert('No hay sesión activa'); return; }
+  
+  const name = prompt('Nombre del template:', `${s.spot} - ${s.focus_area || 'Sesión'}`);
+  if (!name) return;
+  
+  const tpl = {
+    id: DB.genId(),
+    name,
+    spot: s.spot,
+    wave_size: s.wave_size,
+    wave_quality: s.wave_quality,
+    wind_condition: s.wind_condition,
+    crowd_factor: s.crowd_factor,
+    focus_area: s.focus_area,
+    athlete_ids: Object.keys(s.athlete_data || {}),
+    created_at: new Date().toISOString()
+  };
+  
+  const templates = DB.templates;
+  templates.push(tpl);
+  DB.templates = templates;
+  alert('✅ Template guardado');
+}
+
+function loadTemplate(id) {
+  const tpl = DB.templates.find(t => t.id === id);
+  if (!tpl) return;
+  
+  // Start session setup
+  if (DB.athletes.length === 0) { openAddAthleteModal(); return; }
+  showView('session-setup');
+  
+  // Auto-fill fields after render
+  setTimeout(() => {
+    // Spot
+    const spotSel = document.getElementById('ssSpot');
+    for (let i = 0; i < spotSel.options.length; i++) {
+      if (spotSel.options[i].value === tpl.spot) { spotSel.selectedIndex = i; break; }
+    }
+    // Size
+    const sizeBtn = document.querySelector(`#ssSize .seg-btn[data-v="${tpl.wave_size}"]`);
+    if (sizeBtn) segSelect('ssSize', sizeBtn);
+    // Quality
+    if (tpl.wave_quality) starSelect('ssQuality', tpl.wave_quality);
+    // Wind
+    const windBtn = document.querySelector(`#ssWind .seg-btn[data-v="${tpl.wind_condition}"]`);
+    if (windBtn) segSelect('ssWind', windBtn);
+    // Crowd
+    const crowdBtn = document.querySelector(`#ssCrowd .seg-btn[data-v="${tpl.crowd_factor}"]`);
+    if (crowdBtn) segSelect('ssCrowd', crowdBtn);
+    // Focus
+    if (tpl.focus_area) document.getElementById('ssFocus').value = tpl.focus_area;
+    // Athletes
+    if (tpl.athlete_ids && tpl.athlete_ids.length > 0) {
+      const checks = document.querySelectorAll('#ssAthList input[type="checkbox"]');
+      checks.forEach(cb => {
+        cb.checked = tpl.athlete_ids.includes(cb.value);
+      });
+    }
+  }, 100);
+}
+
+function deleteTemplate(id) {
+  if (!confirm('¿Eliminar este template?')) return;
+  DB.templates = DB.templates.filter(t => t.id !== id);
+  renderSettings();
 }
 
 // ============================================================
@@ -2956,6 +3177,23 @@ function renderSettings() {
       <button onclick="removeSpot(${i})" style="color:var(--text-muted);font-size:16px;padding:4px 8px">×</button>
     </div>`
   ).join('');
+  
+  // Templates
+  const templates = DB.templates;
+  const tplList = document.getElementById('setTplList');
+  const tplEmpty = document.getElementById('setTplEmpty');
+  if (templates.length > 0) {
+    tplEmpty.style.display = 'none';
+    tplList.innerHTML = templates.map(t => 
+      `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:600">${t.name}</div><div style="font-size:11px;color:var(--text-muted)">${t.spot} · ${(t.athlete_ids||[]).length} atletas</div></div>
+        <button onclick="deleteTemplate('${t.id}')" style="color:var(--text-muted);font-size:16px;padding:4px 8px">×</button>
+      </div>`
+    ).join('');
+  } else {
+    tplEmpty.style.display = 'block';
+    tplList.innerHTML = '';
+  }
 }
 
 function addSpot() {
