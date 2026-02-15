@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kss-coach-v1.1';
+const CACHE_NAME = 'kss-coach-v2.0';
 const ASSETS = [
   './',
   './index.html',
