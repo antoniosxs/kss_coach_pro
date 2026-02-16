@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kss-coach-v7.0';
+const CACHE_NAME = 'kss-coach-v7.2';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,18 @@ const ASSETS = [
   './longboard.png',
   './kneeboard.png',
   './paddle_surf.png',
-  './paddle_race.png'
+  './paddle_race.png',
+  './stickers_0000s_0000_Screenshot-2026-02-16-143059.png',
+  './stickers_0000s_0001_Screenshot-2026-02-16-143050.png',
+  './stickers_0000s_0002_Screenshot-2026-02-16-142954.png',
+  './stickers_0000s_0003_Screenshot-2026-02-16-142945.png',
+  './stickers_0000s_0004_Screenshot-2026-02-16-142928.png',
+  './stickers_0000s_0005_Screenshot-2026-02-16-142920.png',
+  './stickers_0000s_0006_Screenshot-2026-02-16-142911.png',
+  './stickers_0000s_0007_bs-ooff-the-top.png',
+  './stickers_0000s_0008_bs-carving.png',
+  './stickers_0000s_0009_finishing-off-the-top.png',
+  './stickers_0000s_0010_off-the-top.png'
 ];
 
 self.addEventListener('install', e => {

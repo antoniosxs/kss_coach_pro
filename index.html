@@ -328,41 +328,94 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .drill-cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* ===== PHASE 3: TECH LAB ===== */
-.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:12px}
-.lab-video{width:100%;display:block;max-height:50vh}
+.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:0;touch-action:none;-webkit-user-select:none;user-select:none}
+.lab-video{width:100%;display:block;max-height:55vh}
 .lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;touch-action:none}
 .lab-canvas.drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
 
-/* Lab Fullscreen Mode */
-.lab-fullscreen{position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:9999;background:#000;display:flex;flex-direction:column;border-radius:0;margin:0;padding:0;padding-top:var(--safe-t);padding-bottom:var(--safe-b)}
-.lab-fullscreen .lab-video-wrap{flex:1;border-radius:0;margin:0;min-height:0}
-.lab-fullscreen .lab-video{max-height:none;height:100%;object-fit:contain}
-.lab-fullscreen .lab-controls{padding:6px 12px;background:rgba(0,0,0,.85)}
-.lab-fullscreen .lab-tools{padding:0 12px;margin-bottom:6px;background:rgba(0,0,0,.85);justify-content:center}
-.lab-fullscreen .lab-tool{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;padding:10px 14px;font-size:13px}
-.lab-fullscreen .lab-tool.active{background:var(--accent);border-color:var(--accent)}
-.lab-fullscreen .lab-speed-row{display:flex;gap:4px;justify-content:center;padding:2px 12px;background:rgba(0,0,0,.85)}
-.lab-fullscreen .lab-speed-row .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
-.lab-fullscreen .lab-color-row{display:flex;gap:8px;padding:4px 12px;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
-.lab-fullscreen .lab-timeline{background:rgba(255,255,255,.15)}
-.lab-fullscreen .lab-time{color:rgba(255,255,255,.7)}
-.lab-fullscreen .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;width:44px;height:44px}
-.lab-fs-close{position:absolute;top:calc(var(--safe-t) + 8px);right:12px;z-index:10000;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.3);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.lab-fs-close:active{transform:scale(.9)}
-.lab-fs-expand{position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,.6);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.lab-fs-expand:active{transform:scale(.9)}
+/* Gesture layer - transparent overlay for touch */
+.lab-gesture{position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;touch-action:none;-webkit-tap-highlight-color:transparent}
+.lab-gesture.disabled{pointer-events:none}
+.lab-gest-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;opacity:0;transition:opacity .15s;pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.lab-gest-indicator.show{opacity:1}
+.lab-gest-skip{position:absolute;top:50%;transform:translateY(-50%);width:50%;height:80%;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .15s}
+.lab-gest-skip.show{opacity:1}
+.lab-gest-skip.left{left:0;border-radius:50% 0 0 50%}
+.lab-gest-skip.right{right:0;border-radius:0 50% 50% 0}
+.lab-gest-skip-inner{background:rgba(255,255,255,.15);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.lab-gest-scrub{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);border-radius:12px;padding:10px 20px;pointer-events:none;opacity:0;transition:opacity .12s;text-align:center}
+.lab-gest-scrub.show{opacity:1}
+.lab-gest-scrub-time{font-size:24px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.lab-gest-scrub-delta{font-size:12px;color:var(--accent);font-weight:700;margin-top:2px}
+.lab-gest-speed{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border-radius:8px;padding:6px 14px;pointer-events:none;opacity:0;transition:opacity .12s;font-size:14px;font-weight:700;color:var(--accent)}
+.lab-gest-speed.show{opacity:1}
+
+/* Controls overlay - auto-hides */
+.lab-controls-wrap{transition:opacity .3s;padding:6px 0 0}
+.lab-controls-wrap.hidden{opacity:0;pointer-events:none}
 .lab-controls{display:flex;align-items:center;gap:8px;padding:8px 0}
-.lab-ctrl-btn{width:40px;height:40px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-primary);cursor:pointer}
+.lab-ctrl-btn{width:40px;height:40px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-primary);cursor:pointer;flex-shrink:0}
 .lab-ctrl-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .lab-ctrl-btn:active{transform:scale(.92)}
 .lab-timeline{flex:1;height:6px;background:var(--bg-input);border-radius:3px;cursor:pointer;position:relative;-webkit-appearance:none;appearance:none}
 .lab-timeline::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
 .lab-time{font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums;min-width:42px;text-align:center}
-.lab-tools{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.lab-tools{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .lab-tool{padding:8px 12px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;color:var(--text-secondary)}
 .lab-tool.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .lab-color-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer}
 .lab-color-dot.active{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+.lab-szrow{display:flex;gap:4px;margin-bottom:10px;align-items:center;justify-content:center;flex-wrap:nowrap}
+.lab-szrow .lab-ctrl-btn{font-size:11px;width:auto;padding:0 7px;height:32px}
+.lab-sz-sep{width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0}
+.lab-sz-label{font-size:10px;color:var(--text-muted);font-weight:600;flex-shrink:0}
+.lab-zoom-level{font-size:11px;font-weight:700;color:var(--text-secondary);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Sticker mini-bar (collapsed) */
+.lab-stk-bar{display:none;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:10px}
+.lab-stk-bar.active{display:flex}
+.lab-stk-bar-preview{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)}
+.lab-stk-bar-preview img{max-width:100%;max-height:100%;object-fit:contain}
+.lab-stk-bar-name{font-size:11px;font-weight:700;color:var(--text-primary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab-stk-bar-btn{width:32px;height:32px;border-radius:6px;background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.lab-stk-bar-btn:active{transform:scale(.9)}
+.lab-stk-bar-btn.accent{background:var(--accent);border-color:var(--accent);color:#fff;font-size:10px;width:auto;padding:0 10px;font-weight:700}
+
+/* Sticker full panel - modal overlay */
+.lab-stk-modal{display:none;position:fixed;bottom:0;left:0;right:0;z-index:10001;background:rgba(15,23,42,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.12);padding:16px 16px calc(var(--safe-b) + 16px);border-radius:16px 16px 0 0;max-height:40vh;animation:labStkSlide .2s ease}
+.lab-stk-modal.active{display:block}
+@keyframes labStkSlide{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.lab-stk-modal-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.lab-stk-modal-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer;padding:4px}
+.lab-stk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px}
+.lab-stk-item{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.lab-stk-item-img{width:64px;height:64px;border-radius:10px;border:2px solid rgba(255,255,255,.12);padding:4px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);transition:all .15s}
+.lab-stk-item-img:active{transform:scale(.92)}
+.lab-stk-item-img.selected{border-color:var(--accent);background:rgba(99,102,241,.15)}
+.lab-stk-item-img img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.lab-stk-item-name{font-size:9px;color:rgba(255,255,255,.5);margin-top:3px;text-align:center}
+
+/* Lab Fullscreen Mode */
+.lab-fullscreen{position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:9999;background:#000;display:flex;flex-direction:column;border-radius:0;margin:0;padding:0;padding-top:var(--safe-t);padding-bottom:var(--safe-b)}
+.lab-fullscreen .lab-video-wrap{flex:1;border-radius:0;margin:0;min-height:0}
+.lab-fullscreen .lab-video{max-height:none;height:100%;object-fit:contain}
+.lab-fullscreen .lab-controls-wrap{background:rgba(0,0,0,.85);padding:4px 12px}
+.lab-fullscreen .lab-controls{padding:6px 0}
+.lab-fullscreen .lab-tools{padding:0 12px;margin-bottom:6px;background:rgba(0,0,0,.85);justify-content:center}
+.lab-fullscreen .lab-tool{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;padding:10px 14px;font-size:13px}
+.lab-fullscreen .lab-tool.active{background:var(--accent);border-color:var(--accent)}
+.lab-fullscreen .lab-szrow{background:rgba(0,0,0,.85);padding:4px 12px;margin-bottom:0}
+.lab-fullscreen .lab-szrow .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.lab-fullscreen .lab-color-row{display:flex;gap:8px;padding:4px 12px;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
+.lab-fullscreen .lab-timeline{background:rgba(255,255,255,.15)}
+.lab-fullscreen .lab-time{color:rgba(255,255,255,.7)}
+.lab-fullscreen .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;width:44px;height:44px}
+.lab-fullscreen .lab-stk-bar{background:rgba(0,0,0,.85);border-color:rgba(255,255,255,.15)}
+.lab-fs-close{position:absolute;top:calc(var(--safe-t) + 8px);right:12px;z-index:10000;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.3);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.lab-fs-close:active{transform:scale(.9)}
+.lab-fs-expand{position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,.6);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.lab-fs-expand:active{transform:scale(.9)}
+
 .lab-frames{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .lab-frame{border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative}
 .lab-frame img{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
@@ -373,6 +426,32 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-clip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .lab-clip-name{font-weight:700;font-size:14px}
 .lab-clip-meta{font-size:11px;color:var(--text-muted)}
+
+/* Video wrapper zoom support */
+.lab-video-inner{transform-origin:center center;will-change:transform;position:relative}
+
+/* ===== BEGINNER MODE ===== */
+.beg-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;z-index:10;background:var(--bg)}
+.beg-wave-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 16px 10px}
+.beg-eval-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.beg-eval-label{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;width:70px;flex-shrink:0}
+.beg-eval-opts{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.beg-eval-btn{padding:6px 10px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all .12s}
+.beg-eval-btn:active{transform:scale(.94)}
+.beg-eval-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+.beg-eval-btn.green.selected{background:var(--green);border-color:var(--green)}
+.beg-eval-btn.yellow.selected{background:#f59e0b;border-color:#f59e0b}
+.beg-eval-btn.red.selected{background:var(--red);border-color:var(--red)}
+.beg-summary{margin:0 16px 12px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px}
+.beg-sum-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
+.beg-sum-label{color:var(--text-secondary);font-weight:600}
+.beg-sum-val{font-weight:800;color:var(--text-primary)}
+.beg-wave-mini{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-input);border-radius:8px;margin-bottom:6px;font-size:12px}
+.beg-wave-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.beg-wave-tags{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+.beg-wave-tag{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.beg-graduate-badge{text-align:center;padding:20px;margin:0 16px 12px;background:linear-gradient(135deg,#22c55e,#059669);border-radius:12px;color:#fff}
+.beg-graduate-badge .icon{font-size:40px;margin-bottom:6px}
 
 /* ===== KSS BRANDING ===== */
 .kss-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
@@ -659,6 +738,10 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- Mode selection -->
   <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+    <button class="btn" onclick="showView('beginner')" style="padding:16px;font-size:15px;background:linear-gradient(135deg,#06b6d4,#0891b2);text-align:left;display:flex;align-items:center;gap:14px">
+      <span style="font-size:28px">🌊</span>
+      <div><div style="font-weight:800">Beginner Mode</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Evaluación de principiantes</div></div>
+    </button>
     <button class="btn" onclick="showView('tactical')" style="padding:16px;font-size:15px;background:linear-gradient(135deg,var(--green),#059669);text-align:left;display:flex;align-items:center;gap:14px">
       <span style="font-size:28px">🏄</span>
       <div><div style="font-weight:800">Tactical IQ</div><div style="font-size:11px;font-weight:500;opacity:.85;margin-top:1px">Olas + Biomecánica</div></div>
@@ -1006,6 +1089,101 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <button class="btn btn-sm" style="margin-top:16px;background:var(--red);color:#fff" onclick="endSession()">■ Cerrar Sesión</button>
 </div>
 
+<!-- ==================== BEGINNER MODE ==================== -->
+<div class="view" id="view-beginner" style="padding:0 0 24px">
+  <div class="beg-header">
+    <button class="tac-nav-arrow" onclick="begPrev()">‹</button>
+    <div style="text-align:center">
+      <div style="font-size:16px;font-weight:800" id="begName">—</div>
+      <div style="font-size:11px;color:var(--text-secondary);font-weight:600">🌊 Beginner Mode</div>
+    </div>
+    <button class="tac-nav-arrow" onclick="begNext()">›</button>
+  </div>
+
+  <!-- Quick summary -->
+  <div class="beg-summary" id="begSummary">
+    <div class="beg-sum-row"><span class="beg-sum-label">Intentos</span><span class="beg-sum-val" id="begTotal">0</span></div>
+    <div class="beg-sum-row"><span class="beg-sum-label">De pie</span><span class="beg-sum-val" id="begStanding">0</span></div>
+    <div class="beg-sum-row"><span class="beg-sum-label">Solo</span><span class="beg-sum-val" id="begSolo">0</span></div>
+    <div class="beg-sum-row"><span class="beg-sum-label">Trayecto completo</span><span class="beg-sum-val" id="begComplete">0</span></div>
+  </div>
+
+  <!-- New wave evaluation card -->
+  <div class="beg-wave-card" id="begEvalCard">
+    <div style="font-size:13px;font-weight:800;margin-bottom:12px">📋 Evaluar Intento</div>
+
+    <div class="beg-eval-row">
+      <div class="beg-eval-label">Entrada</div>
+      <div class="beg-eval-opts" id="begCatching">
+        <button class="beg-eval-btn red" data-v="assisted" onclick="begSel('begCatching','assisted',this)">🤝 Asistido</button>
+        <button class="beg-eval-btn yellow" data-v="timed" onclick="begSel('begCatching','timed',this)">⏱️ Timing</button>
+        <button class="beg-eval-btn green" data-v="solo" onclick="begSel('begCatching','solo',this)">🏄 Solo</button>
+      </div>
+    </div>
+
+    <div class="beg-eval-row">
+      <div class="beg-eval-label">Pop-up</div>
+      <div class="beg-eval-opts" id="begPopup">
+        <button class="beg-eval-btn red" data-v="none" onclick="begSel('begPopup','none',this)">❌ No</button>
+        <button class="beg-eval-btn yellow" data-v="knees" onclick="begSel('begPopup','knees',this)">🦵 Rodillas</button>
+        <button class="beg-eval-btn green" data-v="standing" onclick="begSel('begPopup','standing',this)">✅ De pie</button>
+      </div>
+    </div>
+
+    <div class="beg-eval-row">
+      <div class="beg-eval-label">Equilibrio</div>
+      <div class="beg-eval-opts" id="begBalance">
+        <button class="beg-eval-btn red" data-v="falls" onclick="begSel('begBalance','falls',this)">💥 Cae</button>
+        <button class="beg-eval-btn yellow" data-v="partial" onclick="begSel('begBalance','partial',this)">⚖️ Parcial</button>
+        <button class="beg-eval-btn green" data-v="complete" onclick="begSel('begBalance','complete',this)">🏆 Completo</button>
+      </div>
+    </div>
+
+    <div class="beg-eval-row">
+      <div class="beg-eval-label">Dirección</div>
+      <div class="beg-eval-opts" id="begDirection">
+        <button class="beg-eval-btn red" data-v="none" onclick="begSel('begDirection','none',this)">❌ Sin ctrl</button>
+        <button class="beg-eval-btn yellow" data-v="some" onclick="begSel('begDirection','some',this)">〰️ Algo</button>
+        <button class="beg-eval-btn green" data-v="controls" onclick="begSel('begDirection','controls',this)">✅ Controla</button>
+      </div>
+    </div>
+
+    <div class="beg-eval-row">
+      <div class="beg-eval-label">Tipo ola</div>
+      <div class="beg-eval-opts" id="begWaveType">
+        <button class="beg-eval-btn" data-v="whitewash" onclick="begSel('begWaveType','whitewash',this)">🫧 Espuma</button>
+        <button class="beg-eval-btn" data-v="reform" onclick="begSel('begWaveType','reform',this)">🌊 Reforma</button>
+        <button class="beg-eval-btn" data-v="green" onclick="begSel('begWaveType','green',this)">💚 Verde</button>
+      </div>
+    </div>
+
+    <div class="beg-eval-row" style="margin-bottom:0">
+      <div class="beg-eval-label">Stance</div>
+      <div class="beg-eval-opts" id="begStance">
+        <button class="beg-eval-btn" data-v="undefined" onclick="begSel('begStance','undefined',this)">❓ No definido</button>
+        <button class="beg-eval-btn" data-v="frontside" onclick="begSel('begStance','frontside',this)">🧍 Frontside</button>
+        <button class="beg-eval-btn" data-v="backside" onclick="begSel('begStance','backside',this)">🔄 Backside</button>
+      </div>
+    </div>
+
+    <textarea class="field-input" id="begNotes" placeholder="Notas rápidas..." style="margin-top:10px;height:40px;font-size:12px"></textarea>
+
+    <button class="btn btn-accent" onclick="begLogWave()" style="margin-top:10px;padding:14px;font-size:15px;width:100%">
+      ✅ Registrar Intento
+    </button>
+  </div>
+
+  <!-- Wave history -->
+  <div style="padding:0 16px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">📋 Historial de Intentos</div>
+    <div id="begWaveList"></div>
+  </div>
+
+  <div style="padding:16px">
+    <button class="btn btn-outline" onclick="showView('session-hub')" style="width:100%">← Volver al Hub</button>
+  </div>
+</div>
+
 <!-- ==================== WORKOUT MODULE ==================== -->
 <div class="view" id="view-workout">
   <div class="flex-between mb-4" style="padding:0 4px">
@@ -1337,54 +1515,89 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <div id="labPlayerSection" style="display:none">
     <div id="labFsContainer">
       <button class="lab-fs-close" id="labFsClose" onclick="labExitFullscreen()" style="display:none">✕</button>
-      <div class="lab-video-wrap">
-        <video class="lab-video" id="labVideo" playsinline></video>
-        <canvas class="lab-canvas" id="labCanvas"></canvas>
+      <div class="lab-video-wrap" id="labVideoWrap">
+        <div class="lab-video-inner" id="labVideoInner">
+          <video class="lab-video" id="labVideo" playsinline></video>
+          <canvas class="lab-canvas" id="labCanvas"></canvas>
+        </div>
         <img class="kss-watermark" id="labWatermark" alt="KSS">
         <button class="lab-fs-expand" onclick="labEnterFullscreen()" id="labFsExpand" title="Pantalla completa">⛶</button>
+        <!-- Gesture layer -->
+        <div class="lab-gesture" id="labGesture">
+          <div class="lab-gest-skip left" id="labGestL"><div class="lab-gest-skip-inner">⏪</div></div>
+          <div class="lab-gest-skip right" id="labGestR"><div class="lab-gest-skip-inner">⏩</div></div>
+          <div class="lab-gest-indicator" id="labGestPlay">▶️</div>
+          <div class="lab-gest-scrub" id="labGestScrub"><div class="lab-gest-scrub-time" id="labGestScrubTime">0:00</div><div class="lab-gest-scrub-delta" id="labGestScrubDelta"></div></div>
+          <div class="lab-gest-speed" id="labGestSpeed">2.0x ⏩</div>
+        </div>
       </div>
 
-      <!-- Playback controls -->
-      <div class="lab-controls">
-        <button class="lab-ctrl-btn" onclick="labStep(-1)" title="Frame atrás">⏪</button>
-        <button class="lab-ctrl-btn" id="labPlayBtn" onclick="labTogglePlay()">▶️</button>
-        <button class="lab-ctrl-btn" onclick="labStep(1)" title="Frame adelante">⏩</button>
-        <input type="range" class="lab-timeline" id="labTimeline" min="0" max="100" value="0" step="0.1" oninput="labSeek(this.value)">
-        <div class="lab-time" id="labTime">0:00</div>
+      <!-- Sticker mini-bar (shown when sticker mode active) -->
+      <div class="lab-stk-bar" id="labStkBar">
+        <div class="lab-stk-bar-preview" id="labStkBarImg"></div>
+        <div class="lab-stk-bar-name" id="labStkBarName">—</div>
+        <button class="lab-stk-bar-btn" onclick="labStickerShrink()">−</button>
+        <button class="lab-stk-bar-btn" onclick="labStickerGrow()">+</button>
+        <button class="lab-stk-bar-btn" onclick="labStickerDelete()">🗑</button>
+        <button class="lab-stk-bar-btn accent" onclick="labOpenStickerModal()">📂</button>
       </div>
 
-      <!-- Speed control -->
-      <div class="lab-speed-row" style="display:flex;gap:4px;margin-bottom:12px;justify-content:center">
-        <button class="lab-ctrl-btn" onclick="labSpeed(0.25)" style="font-size:11px;width:auto;padding:0 8px">0.25x</button>
-        <button class="lab-ctrl-btn" onclick="labSpeed(0.5)" style="font-size:11px;width:auto;padding:0 8px">0.5x</button>
-        <button class="lab-ctrl-btn active" onclick="labSpeed(1)" style="font-size:11px;width:auto;padding:0 8px" id="labSpeedNormal">1x</button>
-        <button class="lab-ctrl-btn" onclick="labSpeed(2)" style="font-size:11px;width:auto;padding:0 8px">2x</button>
-      </div>
+      <!-- Controls (auto-hide on mobile) -->
+      <div class="lab-controls-wrap" id="labControlsWrap">
+        <div class="lab-controls">
+          <button class="lab-ctrl-btn" onclick="labStep(-1)" title="Frame atrás">⏪</button>
+          <button class="lab-ctrl-btn" id="labPlayBtn" onclick="labTogglePlay()">▶️</button>
+          <button class="lab-ctrl-btn" onclick="labStep(1)" title="Frame adelante">⏩</button>
+          <input type="range" class="lab-timeline" id="labTimeline" min="0" max="100" value="0" step="0.1" oninput="labSeek(this.value)">
+          <div class="lab-time" id="labTime">0:00</div>
+        </div>
 
-      <!-- Drawing tools -->
-      <div class="lab-tools" id="labTools">
-        <button class="lab-tool" onclick="labSetTool('none',this)">👆 Mover</button>
-        <button class="lab-tool" onclick="labSetTool('pen',this)">✏️ Dibujar</button>
-        <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️ Flecha</button>
-        <button class="lab-tool" onclick="labSetTool('angle',this)">📐 Ángulo</button>
-        <button class="lab-tool" onclick="labClearDraw()">🗑️ Borrar</button>
-        <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸 Capturar</button>
-      </div>
+        <div class="lab-szrow">
+          <span class="lab-sz-label">Speed</span>
+          <button class="lab-ctrl-btn lab-spd-btn" onclick="labSpeed(0.25)">0.25x</button>
+          <button class="lab-ctrl-btn lab-spd-btn" onclick="labSpeed(0.5)">0.5x</button>
+          <button class="lab-ctrl-btn lab-spd-btn active" onclick="labSpeed(1)" id="labSpeedNormal">1x</button>
+          <button class="lab-ctrl-btn lab-spd-btn" onclick="labSpeed(2)">2x</button>
+          <div class="lab-sz-sep"></div>
+          <span class="lab-sz-label">Zoom</span>
+          <button class="lab-ctrl-btn" onclick="labZoomOut()" style="font-size:16px;font-weight:700">−</button>
+          <div class="lab-zoom-level" id="labZoomLevel">1.0x</div>
+          <button class="lab-ctrl-btn" onclick="labZoomIn()" style="font-size:16px;font-weight:700">+</button>
+        </div>
 
-      <!-- Color picker -->
-      <div class="lab-color-row" style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
-        <span style="font-size:11px;color:var(--text-muted)">Color:</span>
-        <div class="lab-color-dot active" style="background:#ef4444" onclick="labSetColor('#ef4444',this)"></div>
-        <div class="lab-color-dot" style="background:#f59e0b" onclick="labSetColor('#f59e0b',this)"></div>
-        <div class="lab-color-dot" style="background:#22c55e" onclick="labSetColor('#22c55e',this)"></div>
-        <div class="lab-color-dot" style="background:#3b82f6" onclick="labSetColor('#3b82f6',this)"></div>
-        <div class="lab-color-dot" style="background:#ffffff" onclick="labSetColor('#ffffff',this)"></div>
-        <span style="font-size:11px;color:var(--text-muted);margin-left:auto">Grosor:</span>
-        <button class="lab-ctrl-btn" onclick="labStrokeWidth=2;this.style.borderColor='var(--accent)'" style="font-size:9px;width:28px;height:28px">S</button>
-        <button class="lab-ctrl-btn" onclick="labStrokeWidth=4;this.style.borderColor='var(--accent)'" style="font-size:11px;width:28px;height:28px;border-color:var(--accent)">M</button>
-        <button class="lab-ctrl-btn" onclick="labStrokeWidth=7;this.style.borderColor='var(--accent)'" style="font-size:14px;width:28px;height:28px">L</button>
+        <div class="lab-tools" id="labTools">
+          <button class="lab-tool" onclick="labSetTool('none',this)">👆 Mover</button>
+          <button class="lab-tool" onclick="labSetTool('pen',this)">✏️ Dibujar</button>
+          <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️ Flecha</button>
+          <button class="lab-tool" onclick="labSetTool('angle',this)">📐 Ángulo</button>
+          <button class="lab-tool" onclick="labClearDraw()">🗑️ Borrar</button>
+          <button class="lab-tool" onclick="labOpenStickerModal()">🏄 Stickers</button>
+          <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸 Capturar</button>
+        </div>
+
+        <div class="lab-color-row" style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+          <span style="font-size:11px;color:var(--text-muted)">Color:</span>
+          <div class="lab-color-dot active" style="background:#ef4444" onclick="labSetColor('#ef4444',this)"></div>
+          <div class="lab-color-dot" style="background:#f59e0b" onclick="labSetColor('#f59e0b',this)"></div>
+          <div class="lab-color-dot" style="background:#22c55e" onclick="labSetColor('#22c55e',this)"></div>
+          <div class="lab-color-dot" style="background:#3b82f6" onclick="labSetColor('#3b82f6',this)"></div>
+          <div class="lab-color-dot" style="background:#ffffff" onclick="labSetColor('#ffffff',this)"></div>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:auto">Grosor:</span>
+          <button class="lab-ctrl-btn" onclick="labStrokeWidth=2;this.style.borderColor='var(--accent)'" style="font-size:9px;width:28px;height:28px">S</button>
+          <button class="lab-ctrl-btn" onclick="labStrokeWidth=4;this.style.borderColor='var(--accent)'" style="font-size:11px;width:28px;height:28px;border-color:var(--accent)">M</button>
+          <button class="lab-ctrl-btn" onclick="labStrokeWidth=7;this.style.borderColor='var(--accent)'" style="font-size:14px;width:28px;height:28px">L</button>
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- Sticker modal (full screen bottom sheet) -->
+  <div class="lab-stk-modal" id="labStkModal">
+    <div class="lab-stk-modal-title">
+      <span>🏄 Sticker Library</span>
+      <button class="lab-stk-modal-close" onclick="labCloseStickerModal()">✕</button>
+    </div>
+    <div class="lab-stk-grid" id="labStkGrid"></div>
   </div>
 
   <!-- Captured Frames -->
@@ -1960,6 +2173,7 @@ function showView(id) {
   if (id === 'session-detail') renderSessionDetail();
   if (id === 'progress') renderProgress();
   if (id === 'analytics') renderAnalytics();
+  if (id === 'beginner') renderBeginner();
   
   // Session bar
   updateSessionBar();
@@ -6137,6 +6351,16 @@ function renderLab() {
   // Hide discipline dropdown initially
   document.getElementById('labDiscField').style.display = 'none';
   
+  // Preload stickers
+  labPreloadStickers();
+  
+  // Reset sticker/zoom state
+  labPlacedStickers = [];
+  labSelectedSticker = null;
+  labActiveSticker = null;
+  labZoom = 1; labPanX = 0; labPanY = 0;
+  labApplyZoom();
+  
   // Render saved frames
   renderLabFrames();
   renderLabClips();
@@ -6176,6 +6400,12 @@ function labLoadVideo(input) {
     document.getElementById('labTimeline').max = video.duration;
     labResizeCanvas();
     labAnnotations = [];
+    labPlacedStickers = [];
+    labActiveSticker = null;
+    labZoom = 1; labPanX = 0; labPanY = 0;
+    labApplyZoom();
+    labInitZoomGestures();
+    labInitGestures();
   };
   
   video.ontimeupdate = () => {
@@ -6230,8 +6460,8 @@ function labSeek(val) {
 function labSpeed(rate) {
   const video = document.getElementById('labVideo');
   video.playbackRate = rate;
-  document.querySelectorAll('.lab-controls + div .lab-ctrl-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('.lab-szrow .lab-spd-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
 }
 
 function labUpdateTime() {
@@ -6246,6 +6476,7 @@ function labUpdateTime() {
 function labSetTool(tool, el) {
   labDrawTool = tool;
   const canvas = document.getElementById('labCanvas');
+  const gest = document.getElementById('labGesture');
   
   document.querySelectorAll('.lab-tool').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -6256,8 +6487,13 @@ function labSetTool(tool, el) {
   
   if (tool === 'none') {
     canvas.classList.remove('drawing');
+    canvas.style.cursor = '';
+    if (gest) gest.classList.remove('disabled');
+    // Hide sticker bar if no placed stickers
+    if (labPlacedStickers.length === 0) labHideStickerBar();
   } else {
     canvas.classList.add('drawing');
+    if (gest) gest.classList.add('disabled');
     // Mouse events
     canvas.onmousedown = labPointerDown;
     canvas.onmousemove = labPointerMove;
@@ -6439,11 +6675,36 @@ function labRedraw() {
       ctx.setLineDash([]);
     }
   }
+  
+  // Draw placed stickers
+  labPlacedStickers.forEach(st => {
+    const img = labStickerImages[st.stkId];
+    if (img) {
+      ctx.drawImage(img, st.x, st.y, st.w, st.h);
+      // Selection highlight
+      if (labActiveSticker && labActiveSticker.id === st.id) {
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 4]);
+        ctx.strokeRect(st.x - 4, st.y - 4, st.w + 8, st.h + 8);
+        ctx.setLineDash([]);
+        // Corner dots
+        const corners = [[st.x-4,st.y-4],[st.x+st.w+4,st.y-4],[st.x-4,st.y+st.h+4],[st.x+st.w+4,st.y+st.h+4]];
+        corners.forEach(c => {
+          ctx.beginPath(); ctx.arc(c[0],c[1],5,0,Math.PI*2);
+          ctx.fillStyle='#6366f1'; ctx.fill();
+          ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+        });
+      }
+    }
+  });
 }
 
 function labClearDraw() {
   labAnnotations = [];
   labAnglePoints = [];
+  labPlacedStickers = [];
+  labActiveSticker = null;
   const canvas = document.getElementById('labCanvas');
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -6458,7 +6719,7 @@ function labCapture() {
   const video = document.getElementById('labVideo');
   const canvas = document.getElementById('labCanvas');
   
-  // Create composite: video frame + annotations
+  // Create composite: video frame + annotations + stickers
   const tmpCanvas = document.createElement('canvas');
   tmpCanvas.width = video.videoWidth;
   tmpCanvas.height = video.videoHeight;
@@ -6467,8 +6728,20 @@ function labCapture() {
   // Draw video frame
   ctx.drawImage(video, 0, 0);
   
-  // Draw annotations on top
+  // Temporarily hide selection UI for clean capture
+  const prevTool = labDrawTool;
+  const prevActive = labActiveSticker;
+  labDrawTool = 'none';
+  labActiveSticker = null;
+  labRedraw();
+  
+  // Draw annotations + stickers on top
   ctx.drawImage(canvas, 0, 0);
+  
+  // Restore tool + selection
+  labDrawTool = prevTool;
+  labActiveSticker = prevActive;
+  labRedraw();
   
   // Convert to data URL (compressed)
   const dataUrl = tmpCanvas.toDataURL('image/jpeg', 0.7);
@@ -6596,6 +6869,463 @@ function renderLabClips() {
       <div class="lab-clip-header"><span class="lab-clip-name">${name}</span><span class="lab-clip-meta">${aFrames.length} frames</span></div>
     </div>`;
   }).join('');
+}
+
+// ============================================================
+// LAB STICKER LIBRARY
+// ============================================================
+const LAB_STICKERS = [
+  { id:'stk01', name:'Aerial', file:'stickers_0000s_0000_Screenshot-2026-02-16-143059.png', cat:'SB' },
+  { id:'stk02', name:'Cutback', file:'stickers_0000s_0001_Screenshot-2026-02-16-143050.png', cat:'SB' },
+  { id:'stk03', name:'Reentry', file:'stickers_0000s_0002_Screenshot-2026-02-16-142954.png', cat:'SB' },
+  { id:'stk04', name:'Tube', file:'stickers_0000s_0003_Screenshot-2026-02-16-142945.png', cat:'SB' },
+  { id:'stk05', name:'Snap', file:'stickers_0000s_0004_Screenshot-2026-02-16-142928.png', cat:'SB' },
+  { id:'stk06', name:'Air Grab', file:'stickers_0000s_0005_Screenshot-2026-02-16-142920.png', cat:'SB' },
+  { id:'stk07', name:'Bottom Turn', file:'stickers_0000s_0006_Screenshot-2026-02-16-142911.png', cat:'SB' },
+  { id:'stk08', name:'BS Off The Top', file:'stickers_0000s_0007_bs-ooff-the-top.png', cat:'BS' },
+  { id:'stk09', name:'BS Carving', file:'stickers_0000s_0008_bs-carving.png', cat:'BS' },
+  { id:'stk10', name:'Finishing OTT', file:'stickers_0000s_0009_finishing-off-the-top.png', cat:'SB' },
+  { id:'stk11', name:'Off The Top', file:'stickers_0000s_0010_off-the-top.png', cat:'SB' }
+];
+
+// Preloaded sticker Image objects
+const labStickerImages = {};
+let labSelectedSticker = null;
+let labPlacedStickers = []; // { id, stkId, x, y, w, h }
+let labDraggingSticker = null;
+let labDragOffset = { x: 0, y: 0 };
+let labActiveSticker = null; // currently selected placed sticker for resize
+let labDragMoved = false;
+
+function labPreloadStickers() {
+  LAB_STICKERS.forEach(s => {
+    const img = new Image();
+    img.src = './' + s.file;
+    img.onload = () => { labStickerImages[s.id] = img; };
+    img.onerror = () => { console.warn('Sticker load failed:', s.file); };
+  });
+}
+
+function labOpenStickerModal() {
+  const grid = document.getElementById('labStkGrid');
+  grid.innerHTML = LAB_STICKERS.map(s => `
+    <div class="lab-stk-item" onclick="labPickSticker('${s.id}')">
+      <div class="lab-stk-item-img${labSelectedSticker===s.id?' selected':''}"><img src="./${s.file}" alt="${s.name}"></div>
+      <div class="lab-stk-item-name">${s.name}</div>
+    </div>
+  `).join('');
+  document.getElementById('labStkModal').classList.add('active');
+}
+
+function labCloseStickerModal() {
+  document.getElementById('labStkModal').classList.remove('active');
+}
+
+function labPickSticker(stkId) {
+  labSelectedSticker = stkId;
+  labCloseStickerModal();
+  
+  // Show mini-bar
+  const stk = LAB_STICKERS.find(s => s.id === stkId);
+  const bar = document.getElementById('labStkBar');
+  bar.classList.add('active');
+  document.getElementById('labStkBarName').textContent = stk ? stk.name : '—';
+  document.getElementById('labStkBarImg').innerHTML = stk ? `<img src="./${stk.file}">` : '';
+  
+  // Activate sticker tool
+  labDrawTool = 'sticker';
+  const canvas = document.getElementById('labCanvas');
+  canvas.classList.add('drawing');
+  canvas.style.cursor = 'copy';
+  
+  // Disable gesture layer when drawing
+  const gest = document.getElementById('labGesture');
+  if (gest) gest.classList.add('disabled');
+  
+  canvas.onmousedown = labStickerPointerDown;
+  canvas.onmousemove = labStickerPointerMove;
+  canvas.onmouseup = labStickerPointerUp;
+  canvas.ontouchstart = (e) => { e.preventDefault(); labStickerPointerDown(labTouchToMouse(e)); };
+  canvas.ontouchmove = (e) => { e.preventDefault(); labStickerPointerMove(labTouchToMouse(e)); };
+  canvas.ontouchend = (e) => { e.preventDefault(); labStickerPointerUp(labTouchToMouse(e)); };
+  canvas.ontouchcancel = () => { labDraggingSticker = null; };
+  
+  document.querySelectorAll('.lab-tool').forEach(b => b.classList.remove('active'));
+}
+
+function labHideStickerBar() {
+  document.getElementById('labStkBar').classList.remove('active');
+  labSelectedSticker = null;
+  labActiveSticker = null;
+  if (labDrawTool === 'sticker') labSetTool('none', document.querySelector('.lab-tool'));
+}
+
+// Update mini-bar when active sticker changes
+function labUpdateStkBar() {
+  const bar = document.getElementById('labStkBar');
+  if (!bar.classList.contains('active')) return;
+  if (labActiveSticker) {
+    const stk = LAB_STICKERS.find(s => s.id === labActiveSticker.stkId);
+    document.getElementById('labStkBarName').textContent = (stk ? stk.name : 'Sticker') + ' (seleccionado)';
+  } else if (labSelectedSticker) {
+    const stk = LAB_STICKERS.find(s => s.id === labSelectedSticker);
+    document.getElementById('labStkBarName').textContent = stk ? stk.name : '—';
+  }
+}
+
+// Keep old toggle as alias
+function labToggleStickers() { labOpenStickerModal(); }
+
+function labStickerHitTest(pos) {
+  for (let i = labPlacedStickers.length - 1; i >= 0; i--) {
+    const st = labPlacedStickers[i];
+    if (pos.x >= st.x && pos.x <= st.x + st.w && pos.y >= st.y && pos.y <= st.y + st.h) return st;
+  }
+  return null;
+}
+
+function labStickerPointerDown(e) {
+  e.preventDefault();
+  const pos = labGetPos(e);
+  labDragMoved = false;
+  
+  // Check if tapping an existing placed sticker
+  const hit = labStickerHitTest(pos);
+  if (hit) {
+    labDraggingSticker = hit;
+    labDragOffset = { x: pos.x - hit.x, y: pos.y - hit.y };
+    return;
+  }
+  
+  // Place new sticker if one is selected from library
+  if (labSelectedSticker && labStickerImages[labSelectedSticker]) {
+    const img = labStickerImages[labSelectedSticker];
+    const maxDim = 150;
+    const scale = maxDim / Math.max(img.width, img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    
+    const sticker = {
+      id: 'pstk_' + Date.now().toString(36),
+      stkId: labSelectedSticker,
+      x: pos.x - w / 2,
+      y: pos.y - h / 2,
+      w: w,
+      h: h
+    };
+    labPlacedStickers.push(sticker);
+    labActiveSticker = sticker;
+    labRedraw();
+    labUpdateStkBar();
+    if (navigator.vibrate) navigator.vibrate(20);
+    return;
+  }
+  
+  // Tap on empty area = deselect
+  labActiveSticker = null;
+  labRedraw();
+  labUpdateStkBar();
+}
+
+function labStickerPointerMove(e) {
+  if (!labDraggingSticker) return;
+  e.preventDefault();
+  labDragMoved = true;
+  const pos = labGetPos(e);
+  labDraggingSticker.x = pos.x - labDragOffset.x;
+  labDraggingSticker.y = pos.y - labDragOffset.y;
+  labRedraw();
+}
+
+function labStickerPointerUp(e) {
+  if (labDraggingSticker && !labDragMoved) {
+    // It was a tap, not a drag → select/deselect this sticker
+    labActiveSticker = (labActiveSticker === labDraggingSticker) ? null : labDraggingSticker;
+    labRedraw();
+    labUpdateStkBar();
+  }
+  labDraggingSticker = null;
+  labDragMoved = false;
+}
+
+function labStickerGrow() {
+  if (!labActiveSticker) return;
+  const st = labActiveSticker;
+  const img = labStickerImages[st.stkId];
+  if (!img) return;
+  const aspect = img.width / img.height;
+  const cx = st.x + st.w / 2;
+  const cy = st.y + st.h / 2;
+  st.w = Math.min(st.w * 1.2, 600);
+  st.h = st.w / aspect;
+  st.x = cx - st.w / 2;
+  st.y = cy - st.h / 2;
+  labRedraw();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function labStickerShrink() {
+  if (!labActiveSticker) return;
+  const st = labActiveSticker;
+  const img = labStickerImages[st.stkId];
+  if (!img) return;
+  const aspect = img.width / img.height;
+  const cx = st.x + st.w / 2;
+  const cy = st.y + st.h / 2;
+  st.w = Math.max(st.w / 1.2, 30);
+  st.h = st.w / aspect;
+  st.x = cx - st.w / 2;
+  st.y = cy - st.h / 2;
+  labRedraw();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function labStickerDelete() {
+  if (!labActiveSticker) return;
+  labPlacedStickers = labPlacedStickers.filter(s => s.id !== labActiveSticker.id);
+  labActiveSticker = null;
+  labRedraw();
+  labUpdateStkBar();
+}
+
+function labDeleteLastSticker() {
+  if (labPlacedStickers.length > 0) {
+    if (labActiveSticker === labPlacedStickers[labPlacedStickers.length - 1]) labActiveSticker = null;
+    labPlacedStickers.pop();
+    labRedraw();
+  }
+}
+
+// ============================================================
+// LAB ZOOM & PAN
+// ============================================================
+let labZoom = 1;
+let labPanX = 0;
+let labPanY = 0;
+let labPinchStartDist = 0;
+let labPinchStartZoom = 1;
+let labIsPanning = false;
+let labPanStart = { x: 0, y: 0 };
+let labPanStartOffset = { x: 0, y: 0 };
+
+function labApplyZoom() {
+  const inner = document.getElementById('labVideoInner');
+  if (!inner) return;
+  inner.style.transform = `translate(${labPanX}px,${labPanY}px) scale(${labZoom})`;
+  const lvl = document.getElementById('labZoomLevel');
+  if (lvl) lvl.textContent = labZoom.toFixed(1) + 'x';
+}
+
+function labZoomIn() {
+  labZoom = Math.min(5, labZoom + 0.5);
+  labClampPan();
+  labApplyZoom();
+}
+
+function labZoomOut() {
+  labZoom = Math.max(1, labZoom - 0.5);
+  if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+  labClampPan();
+  labApplyZoom();
+}
+
+function labZoomReset() {
+  labZoom = 1; labPanX = 0; labPanY = 0;
+  labApplyZoom();
+}
+
+function labClampPan() {
+  if (labZoom <= 1) { labPanX = 0; labPanY = 0; return; }
+  const wrap = document.getElementById('labVideoWrap');
+  if (!wrap) return;
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  const maxX = w * (labZoom - 1) / 2;
+  const maxY = h * (labZoom - 1) / 2;
+  labPanX = Math.max(-maxX, Math.min(maxX, labPanX));
+  labPanY = Math.max(-maxY, Math.min(maxY, labPanY));
+}
+
+function labInitZoomGestures() {
+  const wrap = document.getElementById('labVideoWrap');
+  if (!wrap) return;
+  
+  // Pinch-to-zoom (on video wrap, always works)
+  wrap.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      labPinchStartDist = Math.hypot(dx, dy);
+      labPinchStartZoom = labZoom;
+    }
+  }, { passive: false });
+  
+  wrap.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      if (labPinchStartDist > 0) {
+        labZoom = Math.max(1, Math.min(5, labPinchStartZoom * (dist / labPinchStartDist)));
+        if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+        labClampPan();
+        labApplyZoom();
+      }
+    }
+  }, { passive: false });
+  
+  wrap.addEventListener('touchend', function(e) {
+    if (e.touches.length < 2) labPinchStartDist = 0;
+  });
+  
+  // Mouse wheel zoom (desktop)
+  wrap.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.25 : 0.25;
+    labZoom = Math.max(1, Math.min(5, labZoom + delta));
+    if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+    labClampPan();
+    labApplyZoom();
+  }, { passive: false });
+}
+
+// ============ VLC-STYLE GESTURE SYSTEM ============
+let labGestState = {};
+function labInitGestures() {
+  const el = document.getElementById('labGesture');
+  if (!el) return;
+  const video = document.getElementById('labVideo');
+  
+  let startX, startY, startTime, isScrubbing = false, isSpeedSwipe = false;
+  let tapCount = 0, tapTimer = null, tapSide = null;
+  let scrubStartTime = 0;
+  
+  function fmt(t) {
+    const m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return m + ':' + s.toString().padStart(2,'0');
+  }
+  
+  function showEl(id, ms) {
+    const e = document.getElementById(id);
+    e.classList.add('show');
+    setTimeout(() => e.classList.remove('show'), ms || 600);
+  }
+  
+  // Touch
+  el.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    startTime = Date.now();
+    isScrubbing = false; isSpeedSwipe = false;
+    scrubStartTime = video.currentTime;
+  }, { passive: true });
+  
+  el.addEventListener('touchmove', function(e) {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const elapsed = Date.now() - startTime;
+    
+    if (elapsed < 100) return; // debounce
+    
+    const rect = el.getBoundingClientRect();
+    const relX = (startX - rect.left) / rect.width; // 0-1
+    
+    // Horizontal scrub if dx > threshold
+    if (!isSpeedSwipe && (isScrubbing || Math.abs(dx) > 25)) {
+      e.preventDefault();
+      isScrubbing = true;
+      const sensitivity = video.duration / rect.width * 0.5;
+      const newTime = Math.max(0, Math.min(video.duration, scrubStartTime + dx * sensitivity));
+      video.currentTime = newTime;
+      document.getElementById('labTimeline').value = newTime;
+      labUpdateTime();
+      
+      const scrubEl = document.getElementById('labGestScrub');
+      scrubEl.classList.add('show');
+      document.getElementById('labGestScrubTime').textContent = fmt(newTime);
+      const delta = newTime - scrubStartTime;
+      document.getElementById('labGestScrubDelta').textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + 's';
+      return;
+    }
+    
+    // Vertical right side = speed
+    if (!isScrubbing && relX > 0.6 && (isSpeedSwipe || Math.abs(dy) > 30)) {
+      e.preventDefault();
+      isSpeedSwipe = true;
+      // Map dy to speed: up = faster, down = slower
+      const speeds = [0.25, 0.5, 1, 1.5, 2, 3];
+      const curIdx = speeds.indexOf(video.playbackRate);
+      const idx = Math.max(0, Math.min(speeds.length - 1, 2 + Math.round(-dy / 40)));
+      video.playbackRate = speeds[idx];
+      const spdEl = document.getElementById('labGestSpeed');
+      spdEl.textContent = speeds[idx] + 'x';
+      spdEl.classList.add('show');
+    }
+  }, { passive: false });
+  
+  el.addEventListener('touchend', function(e) {
+    const elapsed = Date.now() - startTime;
+    
+    // Hide overlays
+    document.getElementById('labGestScrub').classList.remove('show');
+    document.getElementById('labGestSpeed').classList.remove('show');
+    
+    // Update speed buttons
+    if (isSpeedSwipe) {
+      document.querySelectorAll('.lab-szrow .lab-spd-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent === video.playbackRate + 'x');
+      });
+    }
+    
+    if (isScrubbing || isSpeedSwipe) return;
+    
+    // Tap detection
+    if (elapsed < 300) {
+      const rect = el.getBoundingClientRect();
+      const relX = (startX - rect.left) / rect.width;
+      const side = relX < 0.35 ? 'left' : relX > 0.65 ? 'right' : 'center';
+      
+      tapCount++;
+      if (tapCount === 1) {
+        tapSide = side;
+        tapTimer = setTimeout(() => {
+          // Single tap
+          if (tapSide === 'center') {
+            labTogglePlay();
+            showEl('labGestPlay', 400);
+            document.getElementById('labGestPlay').textContent = video.paused ? '▶️' : '⏸️';
+          }
+          tapCount = 0;
+        }, 250);
+      } else if (tapCount === 2) {
+        clearTimeout(tapTimer);
+        tapCount = 0;
+        // Double tap
+        if (side === 'left') {
+          video.currentTime = Math.max(0, video.currentTime - 2);
+          document.getElementById('labTimeline').value = video.currentTime;
+          labUpdateTime();
+          showEl('labGestL', 400);
+        } else if (side === 'right') {
+          video.currentTime = Math.min(video.duration, video.currentTime + 2);
+          document.getElementById('labTimeline').value = video.currentTime;
+          labUpdateTime();
+          showEl('labGestR', 400);
+        }
+      }
+    }
+  }, { passive: true });
+  
+  // Desktop click = play/pause
+  el.addEventListener('click', function(e) {
+    if ('ontouchstart' in window) return; // skip on touch devices
+    labTogglePlay();
+  });
 }
 
 // ============================================================
@@ -7554,6 +8284,151 @@ function jmExportTracker() {
   a.download = `KSS_Session_Tracker_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// BEGINNER MODE
+// ============================================================
+let begIdx = 0;
+let begEval = {};
+let begWaves = {}; // key: athlete_id, value: array of wave evals
+
+function renderBeginner() {
+  const s = DB.activeSession;
+  if (!s || !s.athletes || s.athletes.length === 0) return;
+  
+  // Load existing data
+  if (s.beginnerData) {
+    Object.keys(s.beginnerData).forEach(aid => {
+      begWaves[aid] = s.beginnerData[aid] || [];
+    });
+  }
+  
+  // Initialize begWaves for all athletes
+  s.athletes.forEach(id => {
+    if (!begWaves[id]) begWaves[id] = [];
+  });
+  
+  begIdx = Math.min(begIdx, s.athletes.length - 1);
+  begResetEval();
+  begUpdateUI();
+}
+
+function begResetEval() {
+  begEval = { catching: null, popup: null, balance: null, direction: null, waveType: null, stance: null };
+  // Reset button states
+  ['begCatching','begPopup','begBalance','begDirection','begWaveType','begStance'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.querySelectorAll('.beg-eval-btn').forEach(b => b.classList.remove('selected'));
+  });
+  const notes = document.getElementById('begNotes');
+  if (notes) notes.value = '';
+}
+
+function begSel(group, value, el) {
+  const map = { begCatching: 'catching', begPopup: 'popup', begBalance: 'balance', begDirection: 'direction', begWaveType: 'waveType', begStance: 'stance' };
+  begEval[map[group]] = value;
+  const container = document.getElementById(group);
+  container.querySelectorAll('.beg-eval-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function begPrev() {
+  const s = DB.activeSession;
+  if (!s) return;
+  begIdx = (begIdx - 1 + s.athletes.length) % s.athletes.length;
+  begResetEval();
+  begUpdateUI();
+}
+
+function begNext() {
+  const s = DB.activeSession;
+  if (!s) return;
+  begIdx = (begIdx + 1) % s.athletes.length;
+  begResetEval();
+  begUpdateUI();
+}
+
+function begUpdateUI() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const aid = s.athletes[begIdx];
+  const ath = DB.athletes.find(a => a.id === aid);
+  document.getElementById('begName').textContent = ath ? ath.name : '—';
+  
+  const waves = begWaves[aid] || [];
+  document.getElementById('begTotal').textContent = waves.length;
+  document.getElementById('begStanding').textContent = waves.filter(w => w.popup === 'standing').length;
+  document.getElementById('begSolo').textContent = waves.filter(w => w.catching === 'solo').length;
+  document.getElementById('begComplete').textContent = waves.filter(w => w.balance === 'complete').length;
+  
+  // Wave history
+  const list = document.getElementById('begWaveList');
+  if (waves.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px">Sin intentos aún</div>';
+    return;
+  }
+  
+  list.innerHTML = waves.map((w, i) => {
+    const tags = [];
+    if (w.catching) tags.push(begTagHTML(w.catching, { assisted: '🤝 Asistido', timed: '⏱️ Timing', solo: '🏄 Solo' }[w.catching], { assisted: 'var(--red)', timed: '#f59e0b', solo: 'var(--green)' }[w.catching]));
+    if (w.popup) tags.push(begTagHTML(w.popup, { none: '❌ No popup', knees: '🦵 Rodillas', standing: '✅ De pie' }[w.popup], { none: 'var(--red)', knees: '#f59e0b', standing: 'var(--green)' }[w.popup]));
+    if (w.balance) tags.push(begTagHTML(w.balance, { falls: '💥 Cae', partial: '⚖️ Parcial', complete: '🏆 Completo' }[w.balance], { falls: 'var(--red)', partial: '#f59e0b', complete: 'var(--green)' }[w.balance]));
+    if (w.direction) tags.push(begTagHTML(w.direction, { none: '❌ Sin ctrl', some: '〰️ Algo', controls: '✅ Controla' }[w.direction], { none: 'var(--red)', some: '#f59e0b', controls: 'var(--green)' }[w.direction]));
+    if (w.waveType) tags.push(begTagHTML(w.waveType, { whitewash: '🫧 Espuma', reform: '🌊 Reforma', green: '💚 Verde' }[w.waveType], 'var(--accent)'));
+    
+    return `<div class="beg-wave-mini">
+      <div class="beg-wave-num">${i + 1}</div>
+      <div class="beg-wave-tags">${tags.join('')}</div>
+      <button style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;flex-shrink:0" onclick="begDeleteWave(${i})">✕</button>
+    </div>`;
+  }).reverse().join('');
+}
+
+function begTagHTML(val, text, color) {
+  return `<span class="beg-wave-tag" style="background:${color};color:#fff">${text}</span>`;
+}
+
+function begLogWave() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const aid = s.athletes[begIdx];
+  
+  // Validate minimum
+  if (!begEval.catching && !begEval.popup) {
+    alert('Selecciona al menos Entrada y Pop-up');
+    return;
+  }
+  
+  const wave = {
+    ...begEval,
+    notes: document.getElementById('begNotes').value.trim(),
+    time: new Date().toISOString()
+  };
+  
+  if (!begWaves[aid]) begWaves[aid] = [];
+  begWaves[aid].push(wave);
+  
+  // Save to session data
+  if (!s.beginnerData) s.beginnerData = {};
+  s.beginnerData[aid] = begWaves[aid];
+  saveDB();
+  
+  if (navigator.vibrate) navigator.vibrate(30);
+  begResetEval();
+  begUpdateUI();
+}
+
+function begDeleteWave(idx) {
+  const s = DB.activeSession;
+  if (!s) return;
+  const aid = s.athletes[begIdx];
+  if (begWaves[aid]) {
+    begWaves[aid].splice(idx, 1);
+    if (s.beginnerData) s.beginnerData[aid] = begWaves[aid];
+    saveDB();
+    begUpdateUI();
+  }
 }
 
 // Auto-update lock states periodically
