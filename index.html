@@ -78,11 +78,13 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .seg-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary)}
 .seg-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
 .disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
-.disc-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:11px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary);background:transparent}
+.disc-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:11px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary);background:transparent}
 .disc-btn .disc-icon{font-size:20px;line-height:1}
 .disc-btn .disc-label{font-size:10px;font-weight:600;line-height:1.2}
+.disc-icon-img{width:32px;height:32px;object-fit:contain}
 .disc-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
 .disc-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;line-height:1.3}
+.disc-badge img{width:14px;height:14px;object-fit:contain;vertical-align:middle}
 
 /* === SEMAPHORE (Crowd) === */
 .sem-row{display:flex;gap:8px}
@@ -1535,12 +1537,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="field">
       <label class="field-label">Disciplinas <span style="font-weight:400;font-size:11px;color:var(--text-muted)">(selecciona 1 o más)</span></label>
       <div class="disc-grid" id="maDisc">
-        <button class="disc-btn selected" data-v="surfboard" onclick="discSelect(this)"><span class="disc-icon">🏄</span><span class="disc-label">Surfboard</span></button>
-        <button class="disc-btn" data-v="bodyboard" onclick="discSelect(this)"><span class="disc-icon">🛹</span><span class="disc-label">Bodyboard</span></button>
-        <button class="disc-btn" data-v="longboard" onclick="discSelect(this)"><span class="disc-icon">🏄‍♂️</span><span class="disc-label">Longboard</span></button>
-        <button class="disc-btn" data-v="kneeboard" onclick="discSelect(this)"><span class="disc-icon">🧎</span><span class="disc-label">Kneeboard</span></button>
-        <button class="disc-btn" data-v="paddlesurf" onclick="discSelect(this)"><span class="disc-icon">🚣</span><span class="disc-label">Paddle Surf</span></button>
-        <button class="disc-btn" data-v="paddlerace" onclick="discSelect(this)"><span class="disc-icon">🏁</span><span class="disc-label">Paddle Race</span></button>
+        <button class="disc-btn selected" data-v="surfboard" onclick="discSelect(this)"><img src="surfboard.png" class="disc-icon-img"><span class="disc-label">Surfboard</span></button>
+        <button class="disc-btn" data-v="bodyboard" onclick="discSelect(this)"><img src="bodyboard.png" class="disc-icon-img"><span class="disc-label">Bodyboard</span></button>
+        <button class="disc-btn" data-v="longboard" onclick="discSelect(this)"><img src="longboard.png" class="disc-icon-img"><span class="disc-label">Longboard</span></button>
+        <button class="disc-btn" data-v="kneeboard" onclick="discSelect(this)"><img src="kneeboard.png" class="disc-icon-img"><span class="disc-label">Kneeboard</span></button>
+        <button class="disc-btn" data-v="paddlesurf" onclick="discSelect(this)"><img src="paddle_surf.png" class="disc-icon-img"><span class="disc-label">Paddle Surf</span></button>
+        <button class="disc-btn" data-v="paddlerace" onclick="discSelect(this)"><img src="paddle_race.png" class="disc-icon-img"><span class="disc-label">Paddle Race</span></button>
       </div>
     </div>
     <div class="field">
@@ -4043,7 +4045,7 @@ function renderProgress() {
   }
   
   const sessions = allSessions;
-  document.getElementById('progSubtitle').textContent = `${sessions.length} sesiones · Nivel ${a.level || 'Intermedio'}${fd ? ' · ' + getDisciplineInfo(fd).icon + ' ' + getDisciplineInfo(fd).label : ''}`;
+  document.getElementById('progSubtitle').innerHTML = `${sessions.length} sesiones · Nivel ${a.level || 'Intermedio'}${fd ? ' · ' + getDisciplineInfo(fd).icon + ' ' + getDisciplineInfo(fd).label : ''}`;
   
   if (sessions.length === 0) {
     document.getElementById('progKPIs').innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;width:100%">Sin datos de sesiones aún</div>';
@@ -4367,13 +4369,14 @@ const LEVEL_COLORS = { 1:'#94a3b8', 2:'#38bdf8', 3:'#38bdf8', 4:'#22c55e', 5:'#2
 // ============================================================
 // DISCIPLINE SYSTEM
 // ============================================================
+const DISC_IMG = (src, sz=18) => `<img src="${src}" alt="" style="width:${sz}px;height:${sz}px;vertical-align:middle;object-fit:contain">`;
 const DISCIPLINES = {
-  surfboard:    { label: 'Surfboard', icon: '🏄', color: '#22c55e', hasWaves: true },
-  bodyboard:    { label: 'Bodyboard', icon: '🛹', color: '#3b82f6', hasWaves: true },
-  longboard:    { label: 'Longboard', icon: '🏄‍♂️', color: '#f59e0b', hasWaves: true },
-  kneeboard:    { label: 'Kneeboard', icon: '🧎', color: '#a855f7', hasWaves: true },
-  paddlesurf:   { label: 'Paddle Surf', icon: '🚣', color: '#06b6d4', hasWaves: true },
-  paddlerace:   { label: 'Paddle Race', icon: '🏁', color: '#ef4444', hasWaves: false },
+  surfboard:    { label: 'Surfboard', icon: DISC_IMG('surfboard.png'), color: '#22c55e', hasWaves: true, img: 'surfboard.png' },
+  bodyboard:    { label: 'Bodyboard', icon: DISC_IMG('bodyboard.png'), color: '#3b82f6', hasWaves: true, img: 'bodyboard.png' },
+  longboard:    { label: 'Longboard', icon: DISC_IMG('longboard.png'), color: '#f59e0b', hasWaves: true, img: 'longboard.png' },
+  kneeboard:    { label: 'Kneeboard', icon: DISC_IMG('kneeboard.png'), color: '#a855f7', hasWaves: true, img: 'kneeboard.png' },
+  paddlesurf:   { label: 'Paddle Surf', icon: DISC_IMG('paddle_surf.png'), color: '#06b6d4', hasWaves: true, img: 'paddle_surf.png' },
+  paddlerace:   { label: 'Paddle Race', icon: DISC_IMG('paddle_race.png'), color: '#ef4444', hasWaves: false, img: 'paddle_race.png' },
 };
 
 const SURFBOARD_MANEUVERS = [
@@ -5103,7 +5106,7 @@ function labAthleteChanged() {
     if (ath) {
       const discs = getAthleteDisciplines(ath);
       if (discs.length > 1) {
-        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.icon} ${di.label}</option>`; }).join('');
+        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.label}</option>`; }).join('');
         discField.style.display = 'block';
         return;
       }
@@ -5862,7 +5865,7 @@ function renderJudge() {
       const ath = curId && curId !== '__custom' ? athletes.find(a => a.id === curId) : null;
       const athDiscs = ath ? getAthleteDisciplines(ath) : [];
       const showDisc = athDiscs.length > 1;
-      let discOpts = athDiscs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}" ${d === curDisc ? 'selected' : ''}>${di.icon} ${di.label}</option>`; }).join('');
+      let discOpts = athDiscs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}" ${d === curDisc ? 'selected' : ''}>${di.label}</option>`; }).join('');
       return `<div class="jm-surfer-item"><label style="${lbl}">${c}</label><select id="jmSN${i}" onchange="jmSelectSurfer(${i})">
         ${opts}</select><select id="jmSD${i}" onchange="jmSurferDiscChange(${i})" style="display:${showDisc ? 'block' : 'none'};font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-primary)">${discOpts}</select><input placeholder="Nombre manual" id="jmSNcustom${i}" value="${curId === '__custom' ? curName : ''}" onchange="jmUpdateSurfer()" style="display:${curId === '__custom' ? 'block' : 'none'}"><input type="number" placeholder="Goal" step="0.1" min="0" max="20" id="jmSG${i}" value="${h.surfers[i].goal||''}" onchange="jmUpdateSurfer()"></div>`;
     }).join('');
@@ -5967,7 +5970,7 @@ function jmSelectSurfer(i) {
     if (ath && discSel) {
       const discs = getAthleteDisciplines(ath);
       if (discs.length > 1) {
-        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.icon} ${di.label}</option>`; }).join('');
+        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.label}</option>`; }).join('');
         discSel.style.display = 'block';
         h.surfers[i].discipline = discs[0]; // Default to first
       } else {

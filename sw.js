@@ -1,10 +1,16 @@
-const CACHE_NAME = 'kss-coach-v6.6';
+const CACHE_NAME = 'kss-coach-v6.7';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './kss_coach_192.png',
-  './kss_coach_512.png'
+  './kss_coach_512.png',
+  './surfboard.png',
+  './bodyboard.png',
+  './longboard.png',
+  './kneeboard.png',
+  './paddle_surf.png',
+  './paddle_race.png'
 ];
 
 self.addEventListener('install', e => {
