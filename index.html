@@ -398,6 +398,17 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .wo-q-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg-input);-webkit-tap-highlight-color:transparent}
 .wo-q-btn:active{transform:scale(.9)}
 .wo-q-btn.active{font-weight:800;border-width:2px}
+
+/* ===== HISTORY & PROGRESSION ===== */
+.hist-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hist-card:active{background:var(--bg-input)}
+.hist-spot{font-weight:800;font-size:15px}
+.hist-date{font-size:12px;color:var(--text-muted)}
+.hist-stats{display:flex;gap:12px;margin-top:6px;font-size:12px;color:var(--text-secondary)}
+.hist-badge{display:inline-flex;align-items:center;gap:3px;background:var(--bg-input);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.spark-line{position:relative;width:100%;height:100%}
+.spark-line svg{width:100%;height:100%}
+.sd-ath-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--bg-card)}
 </style>
 </head>
 <body>
@@ -446,7 +457,10 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- Recent Activity -->
   <div class="dash-section" id="homeFeedSection" style="display:none">
-    <div class="dash-section-title">📰 Actividad Reciente</div>
+    <div class="dash-section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>📰 Actividad Reciente</span>
+      <button style="font-size:12px;color:var(--accent);font-weight:700" onclick="showView('history')">Ver todo ›</button>
+    </div>
     <div class="card" style="padding:10px 12px" id="homeFeed"></div>
   </div>
 
@@ -1041,8 +1055,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- Actions -->
   <div style="margin-top:16px;display:flex;gap:8px">
+    <button class="btn btn-accent" onclick="openProgression(_pcAthleteId, 'player-card')" style="flex:1">📈 Progresión</button>
     <button class="btn btn-outline" onclick="editAthlete()" style="flex:1">✏️ Editar</button>
-    <button class="btn" onclick="deleteAthleteFromCard()" style="flex:1;background:var(--bg-card);border:1px solid var(--red);color:var(--red)">🗑️ Eliminar</button>
+    <button class="btn" onclick="deleteAthleteFromCard()" style="flex:1;background:var(--bg-card);border:1px solid var(--red);color:var(--red)">🗑️</button>
   </div>
 </div>
 
@@ -1223,6 +1238,97 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 </div>
 
+<!-- ==================== SESSION HISTORY ==================== -->
+<div class="view" id="view-history">
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px">📚 Historial de Sesiones</div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="histCount"></div>
+  
+  <!-- Filters -->
+  <div style="display:flex;gap:6px;margin-bottom:12px">
+    <select class="field-input" id="histSpotFilter" onchange="renderHistory()" style="flex:1;font-size:13px;padding:8px">
+      <option value="">Todos los spots</option>
+    </select>
+    <select class="field-input" id="histAthleteFilter" onchange="renderHistory()" style="flex:1;font-size:13px;padding:8px">
+      <option value="">Todos los atletas</option>
+    </select>
+  </div>
+  
+  <div id="histList"></div>
+  <div id="histEmpty" style="text-align:center;color:var(--text-muted);padding:40px 0;display:none">
+    <div style="font-size:36px;margin-bottom:8px">📋</div>
+    <div>Sin sesiones guardadas aún</div>
+  </div>
+</div>
+
+<!-- ==================== SESSION DETAIL ==================== -->
+<div class="view" id="view-session-detail">
+  <button class="text-sm text-muted" onclick="showView('history')" style="margin-bottom:8px">← Historial</button>
+  <div style="font-size:18px;font-weight:800;margin-bottom:4px" id="sdTitle"></div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="sdMeta"></div>
+  
+  <div class="db-condition" id="sdConditions"></div>
+  
+  <!-- Team stats -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">EQUIPO</div>
+    <div id="sdTeamStats"></div>
+  </div>
+  
+  <!-- Athlete cards -->
+  <div id="sdAthletes"></div>
+  
+  <!-- Charts -->
+  <div id="sdCharts"></div>
+  
+  <!-- Notes -->
+  <div class="card" id="sdNotesCard" style="padding:12px;display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px">📝 Notas del Coach</div>
+    <div id="sdNotes" style="font-size:13px;line-height:1.5"></div>
+  </div>
+  
+  <button class="btn btn-outline btn-sm" onclick="exportSessionCSVById(window._sdSessionIdx)" style="margin-top:12px">📥 Exportar CSV</button>
+</div>
+
+<!-- ==================== PROGRESSION ==================== -->
+<div class="view" id="view-progress">
+  <button class="text-sm text-muted" onclick="showView(_progressReturn || 'athletes')" style="margin-bottom:8px">← Atrás</button>
+  <div style="font-size:20px;font-weight:800;margin-bottom:4px" id="progTitle"></div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px" id="progSubtitle"></div>
+  
+  <!-- Stat summaries -->
+  <div class="dash-row" id="progKPIs" style="margin-bottom:16px"></div>
+  
+  <!-- Catch ratio trend -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">📈 Catch Ratio</div>
+    <div id="progCatchChart" style="height:120px;position:relative"></div>
+  </div>
+  
+  <!-- Bio trend -->
+  <div class="card" id="progBioCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">🦴 Biomecánica Promedio</div>
+    <div id="progBioBars"></div>
+  </div>
+  
+  <!-- Maneuver frequency -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">🏄 Maniobras Frecuentes</div>
+    <div id="progManeuvers"></div>
+  </div>
+  
+  <!-- XP timeline -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">✨ XP Acumulado</div>
+    <div id="progXPChart" style="height:100px;position:relative"></div>
+  </div>
+  
+  <!-- Session list for this athlete -->
+  <div class="card" style="padding:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">🗓️ Sesiones</div>
+    <div id="progSessions"></div>
+  </div>
+</div>
+
 <!-- ==================== SETTINGS ==================== -->
 <div class="view" id="view-settings">
   <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ Configuración</div>
@@ -1259,7 +1365,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v4.1 · Phase 4+<br>Karibe Surf Score
+    KSS Coach v5.0 · Phase 5<br>Karibe Surf Score
   </div>
 </div>
 
@@ -1509,6 +1615,9 @@ function showView(id) {
   if (id === 'debrief') renderDebrief();
   if (id === 'judge') renderJudge();
   if (id === 'workout') renderWorkout();
+  if (id === 'history') renderHistory();
+  if (id === 'session-detail') renderSessionDetail();
+  if (id === 'progress') renderProgress();
   
   // Session bar
   updateSessionBar();
@@ -2159,18 +2268,19 @@ function renderBioHistory() {
   }
   
   const colorMap = { poor: '🔴', ok: '🟡', good: '🟢', none: '🔴', partial: '🟡', full: '🟢' };
+  const scoreLabel = v => `${colorMap[v] || '⚪'} ${bioScore(v)}`;
   const numColor = v => { const n = parseInt(v); return n >= 4 ? '🟢' : n >= 3 ? '🟡' : '🔴'; };
   
   div.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Historial Biomecánica</div>' +
     biomech.slice().reverse().map(b => {
       const checks = [
-        b.bio_shoulders ? `Hombros ${colorMap[b.bio_shoulders] || '⚪'}` : null,
-        b.bio_knees ? `Rodillas ${colorMap[b.bio_knees] || '⚪'}` : null,
-        b.bio_arms ? `Brazos ${colorMap[b.bio_arms] || '⚪'}` : null,
-        b.bio_compression ? `Compresión ${colorMap[b.bio_compression] || '⚪'}` : null,
-        b.bio_head ? `Cabeza ${colorMap[b.bio_head] || '⚪'}` : null,
-        b.bio_backfoot ? `Pie trasero ${colorMap[b.bio_backfoot] || '⚪'}` : null,
-        b.bio_weight ? `Peso ${colorMap[b.bio_weight] || '⚪'}` : null,
+        b.bio_shoulders ? `Hombros ${scoreLabel(b.bio_shoulders)}` : null,
+        b.bio_knees ? `Rodillas ${scoreLabel(b.bio_knees)}` : null,
+        b.bio_arms ? `Brazos ${scoreLabel(b.bio_arms)}` : null,
+        b.bio_compression ? `Compresión ${scoreLabel(b.bio_compression)}` : null,
+        b.bio_head ? `Cabeza ${scoreLabel(b.bio_head)}` : null,
+        b.bio_backfoot ? `Pie trasero ${scoreLabel(b.bio_backfoot)}` : null,
+        b.bio_weight ? `Peso ${scoreLabel(b.bio_weight)}` : null,
         b.bio_flow ? `Fluidez ${numColor(b.bio_flow)} ${b.bio_flow}/5` : null,
       ].filter(Boolean);
       
@@ -2185,20 +2295,30 @@ function renderBioHistory() {
 // ============================================================
 // DEBRIEF SUMMARY HELPERS
 // ============================================================
+// Universal bio scoring: poor/none=1, ok/partial=50, good/full=100, empty=0
+function bioScore(v) {
+  if (!v) return 0;
+  if (v === 'good' || v === 'full') return 100;
+  if (v === 'ok' || v === 'partial') return 50;
+  return 1; // poor, none, or any other value
+}
+
+function bioAvgScore(bio, field) {
+  const vals = bio.map(b => b[field]).filter(Boolean);
+  if (vals.length === 0) return 0;
+  return Math.round(vals.reduce((sum, v) => sum + bioScore(v), 0) / vals.length);
+}
+
 function renderBioSummaryHTML(ad) {
   const bio = ad.biomech || [];
   if (bio.length === 0) return '';
   
-  const colorEmoji = v => v === 'good' || v === 'full' ? '🟢' : v === 'ok' || v === 'partial' ? '🟡' : v ? '🔴' : '⚪';
   const fields = ['bio_shoulders','bio_knees','bio_arms','bio_compression','bio_head','bio_backfoot','bio_weight'];
   const labels = ['Hombros','Rodillas','Brazos','Compresión','Cabeza','Pie','Peso'];
   
-  // Aggregate: count good/ok/poor per field
   let summary = fields.map((f, i) => {
-    const vals = bio.map(b => b[f]).filter(Boolean);
-    const good = vals.filter(v => v === 'good' || v === 'full').length;
-    const pct = vals.length > 0 ? Math.round(good / vals.length * 100) : 0;
-    return `<span style="font-size:11px">${labels[i]} ${pct >= 60 ? '🟢' : pct >= 40 ? '🟡' : '🔴'}${pct}%</span>`;
+    const avg = bioAvgScore(bio, f);
+    return `<span style="font-size:11px">${labels[i]} ${avg >= 60 ? '🟢' : avg >= 30 ? '🟡' : avg > 0 ? '🔴' : '⚪'}${avg}</span>`;
   }).join(' · ');
   
   // Average flow
@@ -2693,8 +2813,8 @@ function exportSessionCSV() {
     'position_poor','position_normal','position_excellent',
     'commit_poor','commit_normal','commit_excellent',
     'xp',
-    'bio_evals','bio_shoulders_good_pct','bio_knees_good_pct','bio_arms_good_pct',
-    'bio_compression_good_pct','bio_head_good_pct','bio_backfoot_good_pct','bio_weight_good_pct',
+    'bio_evals','bio_shoulders_score','bio_knees_score','bio_arms_score',
+    'bio_compression_score','bio_head_score','bio_backfoot_score','bio_weight_score',
     'bio_avg_flow','bio_notes',
     'workout_total','workout_completed','workout_good','workout_regular','workout_poor',
     'coach_notes'
@@ -2726,11 +2846,6 @@ function exportSessionCSV() {
     
     // Biomechanics aggregates
     const bio = d.biomech || [];
-    const bioGoodPct = (field) => {
-      const vals = bio.map(b => b[field]).filter(Boolean);
-      const good = vals.filter(v => v === 'good' || v === 'full').length;
-      return vals.length > 0 ? Math.round(good / vals.length * 100) : '';
-    };
     const flows = bio.map(b => parseInt(b.bio_flow)).filter(n => !isNaN(n));
     const avgFlow = flows.length > 0 ? (flows.reduce((a,b)=>a+b,0)/flows.length).toFixed(1) : '';
     const bioNotes = bio.map(b => b.notes).filter(Boolean).join(' | ');
@@ -2766,13 +2881,13 @@ function exportSessionCSV() {
       com.poor, com.normal, com.excellent,
       xp,
       bio.length,
-      bioGoodPct('bio_shoulders'),
-      bioGoodPct('bio_knees'),
-      bioGoodPct('bio_arms'),
-      bioGoodPct('bio_compression'),
-      bioGoodPct('bio_head'),
-      bioGoodPct('bio_backfoot'),
-      bioGoodPct('bio_weight'),
+      bioAvgScore(bio, 'bio_shoulders'),
+      bioAvgScore(bio, 'bio_knees'),
+      bioAvgScore(bio, 'bio_arms'),
+      bioAvgScore(bio, 'bio_compression'),
+      bioAvgScore(bio, 'bio_head'),
+      bioAvgScore(bio, 'bio_backfoot'),
+      bioAvgScore(bio, 'bio_weight'),
       avgFlow,
       esc(bioNotes),
       wo.length,
@@ -2810,6 +2925,367 @@ function exportAllData() {
   link.download = `KSS_Coach_Backup_${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// SESSION HISTORY
+// ============================================================
+function renderHistory() {
+  const sessions = DB.sessions.slice().reverse();
+  const athletes = DB.athletes;
+  const spotFilter = document.getElementById('histSpotFilter').value;
+  const athFilter = document.getElementById('histAthleteFilter').value;
+  
+  // Populate filter options
+  const spots = [...new Set(sessions.map(s => s.spot))];
+  const spotSel = document.getElementById('histSpotFilter');
+  if (spotSel.options.length <= 1) {
+    spots.forEach(sp => { const o = document.createElement('option'); o.value = sp; o.textContent = sp; spotSel.appendChild(o); });
+  }
+  const athSel = document.getElementById('histAthleteFilter');
+  if (athSel.options.length <= 1) {
+    athletes.forEach(a => { const o = document.createElement('option'); o.value = a.id; o.textContent = a.name; athSel.appendChild(o); });
+  }
+  
+  let filtered = sessions;
+  if (spotFilter) filtered = filtered.filter(s => s.spot === spotFilter);
+  if (athFilter) filtered = filtered.filter(s => s.athlete_data && s.athlete_data[athFilter]);
+  
+  document.getElementById('histCount').textContent = `${filtered.length} sesión${filtered.length !== 1 ? 'es' : ''}`;
+  
+  if (filtered.length === 0) {
+    document.getElementById('histList').innerHTML = '';
+    document.getElementById('histEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('histEmpty').style.display = 'none';
+  
+  const allSessions = DB.sessions;
+  document.getElementById('histList').innerHTML = filtered.map(s => {
+    const idx = allSessions.indexOf(s);
+    const ids = Object.keys(s.athlete_data || {});
+    const athCount = ids.length;
+    const date = new Date(s.date || s.started_at);
+    const dateStr = new Intl.DateTimeFormat('es', { weekday:'short', day:'numeric', month:'short', year:'numeric' }).format(date);
+    const sizeNames = { 1:'Flat', 2:'1-2ft', 3:'2-4ft', 4:'4-6ft', 5:'+6ft' };
+    
+    // Aggregate stats
+    let totalP = 0, totalC = 0, totalF = 0;
+    ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled || 0; totalC += d.caught || 0; totalF += d.falls || 0; });
+    const ratio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
+    const bioCount = ids.reduce((sum, id) => sum + (s.athlete_data[id].biomech || []).length, 0);
+    const woCount = ids.reduce((sum, id) => sum + (s.athlete_data[id].workouts || []).length, 0);
+    
+    let badges = '';
+    if (bioCount > 0) badges += `<span class="hist-badge">🦴 ${bioCount}</span>`;
+    if (woCount > 0) badges += `<span class="hist-badge">💪 ${woCount}</span>`;
+    if (s.duration_min) badges += `<span class="hist-badge">⏱️ ${s.duration_min}m</span>`;
+    
+    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+    
+    return `<div class="hist-card" onclick="openSessionDetail(${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="hist-spot">${s.spot}</div>
+          <div class="hist-date">${dateStr} · ${sizeNames[s.wave_size] || ''} · ${s.wind_condition || ''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:800;color:${ratioColor}">${ratio}%</div>
+          <div style="font-size:10px;color:var(--text-muted)">catch</div>
+        </div>
+      </div>
+      <div class="hist-stats">
+        <span>👥 ${athCount}</span>
+        <span>🏄 ${totalC}/${totalP} olas</span>
+        ${totalF > 0 ? `<span>💥 ${totalF}</span>` : ''}
+        ${badges}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSessionDetail(idx) {
+  window._sdSessionIdx = idx;
+  showView('session-detail');
+}
+
+function exportSessionCSVById(idx) {
+  // Temporarily swap sessions array to export specific session
+  const sessions = DB.sessions;
+  if (idx === undefined || !sessions[idx]) return;
+  const orig = sessions.length;
+  const s = sessions[idx];
+  // Push to end temporarily for exportSessionCSV which grabs last
+  sessions.push(s);
+  DB.sessions = sessions;
+  exportSessionCSV();
+  sessions.pop();
+  DB.sessions = sessions;
+}
+
+// ============================================================
+// SESSION DETAIL
+// ============================================================
+function renderSessionDetail() {
+  const s = DB.sessions[window._sdSessionIdx];
+  if (!s) { showView('history'); return; }
+  const athletes = DB.athletes;
+  
+  const date = new Date(s.date || s.started_at);
+  const dateStr = new Intl.DateTimeFormat('es', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(date);
+  const sizeNames = { 1:'Flat', 2:'1-2ft', 3:'2-4ft', 4:'4-6ft', 5:'+6ft' };
+  
+  document.getElementById('sdTitle').textContent = s.spot;
+  document.getElementById('sdMeta').textContent = `${dateStr} · ${s.duration_min ? s.duration_min + ' min' : ''}`;
+  
+  // Conditions
+  document.getElementById('sdConditions').innerHTML = `
+    <span class="db-cond-tag">${sizeNames[s.wave_size] || ''}</span>
+    <span class="db-cond-tag">${'⭐'.repeat(s.wave_quality || 0)}</span>
+    <span class="db-cond-tag">${s.wind_condition || ''}</span>
+    <span class="db-cond-tag">${s.crowd_factor || ''}</span>
+    ${s.focus_area ? `<span class="db-cond-tag">🎯 ${s.focus_area}</span>` : ''}
+  `;
+  
+  const ids = Object.keys(s.athlete_data || {});
+  let totalP = 0, totalC = 0;
+  
+  // Athlete cards
+  let athHtml = '';
+  ids.forEach(id => {
+    const a = athletes.find(x => x.id === id);
+    const d = s.athlete_data[id];
+    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+    totalP += d.paddled || 0;
+    totalC += d.caught || 0;
+    
+    const maneuvers = {};
+    d.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1); });
+    const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+    
+    athHtml += `<div class="sd-ath-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:800;font-size:14px">${a ? a.name : 'Atleta'}</div>
+        <div style="font-size:20px;font-weight:800;color:${ratioColor}">${ratio}%</div>
+      </div>
+      <div class="db-stat-grid">
+        <div class="db-stat"><div class="db-stat-v">${d.paddled}</div><div class="db-stat-l">Remó</div></div>
+        <div class="db-stat"><div class="db-stat-v">${d.caught}</div><div class="db-stat-l">Atrapó</div></div>
+        <div class="db-stat"><div class="db-stat-v">${d.falls || 0}</div><div class="db-stat-l">Caídas</div></div>
+      </div>
+      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">🏄 ${manStr}</div>` : ''}
+      ${renderBioSummaryHTML(d)}
+      ${renderWorkoutSummaryHTML(d)}
+    </div>`;
+  });
+  document.getElementById('sdAthletes').innerHTML = athHtml;
+  
+  const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
+  document.getElementById('sdTeamStats').innerHTML = `
+    <div class="db-stat-grid">
+      <div class="db-stat"><div class="db-stat-v">${ids.length}</div><div class="db-stat-l">Atletas</div></div>
+      <div class="db-stat"><div class="db-stat-v">${totalC}/${totalP}</div><div class="db-stat-l">Olas</div></div>
+      <div class="db-stat"><div class="db-stat-v" style="color:${teamRatio>=60?'var(--green)':teamRatio>=40?'var(--yellow)':'var(--red)'}">${teamRatio}%</div><div class="db-stat-l">Catch</div></div>
+    </div>
+  `;
+  
+  // Catch ratio chart
+  if (ids.length > 1) {
+    document.getElementById('sdCharts').innerHTML = `<div class="card" style="padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">📊 Catch Ratio Comparado</div>
+      ${ids.map(id => {
+        const a = athletes.find(x => x.id === id);
+        const d = s.athlete_data[id];
+        const r = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+        const c = r >= 60 ? 'var(--green)' : r >= 40 ? 'var(--yellow)' : 'var(--red)';
+        return `<div class="pc-bar-row"><div class="pc-bar-label">${(a?a.name.split(' ')[0]:'?').slice(0,8)}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${r}%;background:${c}"></div></div><div class="pc-bar-val">${r}%</div></div>`;
+      }).join('')}
+    </div>`;
+  } else { document.getElementById('sdCharts').innerHTML = ''; }
+  
+  // Notes
+  if (s.coach_notes) {
+    document.getElementById('sdNotesCard').style.display = 'block';
+    document.getElementById('sdNotes').textContent = s.coach_notes;
+  } else { document.getElementById('sdNotesCard').style.display = 'none'; }
+}
+
+// ============================================================
+// ATHLETE PROGRESSION
+// ============================================================
+let _progressAthleteId = null;
+let _progressReturn = 'athletes';
+
+function openProgression(athleteId, returnView) {
+  _progressAthleteId = athleteId;
+  _progressReturn = returnView || 'athletes';
+  showView('progress');
+}
+
+function renderProgress() {
+  const a = DB.athletes.find(x => x.id === _progressAthleteId);
+  if (!a) { showView('athletes'); return; }
+  
+  const sessions = DB.sessions.filter(s => s.athlete_data && s.athlete_data[a.id]);
+  document.getElementById('progTitle').textContent = a.name;
+  document.getElementById('progSubtitle').textContent = `${sessions.length} sesiones · Nivel ${a.level || 'Intermedio'}`;
+  
+  if (sessions.length === 0) {
+    document.getElementById('progKPIs').innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;width:100%">Sin datos de sesiones aún</div>';
+    return;
+  }
+  
+  // Aggregate stats
+  let totalP = 0, totalC = 0, totalF = 0, totalXP = 0;
+  const catchRatios = [];
+  const allManeuvers = {};
+  const allBio = [];
+  
+  sessions.forEach(s => {
+    const d = s.athlete_data[a.id];
+    totalP += d.paddled || 0;
+    totalC += d.caught || 0;
+    totalF += d.falls || 0;
+    
+    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : null;
+    if (ratio !== null) catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
+    
+    d.waves.forEach(w => {
+      if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
+    });
+    
+    let xp = 10;
+    if (ratio >= 70) xp += 25;
+    if (d.falls === 0 && d.caught > 0) xp += 40;
+    xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
+    totalXP += xp;
+    
+    (d.biomech || []).forEach(b => allBio.push(b));
+  });
+  
+  const avgRatio = catchRatios.length > 0 ? Math.round(catchRatios.reduce((s, r) => s + r.ratio, 0) / catchRatios.length) : 0;
+  const avgColor = avgRatio >= 60 ? 'var(--green)' : avgRatio >= 40 ? 'var(--yellow)' : 'var(--red)';
+  
+  // Trend arrow
+  let trend = '';
+  if (catchRatios.length >= 3) {
+    const recent = catchRatios.slice(-3).reduce((s, r) => s + r.ratio, 0) / 3;
+    const older = catchRatios.slice(0, 3).reduce((s, r) => s + r.ratio, 0) / Math.min(3, catchRatios.length);
+    trend = recent > older + 5 ? '📈' : recent < older - 5 ? '📉' : '➡️';
+  }
+  
+  // KPIs
+  document.getElementById('progKPIs').innerHTML = `
+    <div class="dash-kpi"><div class="dash-kpi-val" style="color:${avgColor}">${avgRatio}% ${trend}</div><div class="dash-kpi-lbl">Catch Prom.</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val">${totalC}/${totalP}</div><div class="dash-kpi-lbl">Olas Total</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val" style="color:var(--accent)">${totalXP}</div><div class="dash-kpi-lbl">XP Total</div></div>
+  `;
+  
+  // Catch ratio sparkline
+  if (catchRatios.length >= 2) {
+    const w = 300, h = 100, pad = 8;
+    const pts = catchRatios.map((r, i) => {
+      const x = pad + (i / (catchRatios.length - 1)) * (w - pad * 2);
+      const y = h - pad - (r.ratio / 100) * (h - pad * 2);
+      return `${x},${y}`;
+    });
+    const line = pts.join(' ');
+    const areaPath = `M${pts[0]} ${pts.map(p => `L${p}`).join(' ')} L${pad + ((catchRatios.length - 1) / (catchRatios.length - 1)) * (w - pad * 2)},${h - pad} L${pad},${h - pad} Z`;
+    
+    document.getElementById('progCatchChart').innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%">
+        <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--accent)" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity=".02"/>
+        </linearGradient></defs>
+        <line x1="${pad}" y1="${h - pad - 60 / 100 * (h - pad * 2)}" x2="${w - pad}" y2="${h - pad - 60 / 100 * (h - pad * 2)}" stroke="var(--text-muted)" stroke-width=".5" stroke-dasharray="4,4"/>
+        <path d="${areaPath}" fill="url(#cg)"/>
+        <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        ${catchRatios.map((r, i) => {
+          const x = pad + (i / (catchRatios.length - 1)) * (w - pad * 2);
+          const y = h - pad - (r.ratio / 100) * (h - pad * 2);
+          return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--accent)"/>`;
+        }).join('')}
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:2px">
+        ${catchRatios.map(r => `<span>${new Intl.DateTimeFormat('es', {day:'numeric', month:'short'}).format(new Date(r.date))}</span>`).join('')}
+      </div>
+    `;
+  } else {
+    document.getElementById('progCatchChart').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px">Necesita al menos 2 sesiones para ver tendencia</div>';
+  }
+  
+  // Biomechanics bars
+  if (allBio.length > 0) {
+    document.getElementById('progBioCard').style.display = 'block';
+    const fields = ['bio_shoulders','bio_knees','bio_arms','bio_compression','bio_head','bio_backfoot','bio_weight'];
+    const labels = ['Hombros','Rodillas','Brazos','Compresión','Cabeza','Pie Trasero','Trans. Peso'];
+    
+    document.getElementById('progBioBars').innerHTML = fields.map((f, i) => {
+      const avg = bioAvgScore(allBio, f);
+      const color = avg >= 60 ? 'var(--green)' : avg >= 30 ? 'var(--yellow)' : avg > 0 ? 'var(--red)' : 'var(--text-muted)';
+      return `<div class="pc-bar-row"><div class="pc-bar-label">${labels[i]}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${avg}%;background:${color}"></div></div><div class="pc-bar-val">${avg}</div></div>`;
+    }).join('');
+  } else { document.getElementById('progBioCard').style.display = 'none'; }
+  
+  // Maneuvers frequency
+  const sorted = Object.entries(allManeuvers).sort((a, b) => b[1] - a[1]);
+  if (sorted.length > 0) {
+    const maxCount = sorted[0][1];
+    document.getElementById('progManeuvers').innerHTML = sorted.slice(0, 10).map(([m, c]) => {
+      const pct = Math.round(c / maxCount * 100);
+      return `<div class="pc-bar-row"><div class="pc-bar-label">${m.toUpperCase()}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="pc-bar-val">${c}</div></div>`;
+    }).join('');
+  } else {
+    document.getElementById('progManeuvers').innerHTML = '<div style="color:var(--text-muted);font-size:12px">Sin datos</div>';
+  }
+  
+  // XP timeline
+  if (sessions.length >= 2) {
+    let cumXP = 0;
+    const xpPts = sessions.map(s => {
+      const d = s.athlete_data[a.id];
+      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      let xp = 10;
+      if (ratio >= 70) xp += 25;
+      if (d.falls === 0 && d.caught > 0) xp += 40;
+      xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
+      cumXP += xp;
+      return { date: s.date || s.started_at, xp: cumXP };
+    });
+    
+    const w = 300, h = 80, pad = 8;
+    const maxXP = xpPts[xpPts.length - 1].xp;
+    const pts = xpPts.map((p, i) => {
+      const x = pad + (i / (xpPts.length - 1)) * (w - pad * 2);
+      const y = h - pad - (p.xp / maxXP) * (h - pad * 2);
+      return `${x},${y}`;
+    });
+    
+    document.getElementById('progXPChart').innerHTML = `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%">
+        <polyline points="${pts.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="${pts[pts.length-1].split(',')[0]}" cy="${pts[pts.length-1].split(',')[1]}" r="4" fill="var(--accent)"/>
+      </svg>
+      <div style="text-align:right;font-size:11px;font-weight:700;color:var(--accent)">${totalXP} XP</div>
+    `;
+  } else {
+    document.getElementById('progXPChart').innerHTML = `<div style="text-align:center;font-size:20px;font-weight:800;color:var(--accent);padding:20px">${totalXP} XP</div>`;
+  }
+  
+  // Session list
+  document.getElementById('progSessions').innerHTML = sessions.slice().reverse().map(s => {
+    const d = s.athlete_data[a.id];
+    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(s.date || s.started_at));
+    const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+    const idx = DB.sessions.indexOf(s);
+    return `<div class="pc-hist-item" onclick="openSessionDetail(${idx})" style="cursor:pointer">
+      <div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${d.caught}/${d.paddled} olas</div></div>
+      <div style="font-weight:800;font-size:16px;color:${color}">${ratio}%</div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -3098,14 +3574,11 @@ function renderPlayerCard() {
       bioCard.style.display = 'block';
       const fields = ['bio_shoulders','bio_knees','bio_arms','bio_compression','bio_head','bio_backfoot','bio_weight'];
       const labels = ['Hombros','Rodillas','Brazos','Compresión','Cabeza','Pie Trasero','Trans. Peso'];
-      const goodVals = ['good', 'full'];
       
       let barsHtml = fields.map((f, i) => {
-        const vals = allBio.map(b => b[f]).filter(Boolean);
-        const good = vals.filter(v => goodVals.includes(v)).length;
-        const pct = vals.length > 0 ? Math.round(good / vals.length * 100) : 0;
-        const color = pct >= 60 ? 'var(--green)' : pct >= 40 ? 'var(--yellow)' : 'var(--red)';
-        return `<div class="pc-bar-row"><div class="pc-bar-label">${labels[i]}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="pc-bar-val">${pct}%</div></div>`;
+        const avg = bioAvgScore(allBio, f);
+        const color = avg >= 60 ? 'var(--green)' : avg >= 30 ? 'var(--yellow)' : avg > 0 ? 'var(--red)' : 'var(--text-muted)';
+        return `<div class="pc-bar-row"><div class="pc-bar-label">${labels[i]}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${avg}%;background:${color}"></div></div><div class="pc-bar-val">${avg}</div></div>`;
       }).join('');
       
       const flows = allBio.map(b => parseInt(b.bio_flow)).filter(n => !isNaN(n));
