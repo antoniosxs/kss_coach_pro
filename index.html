@@ -77,6 +77,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .seg-row{display:flex;gap:6px;margin-bottom:16px}
 .seg-btn{flex:1;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary)}
 .seg-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.disc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
+.disc-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:var(--radius-sm);border:1px solid var(--border);font-size:11px;font-weight:700;text-align:center;transition:all .15s;color:var(--text-secondary);background:transparent}
+.disc-btn .disc-icon{font-size:20px;line-height:1}
+.disc-btn .disc-label{font-size:10px;font-weight:600;line-height:1.2}
+.disc-btn.selected{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.disc-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;line-height:1.3}
 
 /* === SEMAPHORE (Crowd) === */
 .sem-row{display:flex;gap:8px}
@@ -882,6 +888,68 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <div id="bioHistory" style="margin-top:16px"></div>
     </div><!-- end tacBioMode -->
 
+    <!-- ===== PADDLE RACE MODE ===== -->
+    <div id="tacPaddleRaceMode" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">🏁 Paddle Race Tracking</div>
+      
+      <!-- Race Timer -->
+      <div class="card" style="text-align:center;padding:16px;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Tiempo de Carrera</div>
+        <div id="raceTimerDisplay" style="font-size:42px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)">00:00.0</div>
+        <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+          <button class="btn btn-sm" onclick="raceTimerToggle()" id="raceTimerBtn" style="background:var(--green);color:#fff;padding:10px 24px;font-weight:800">▶ Start</button>
+          <button class="btn btn-sm btn-outline" onclick="raceTimerReset()" style="padding:10px 16px">↻ Reset</button>
+        </div>
+      </div>
+
+      <!-- Lap Counter -->
+      <div class="card" style="padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em">Vueltas / Splits</div>
+          <button class="btn btn-sm" onclick="raceAddLap()" id="raceLapBtn" style="background:var(--accent);color:#fff;padding:8px 20px;font-size:14px;font-weight:800">⏱ Lap</button>
+        </div>
+        <div id="raceLapList" style="font-size:13px"></div>
+      </div>
+
+      <!-- Race Stats -->
+      <div class="tac-stat-row" style="margin-bottom:12px">
+        <div class="tac-stat"><div class="tac-stat-val" id="raceLapCount" style="color:var(--accent)">0</div><div class="tac-stat-label">Vueltas</div></div>
+        <div class="tac-stat"><div class="tac-stat-val" id="raceBestLap" style="color:var(--green)">—</div><div class="tac-stat-label">Mejor Vuelta</div></div>
+        <div class="tac-stat"><div class="tac-stat-val" id="raceAvgLap" style="color:var(--text-primary)">—</div><div class="tac-stat-label">Promedio</div></div>
+      </div>
+
+      <!-- Race Eval -->
+      <div class="card" style="padding:12px;margin-bottom:12px">
+        <div class="eval-label">Técnica de Remada</div>
+        <div class="eval-row" id="raceTechnique">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('race_technique',this,'r')">🔴 Débil</button>
+          <button class="eval-btn" data-v="ok" onclick="evalSet('race_technique',this,'y')">🟡 Regular</button>
+          <button class="eval-btn" data-v="good" onclick="evalSet('race_technique',this,'g')">🟢 Fuerte</button>
+        </div>
+        
+        <div class="eval-label" style="margin-top:10px">Estrategia / Pacing</div>
+        <div class="eval-row" id="racePacing">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('race_pacing',this,'r')">🔴 Inconsistente</button>
+          <button class="eval-btn" data-v="ok" onclick="evalSet('race_pacing',this,'y')">🟡 Regular</button>
+          <button class="eval-btn" data-v="good" onclick="evalSet('race_pacing',this,'g')">🟢 Bien</button>
+        </div>
+
+        <div class="eval-label" style="margin-top:10px">Posición en la Tabla</div>
+        <div class="eval-row" id="racePosition">
+          <button class="eval-btn" data-v="poor" onclick="evalSet('race_position',this,'r')">🔴 Inestable</button>
+          <button class="eval-btn" data-v="ok" onclick="evalSet('race_position',this,'y')">🟡 Regular</button>
+          <button class="eval-btn" data-v="good" onclick="evalSet('race_position',this,'g')">🟢 Sólida</button>
+        </div>
+        
+        <div class="eval-label" style="margin-top:10px">Notas de Carrera</div>
+        <textarea class="field-input" id="raceNotes" rows="2" placeholder="Ej: Perdió ritmo en el segundo tramo..." style="font-size:13px"></textarea>
+        <button class="btn btn-sm" onclick="raceSaveEval()" style="margin-top:8px;background:var(--accent);color:#fff;font-weight:700;width:100%;padding:10px">💾 Guardar Evaluación</button>
+      </div>
+
+      <!-- Race History -->
+      <div id="raceHistory" style="margin-top:12px"></div>
+    </div><!-- end tacPaddleRaceMode -->
+
     <div style="margin-top:20px;display:flex;gap:8px">
       <button class="btn btn-outline btn-sm" onclick="showView('overview')" style="flex:1">👥 Ver Todos</button>
       <button class="btn btn-sm" style="flex:1;background:var(--red);color:#fff" onclick="endSession()">■ Cerrar Sesión</button>
@@ -1037,8 +1105,14 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="pc-xp-text" id="pcXpText">0 / 100 XP</div>
   </div>
 
+  <!-- Discipline Filter Tabs -->
+  <div id="pcDiscFilter" style="display:none;padding:0 12px 4px;overflow-x:auto"></div>
+
   <!-- Quick Stats -->
   <div class="pc-stats" id="pcStats"></div>
+
+  <!-- Per-Discipline Breakdown -->
+  <div id="pcDiscBreakdown" style="display:none"></div>
 
   <!-- Badges -->
   <div class="card" style="padding:12px">
@@ -1217,7 +1291,11 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <!-- Athlete selector -->
     <div class="field" style="margin-top:10px;margin-bottom:0">
       <label class="field-label">Vincular a Atleta</label>
-      <select class="field-input" id="labAthlete"><option value="">— Sin vincular —</option></select>
+      <select class="field-input" id="labAthlete" onchange="labAthleteChanged()"><option value="">— Sin vincular —</option></select>
+    </div>
+    <div class="field" id="labDiscField" style="margin-top:6px;margin-bottom:0;display:none">
+      <label class="field-label">Disciplina</label>
+      <select class="field-input" id="labDisc"></select>
     </div>
   </div>
 
@@ -1367,7 +1445,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <img class="kss-logo-sm" id="progLogoImg" alt="KSS" style="opacity:.6">
   </div>
   <div style="font-size:20px;font-weight:800;margin-bottom:4px" id="progTitle"></div>
-  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px" id="progSubtitle"></div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px" id="progSubtitle"></div>
+  <div id="progDiscFilter" style="display:none;margin-bottom:12px;overflow-x:auto"></div>
   
   <!-- Stat summaries -->
   <div class="dash-row" id="progKPIs" style="margin-bottom:16px"></div>
@@ -1452,6 +1531,17 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="field">
       <label class="field-label">Nombre</label>
       <input class="field-input" id="maName" placeholder="Nombre completo">
+    </div>
+    <div class="field">
+      <label class="field-label">Disciplinas <span style="font-weight:400;font-size:11px;color:var(--text-muted)">(selecciona 1 o más)</span></label>
+      <div class="disc-grid" id="maDisc">
+        <button class="disc-btn selected" data-v="surfboard" onclick="discSelect(this)"><span class="disc-icon">🏄</span><span class="disc-label">Surfboard</span></button>
+        <button class="disc-btn" data-v="bodyboard" onclick="discSelect(this)"><span class="disc-icon">🛹</span><span class="disc-label">Bodyboard</span></button>
+        <button class="disc-btn" data-v="longboard" onclick="discSelect(this)"><span class="disc-icon">🏄‍♂️</span><span class="disc-label">Longboard</span></button>
+        <button class="disc-btn" data-v="kneeboard" onclick="discSelect(this)"><span class="disc-icon">🧎</span><span class="disc-label">Kneeboard</span></button>
+        <button class="disc-btn" data-v="paddlesurf" onclick="discSelect(this)"><span class="disc-icon">🚣</span><span class="disc-label">Paddle Surf</span></button>
+        <button class="disc-btn" data-v="paddlerace" onclick="discSelect(this)"><span class="disc-icon">🏁</span><span class="disc-label">Paddle Race</span></button>
+      </div>
     </div>
     <div class="field">
       <label class="field-label">Stance</label>
@@ -1982,8 +2072,9 @@ function renderSSAthletes() {
   container.innerHTML = athletes.map(a => {
     const sel = window._ssSelected.has(a.id);
     const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const discIcons = getAthleteDisciplines(a).map(d => getDisciplineInfo(d).icon).join('');
     return `<button class="athlete-chip ${sel ? 'selected' : ''}" onclick="toggleSSAthlete('${a.id}',this)">
-      <span class="avi">${initials}</span>${a.name.split(' ')[0]}
+      <span class="avi">${initials}</span>${a.name.split(' ')[0]} <span style="font-size:11px">${discIcons}</span>
     </button>`;
   }).join('');
   
@@ -2017,11 +2108,15 @@ function launchSession() {
   // Build athlete data
   const athleteData = {};
   selectedIds.forEach(id => {
+    const ath = DB.athletes.find(a => a.id === id);
+    const athDiscs = ath ? getAthleteDisciplines(ath) : ['surfboard'];
+    const hasRaceDisc = athDiscs.some(d => !isDiscWaveBased(d));
     athleteData[id] = {
       paddled: 0,
       caught: 0,
       falls: 0,
-      waves: [] // Array of wave objects
+      waves: [], // Array of wave objects
+      race: hasRaceDisc ? { sessions: [] } : undefined,
     };
   });
   
@@ -2085,11 +2180,22 @@ function renderSessionHub() {
     const caught = data.caught || 0;
     const paddled = data.paddled || 0;
     const ratio = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
-    const hasData = paddled > 0;
+    const hasWaveData = paddled > 0;
+    const athDiscs = getAthleteDisciplines(ath);
+    const discIcons = athDiscs.map(d => getDisciplineInfo(d).icon).join('');
+    const raceCount = data.race ? data.race.sessions.length : 0;
+    const hasRaceData = raceCount > 0;
+    
+    let infoHtml = '';
+    if (hasWaveData) infoHtml += `${caught}/${paddled} · ${ratio}%`;
+    if (hasWaveData && hasRaceData) infoHtml += ' · ';
+    if (hasRaceData) infoHtml += `${raceCount} 🏁`;
+    
     return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px">
       <span class="avi" style="width:28px;height:28px;font-size:11px">${ath.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>
       <span style="font-weight:700">${ath.name.split(' ')[0]}</span>
-      ${hasData ? `<span style="font-size:11px;color:var(--text-secondary);margin-left:auto">${caught}/${paddled} · ${ratio}%</span>` : ''}
+      <span style="font-size:11px">${discIcons}</span>
+      ${infoHtml ? `<span style="font-size:11px;color:var(--text-secondary);margin-left:auto">${infoHtml}</span>` : ''}
     </div>`;
   }).join('');
   
@@ -2125,6 +2231,9 @@ function hubEnterJudge() {
     if (ath && h.surfers[i]) {
       h.surfers[i].name = ath.name;
       h.surfers[i].athlete_id = id;
+      // Pre-fill discipline from active discipline in tactical IQ or default
+      const athDiscs = getAthleteDisciplines(ath);
+      h.surfers[i].discipline = athDiscs.length > 1 ? getActiveDisc(id) : athDiscs[0];
     }
   });
   
@@ -2168,7 +2277,83 @@ function renderTactical() {
   const data = s.athlete_data[currentId];
   
   document.getElementById('tacName').textContent = athlete ? athlete.name : 'Atleta';
-  document.getElementById('tacLevel').textContent = athlete ? `Nivel ${athlete.level || 1} · ${athlete.stance || 'Regular'}` : '';
+  
+  // Discipline picker for multi-discipline athletes
+  const discs = athlete ? getAthleteDisciplines(athlete) : ['surfboard'];
+  const activeDisc = getActiveDisc(currentId);
+  const discInfo = getDisciplineInfo(activeDisc);
+  
+  // Show discipline strip if athlete has multiple disciplines
+  let discPickerEl = document.getElementById('tacDiscPicker');
+  if (!discPickerEl) {
+    // Create it dynamically if not in DOM yet
+    const tacHeader = document.querySelector('#view-tactical .tac-header');
+    if (tacHeader) {
+      const dp = document.createElement('div');
+      dp.id = 'tacDiscPicker';
+      dp.style.cssText = 'display:flex;gap:4px;justify-content:center;padding:4px 12px 0;flex-wrap:wrap';
+      tacHeader.after(dp);
+      discPickerEl = dp;
+    }
+  }
+  
+  if (discPickerEl) {
+    if (discs.length > 1) {
+      discPickerEl.style.display = 'flex';
+      discPickerEl.innerHTML = discs.map(d => {
+        const di = getDisciplineInfo(d);
+        const isActive = d === activeDisc;
+        return `<button onclick="setActiveDisc('${currentId}','${d}')" style="display:flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${isActive ? di.color : 'var(--border)'};background:${isActive ? di.color + '20' : 'transparent'};color:${isActive ? di.color : 'var(--text-muted)'};transition:all .15s">${di.icon} ${di.label}</button>`;
+      }).join('');
+    } else {
+      discPickerEl.style.display = 'none';
+    }
+  }
+  
+  document.getElementById('tacLevel').innerHTML = athlete ? `${discInfo.icon} ${discInfo.label} · Nivel ${athlete.level || 1} · ${athlete.stance || 'Regular'}` : '';
+  
+  // Dynamic maneuver tags based on ACTIVE discipline
+  const isPaddleRace = !isDiscWaveBased(activeDisc);
+  const maneuvers = getManeuversForDisc(activeDisc);
+  const tagContainer = document.getElementById('tacTags');
+  if (tagContainer) {
+    tagContainer.innerHTML = maneuvers.map(m => 
+      `<button class="tag-btn${window._pendingWave && window._pendingWave.maneuvers.includes(m.id) ? ' active' : ''}" data-m="${m.id}" onclick="tagToggle(this)">${m.label}</button>`
+    ).join('');
+  }
+  
+  // Toggle wave mode vs paddle race mode
+  const waveMode = document.getElementById('tacWaveMode');
+  const bioMode = document.getElementById('tacBioMode');
+  const raceMode = document.getElementById('tacPaddleRaceMode');
+  const modeToggle = document.getElementById('tacModeToggle');
+  
+  if (isPaddleRace) {
+    // Show paddle race toggle options
+    if (modeToggle) {
+      modeToggle.innerHTML = `
+        <button class="seg-btn${window._tacMode === 'race' || window._tacMode === 'waves' ? ' selected' : ''}" data-v="race" onclick="tacSwitchMode('race',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🏁 Carrera</button>
+        <button class="seg-btn${window._tacMode === 'biomech' ? ' selected' : ''}" data-v="biomech" onclick="tacSwitchMode('biomech',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🦴 Biomecánica</button>
+      `;
+    }
+    if (window._tacMode !== 'biomech') window._tacMode = 'race';
+    if (waveMode) waveMode.style.display = 'none';
+    if (raceMode) raceMode.style.display = window._tacMode === 'race' ? 'block' : 'none';
+    if (bioMode) bioMode.style.display = window._tacMode === 'biomech' ? 'block' : 'none';
+    // Render race data
+    if (window._tacMode === 'race') renderPaddleRaceUI(currentId, data);
+  } else {
+    // Restore wave/bio toggle
+    if (modeToggle) {
+      modeToggle.innerHTML = `
+        <button class="seg-btn${window._tacMode === 'waves' ? ' selected' : ''}" data-v="waves" onclick="tacSwitchMode('waves',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🌊 Olas</button>
+        <button class="seg-btn${window._tacMode === 'biomech' ? ' selected' : ''}" data-v="biomech" onclick="tacSwitchMode('biomech',this)" style="flex:1;border-radius:6px;padding:8px;font-size:12px;font-weight:700">🦴 Biomecánica</button>
+      `;
+    }
+    if (waveMode) waveMode.style.display = window._tacMode === 'waves' ? 'block' : 'none';
+    if (raceMode) raceMode.style.display = 'none';
+    if (bioMode) bioMode.style.display = window._tacMode === 'biomech' ? 'block' : 'none';
+  }
   
   // Stats
   document.getElementById('tacPaddled').textContent = data.paddled;
@@ -2195,6 +2380,14 @@ function tacPrev() {
   const ids = Object.keys(s.athlete_data);
   window._tacIdx = (window._tacIdx - 1 + ids.length) % ids.length;
   window._pendingWave = null;
+  // Auto-switch mode based on active discipline for this athlete
+  const nextId = ids[window._tacIdx];
+  const activeDisc = getActiveDisc(nextId);
+  if (!isDiscWaveBased(activeDisc)) {
+    if (window._tacMode === 'waves') window._tacMode = 'race';
+  } else {
+    if (window._tacMode === 'race') window._tacMode = 'waves';
+  }
   renderTactical();
 }
 
@@ -2204,6 +2397,14 @@ function tacNext() {
   const ids = Object.keys(s.athlete_data);
   window._tacIdx = (window._tacIdx + 1) % ids.length;
   window._pendingWave = null;
+  // Auto-switch mode based on active discipline for this athlete
+  const nextId = ids[window._tacIdx];
+  const activeDisc = getActiveDisc(nextId);
+  if (!isDiscWaveBased(activeDisc)) {
+    if (window._tacMode === 'waves') window._tacMode = 'race';
+  } else {
+    if (window._tacMode === 'race') window._tacMode = 'waves';
+  }
   renderTactical();
 }
 
@@ -2221,7 +2422,7 @@ function tacCount(type) {
     data.caught++;
     if (data.paddled < data.caught) data.paddled = data.caught; // Auto-correct
     // Show eval section for this wave
-    window._pendingWave = { type: 'caught', timestamp: new Date().toISOString(), wave_type: null, wave_quality: null, selection: null, position: null, commit: null, maneuvers: [] };
+    window._pendingWave = { type: 'caught', timestamp: new Date().toISOString(), discipline: getActiveDisc(currentId), wave_type: null, wave_quality: null, selection: null, position: null, commit: null, maneuvers: [] };
     document.getElementById('tacEvalSection').style.display = 'block';
     resetEvalUI();
     showUndoToast('Atrapada +1', () => { 
@@ -2235,7 +2436,7 @@ function tacCount(type) {
     data.paddled++;
     if (data.paddled < data.caught + data.falls) data.paddled = data.caught + data.falls;
     // Record fall wave
-    data.waves.push({ type: 'fall', timestamp: new Date().toISOString() });
+    data.waves.push({ type: 'fall', timestamp: new Date().toISOString(), discipline: getActiveDisc(currentId) });
     showUndoToast('Caída +1', () => { 
       data.falls = Math.max(0, data.falls - 1); 
       data.paddled = Math.max(0, data.paddled - 1);
@@ -2302,8 +2503,19 @@ function tacSwitchMode(mode, el) {
   
   document.getElementById('tacWaveMode').style.display = mode === 'waves' ? 'block' : 'none';
   document.getElementById('tacBioMode').style.display = mode === 'biomech' ? 'block' : 'none';
+  const raceEl = document.getElementById('tacPaddleRaceMode');
+  if (raceEl) raceEl.style.display = mode === 'race' ? 'block' : 'none';
   
   if (mode === 'biomech') renderBioHistory();
+  if (mode === 'race') {
+    const s = DB.activeSession;
+    if (s) {
+      const ids = Object.keys(s.athlete_data);
+      const currentId = ids[window._tacIdx];
+      const data = s.athlete_data[currentId];
+      renderPaddleRaceUI(currentId, data);
+    }
+  }
 }
 
 function bioNewWave() {
@@ -2320,6 +2532,7 @@ function bioNewWave() {
   window._pendingBio = {
     wave_num: window._bioWaveCount,
     timestamp: new Date().toISOString(),
+    discipline: (() => { const s = DB.activeSession; if (!s) return 'surfboard'; const ids = Object.keys(s.athlete_data); return getActiveDisc(ids[window._tacIdx]); })(),
     bio_shoulders: null,
     bio_knees: null,
     bio_arms: null,
@@ -2396,6 +2609,178 @@ function renderBioHistory() {
         ${b.notes ? `<div style="font-size:12px;color:var(--text-primary);margin-top:6px;padding:6px 8px;background:var(--bg-input);border-radius:6px;line-height:1.4">📝 ${b.notes}</div>` : ''}
       </div>`;
     }).join('');
+}
+
+// ============================================================
+// PADDLE RACE MODE
+// ============================================================
+window._raceTimer = null;
+window._raceStartTime = null;
+window._raceElapsed = 0;
+window._raceLaps = [];
+window._raceRunning = false;
+
+function formatRaceTime(ms) {
+  const totalSec = ms / 1000;
+  const mins = Math.floor(totalSec / 60);
+  const secs = Math.floor(totalSec % 60);
+  const tenths = Math.floor((totalSec * 10) % 10);
+  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${tenths}`;
+}
+
+function raceTimerToggle() {
+  if (window._raceRunning) {
+    // Stop
+    clearInterval(window._raceTimer);
+    window._raceElapsed += Date.now() - window._raceStartTime;
+    window._raceRunning = false;
+    document.getElementById('raceTimerBtn').innerHTML = '▶ Resume';
+    document.getElementById('raceTimerBtn').style.background = 'var(--green)';
+  } else {
+    // Start
+    window._raceStartTime = Date.now();
+    window._raceRunning = true;
+    document.getElementById('raceTimerBtn').innerHTML = '⏸ Pause';
+    document.getElementById('raceTimerBtn').style.background = 'var(--red)';
+    window._raceTimer = setInterval(() => {
+      const total = window._raceElapsed + (Date.now() - window._raceStartTime);
+      document.getElementById('raceTimerDisplay').textContent = formatRaceTime(total);
+    }, 100);
+  }
+}
+
+function raceTimerReset() {
+  clearInterval(window._raceTimer);
+  window._raceElapsed = 0;
+  window._raceStartTime = null;
+  window._raceRunning = false;
+  window._raceLaps = [];
+  document.getElementById('raceTimerDisplay').textContent = '00:00.0';
+  document.getElementById('raceTimerBtn').innerHTML = '▶ Start';
+  document.getElementById('raceTimerBtn').style.background = 'var(--green)';
+  document.getElementById('raceLapList').innerHTML = '';
+  document.getElementById('raceLapCount').textContent = '0';
+  document.getElementById('raceBestLap').textContent = '—';
+  document.getElementById('raceAvgLap').textContent = '—';
+}
+
+function raceAddLap() {
+  if (!window._raceRunning && window._raceElapsed === 0) return;
+  const currentTotal = window._raceRunning ? window._raceElapsed + (Date.now() - window._raceStartTime) : window._raceElapsed;
+  const prevTotal = window._raceLaps.length > 0 ? window._raceLaps[window._raceLaps.length - 1].totalMs : 0;
+  const lapMs = currentTotal - prevTotal;
+  
+  window._raceLaps.push({ lapMs, totalMs: currentTotal, num: window._raceLaps.length + 1 });
+  renderRaceLaps();
+}
+
+function renderRaceLaps() {
+  const laps = window._raceLaps;
+  const bestMs = laps.length > 0 ? Math.min(...laps.map(l => l.lapMs)) : 0;
+  const avgMs = laps.length > 0 ? laps.reduce((s, l) => s + l.lapMs, 0) / laps.length : 0;
+  
+  document.getElementById('raceLapCount').textContent = laps.length;
+  document.getElementById('raceBestLap').textContent = laps.length > 0 ? formatRaceTime(bestMs) : '—';
+  document.getElementById('raceAvgLap').textContent = laps.length > 0 ? formatRaceTime(avgMs) : '—';
+  
+  document.getElementById('raceLapList').innerHTML = laps.slice().reverse().map(l => {
+    const isBest = l.lapMs === bestMs && laps.length > 1;
+    return `<div style="display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid var(--border);${isBest ? 'color:var(--green);font-weight:700' : ''}">
+      <span>Vuelta ${l.num}</span>
+      <span style="font-variant-numeric:tabular-nums">${formatRaceTime(l.lapMs)} ${isBest ? '⚡' : ''}</span>
+      <span style="font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums">${formatRaceTime(l.totalMs)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderPaddleRaceUI(athleteId, data) {
+  // Initialize race data if needed
+  if (!data.race) data.race = { sessions: [] };
+  
+  // Render past race evals for this session
+  const histDiv = document.getElementById('raceHistory');
+  if (histDiv && data.race.sessions.length > 0) {
+    histDiv.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📋 Evaluaciones de Carrera</div>' +
+      data.race.sessions.slice().reverse().map((r, i) => {
+        const evalTags = [
+          r.technique ? `Remada ${r.technique === 'good' ? '🟢' : r.technique === 'ok' ? '🟡' : '🔴'}` : null,
+          r.pacing ? `Pacing ${r.pacing === 'good' ? '🟢' : r.pacing === 'ok' ? '🟡' : '🔴'}` : null,
+          r.position ? `Posición ${r.position === 'good' ? '🟢' : r.position === 'ok' ? '🟡' : '🔴'}` : null,
+        ].filter(Boolean);
+        return `<div class="card" style="padding:10px 12px;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">🏁 Carrera #${data.race.sessions.length - i}</div>
+          <div style="font-size:12px;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:4px">${
+            r.laps ? `<span style="background:var(--bg-input);padding:2px 6px;border-radius:4px">${r.laps} vueltas</span>` : ''
+          }${r.total_time ? `<span style="background:var(--bg-input);padding:2px 6px;border-radius:4px">Total: ${r.total_time}</span>` : ''}${
+            r.best_lap ? `<span style="background:var(--bg-input);padding:2px 6px;border-radius:4px">Mejor: ${r.best_lap}</span>` : ''
+          }${evalTags.map(t => `<span style="background:var(--bg-input);padding:2px 6px;border-radius:4px">${t}</span>`).join('')}</div>
+          ${r.notes ? `<div style="font-size:12px;color:var(--text-primary);margin-top:6px;padding:6px 8px;background:var(--bg-input);border-radius:6px;line-height:1.4">📝 ${r.notes}</div>` : ''}
+        </div>`;
+      }).join('');
+  } else if (histDiv) {
+    histDiv.innerHTML = '';
+  }
+}
+
+function raceSaveEval() {
+  const s = DB.activeSession;
+  if (!s) return;
+  const ids = Object.keys(s.athlete_data);
+  const currentId = ids[window._tacIdx];
+  const data = s.athlete_data[currentId];
+  
+  if (!data.race) data.race = { sessions: [] };
+  
+  const totalMs = window._raceRunning ? window._raceElapsed + (Date.now() - window._raceStartTime) : window._raceElapsed;
+  
+  const raceEntry = {
+    timestamp: new Date().toISOString(),
+    discipline: getActiveDisc(currentId),
+    laps: window._raceLaps.length,
+    total_time: formatRaceTime(totalMs),
+    total_ms: totalMs,
+    best_lap: window._raceLaps.length > 0 ? formatRaceTime(Math.min(...window._raceLaps.map(l => l.lapMs))) : null,
+    best_lap_ms: window._raceLaps.length > 0 ? Math.min(...window._raceLaps.map(l => l.lapMs)) : null,
+    avg_lap: window._raceLaps.length > 0 ? formatRaceTime(window._raceLaps.reduce((s, l) => s + l.lapMs, 0) / window._raceLaps.length) : null,
+    lap_splits: window._raceLaps.map(l => ({ num: l.num, ms: l.lapMs, total_ms: l.totalMs })),
+    technique: getEvalValue('race_technique'),
+    pacing: getEvalValue('race_pacing'),
+    position: getEvalValue('race_position'),
+    notes: document.getElementById('raceNotes')?.value?.trim() || '',
+  };
+  
+  data.race.sessions.push(raceEntry);
+  
+  // Track modules used
+  if (!s.modules_used) s.modules_used = [];
+  if (!s.modules_used.includes('race')) s.modules_used.push('race');
+  
+  saveSession();
+  
+  // Reset timer & UI for next race
+  raceTimerReset();
+  document.getElementById('raceNotes').value = '';
+  // Reset eval buttons
+  document.querySelectorAll('#raceTechnique .eval-btn, #racePacing .eval-btn, #racePosition .eval-btn').forEach(b => {
+    b.className = 'eval-btn';
+  });
+  
+  renderPaddleRaceUI(currentId, data);
+  
+  // Visual confirmation
+  const btn = document.querySelector('#tacPaddleRaceMode .btn[onclick="raceSaveEval()"]');
+  if (btn) {
+    btn.textContent = '✅ Guardado!';
+    setTimeout(() => { btn.textContent = '💾 Guardar Evaluación'; }, 1500);
+  }
+}
+
+function getEvalValue(name) {
+  const containerMap = { race_technique: 'raceTechnique', race_pacing: 'racePacing', race_position: 'racePosition' };
+  const containerId = containerMap[name];
+  if (!containerId) return null;
+  const sel = document.querySelector(`#${containerId} .eval-btn[class*="sel-"]`);
+  return sel ? sel.dataset.v : null;
 }
 
 // ============================================================
@@ -2671,16 +3056,37 @@ function renderOverview() {
   ids.forEach((id, i) => {
     const a = athletes.find(x => x.id === id);
     const d = s.athlete_data[id];
-    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
-    const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : d.paddled > 0 ? 'var(--red)' : 'var(--text-muted)';
-    totalPaddled += d.paddled;
-    totalCaught += d.caught;
+    const athDiscs = a ? getAthleteDisciplines(a) : ['surfboard'];
+    const discIcons = athDiscs.map(dc => getDisciplineInfo(dc).icon).join('');
+    const raceCount = d.race ? d.race.sessions.length : 0;
+    const hasWaveData = d.paddled > 0;
+    const hasRaceData = raceCount > 0;
     
-    html += `<div class="ov-row" onclick="window._tacIdx=${i};showView('tactical')" style="cursor:pointer">
-      <div class="ov-name">${a ? a.name.split(' ')[0] : 'Atleta'}</div>
-      <div class="ov-stats">${d.paddled}/${d.caught}</div>
-      <div class="ov-ratio" style="color:${color}">${d.paddled > 0 ? ratio + '%' : '—'}</div>
-    </div>`;
+    if (hasWaveData) {
+      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : d.paddled > 0 ? 'var(--red)' : 'var(--text-muted)';
+      totalPaddled += d.paddled;
+      totalCaught += d.caught;
+      
+      html += `<div class="ov-row" onclick="window._tacIdx=${i};showView('tactical')" style="cursor:pointer">
+        <div class="ov-name">${discIcons} ${a ? a.name.split(' ')[0] : 'Atleta'}</div>
+        <div class="ov-stats">${d.paddled}/${d.caught}${hasRaceData ? ` · ${raceCount}🏁` : ''}</div>
+        <div class="ov-ratio" style="color:${color}">${d.paddled > 0 ? ratio + '%' : '—'}</div>
+      </div>`;
+    } else if (hasRaceData) {
+      const lastRace = d.race.sessions[raceCount - 1];
+      html += `<div class="ov-row" onclick="window._tacIdx=${i};showView('tactical')" style="cursor:pointer">
+        <div class="ov-name">${discIcons} ${a ? a.name.split(' ')[0] : 'Atleta'}</div>
+        <div class="ov-stats">${raceCount} carrera${raceCount>1?'s':''}</div>
+        <div class="ov-ratio" style="color:var(--accent)">${lastRace ? lastRace.total_time : '—'}</div>
+      </div>`;
+    } else {
+      html += `<div class="ov-row" onclick="window._tacIdx=${i};showView('tactical')" style="cursor:pointer">
+        <div class="ov-name">${discIcons} ${a ? a.name.split(' ')[0] : 'Atleta'}</div>
+        <div class="ov-stats">—</div>
+        <div class="ov-ratio" style="color:var(--text-muted)">—</div>
+      </div>`;
+    }
   });
   
   document.getElementById('ovList').innerHTML = html;
@@ -2735,13 +3141,20 @@ function renderDebrief() {
   // Team stats
   const ids = Object.keys(s.athlete_data);
   let totalP = 0, totalC = 0, totalF = 0;
+  let raceAthletes = 0;
   if (hasTactical) {
-    ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled; totalC += d.caught; totalF += d.falls; });
+    ids.forEach(id => { 
+      const d = s.athlete_data[id]; 
+      totalP += d.paddled; totalC += d.caught; totalF += d.falls;
+      if (d.race && d.race.sessions.length > 0) raceAthletes++;
+    });
   }
   const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
   
-  if (hasTactical) {
-    document.getElementById('dbTeamRatio').textContent = `Catch Ratio: ${teamRatio}%`;
+  if (hasTactical && (totalP > 0 || raceAthletes > 0)) {
+    const waveInfo = totalP > 0 ? `Catch Ratio: ${teamRatio}%` : '';
+    const raceInfo = raceAthletes > 0 ? `${raceAthletes} paddle race` : '';
+    document.getElementById('dbTeamRatio').textContent = [waveInfo, raceInfo].filter(Boolean).join(' · ');
     document.getElementById('dbTeamStats').textContent = `${ids.length} atletas · ${totalP} remadas · ${totalC} atrapadas · ${totalF} caídas`;
   } else {
     document.getElementById('dbTeamRatio').textContent = '';
@@ -2756,15 +3169,66 @@ function renderDebrief() {
     const ad = s.athlete_data[id];
     
     athHtml += `<div class="db-athlete-card">
-      <div class="db-athlete-name">${a ? a.name : 'Atleta'}</div>`;
+      <div class="db-athlete-name">${a ? a.name : 'Atleta'} ${a ? getAthleteDisciplines(a).map(d => { const di = getDisciplineInfo(d); return `<span style="font-size:11px" title="${di.label}">${di.icon}</span>`; }).join(' ') : ''}</div>`;
     
-    // Tactical section (only if used)
-    if (hasTactical) {
-      const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
-      const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
-      const maneuvers = {};
-      ad.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; }); });
-      const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+    const athDiscs = a ? getAthleteDisciplines(a) : ['surfboard'];
+    const hasRaceDisc = athDiscs.some(d => !isDiscWaveBased(d));
+    const hasWaveDisc = athDiscs.some(d => isDiscWaveBased(d));
+    
+    // Paddle Race section (if they have race data)
+    if (ad.race && ad.race.sessions.length > 0) {
+      const races = ad.race.sessions;
+      const bestTime = races.reduce((best, r) => !best || r.total_ms < best.total_ms ? r : best, null);
+      const avgLaps = races.length > 0 ? Math.round(races.reduce((s, r) => s + (r.laps || 0), 0) / races.length) : 0;
+      
+      athHtml += `<div style="margin-top:6px;padding:8px;background:var(--bg-input);border-radius:8px">
+        <div style="font-size:11px;font-weight:700;color:${getDisciplineInfo('paddlerace').color};text-transform:uppercase;margin-bottom:4px">🏁 Paddle Race</div>
+        <div class="db-stat-grid">
+        <div class="db-stat"><div class="db-stat-v" style="color:var(--accent)">${races.length}</div><div class="db-stat-l">Carreras</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:var(--green)">${bestTime ? bestTime.total_time : '—'}</div><div class="db-stat-l">Mejor Tiempo</div></div>
+        <div class="db-stat"><div class="db-stat-v">${avgLaps}</div><div class="db-stat-l">Avg Vueltas</div></div>
+      </div>
+      ${bestTime && bestTime.best_lap ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">⚡ Mejor vuelta: ${bestTime.best_lap}</div>` : ''}
+      </div>`;
+    }
+    
+    // Wave-based discipline section (with per-discipline breakdown if multiple)
+    if (hasTactical && ad.waves && ad.waves.length > 0) {
+      // Detect which wave disciplines were used in this session
+      const waveDiscsUsed = [...new Set(ad.waves.map(w => w.discipline || getAthleteDiscipline(a)).filter(d => isDiscWaveBased(d)))];
+      
+      if (waveDiscsUsed.length > 1) {
+        // Multi-discipline breakdown
+        waveDiscsUsed.forEach(disc => {
+          const di = getDisciplineInfo(disc);
+          const discWaves = ad.waves.filter(w => (w.discipline || getAthleteDiscipline(a)) === disc);
+          const discCaught = discWaves.filter(w => w.type === 'caught').length;
+          const discFalls = discWaves.filter(w => w.type === 'fall').length;
+          const discPaddled = discCaught + discFalls;
+          const ratio = discPaddled > 0 ? Math.round(discCaught / discPaddled * 100) : 0;
+          const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+          const maneuvers = {};
+          discWaves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; }); });
+          const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+          
+          athHtml += `<div style="margin-top:6px;padding:8px;background:var(--bg-input);border-radius:8px">
+            <div style="font-size:11px;font-weight:700;color:${di.color};text-transform:uppercase;margin-bottom:4px">${di.icon} ${di.label}</div>
+            <div class="db-stat-grid">
+              <div class="db-stat"><div class="db-stat-v">${discPaddled}</div><div class="db-stat-l">Remó</div></div>
+              <div class="db-stat"><div class="db-stat-v">${discCaught}</div><div class="db-stat-l">Atrapó</div></div>
+              <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
+            </div>
+            ${discFalls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${discFalls} caída${discFalls > 1 ? 's' : ''}</div>` : ''}
+            ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}
+          </div>`;
+        });
+      } else {
+        // Single discipline - show classic view
+        const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
+        const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+        const maneuvers = {};
+        ad.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; }); });
+        const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
       
       athHtml += `<div class="db-stat-grid">
         <div class="db-stat"><div class="db-stat-v">${ad.paddled}</div><div class="db-stat-l">Remó</div></div>
@@ -2773,6 +3237,7 @@ function renderDebrief() {
       </div>
       ${ad.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${ad.falls} caída${ad.falls > 1 ? 's' : ''}</div>` : ''}
       ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}`;
+      }
     }
     
     // Judge section
@@ -2802,11 +3267,12 @@ function renderDebrief() {
   });
   document.getElementById('dbAthletes').innerHTML = athHtml;
   
-  // Visual catch ratio chart (only if tactical used)
-  if (hasTactical && ids.length > 0) {
+  // Visual catch ratio chart (only athletes with wave data)
+  const waveIds = ids.filter(id => { const d = s.athlete_data[id]; return d.paddled > 0; });
+  if (hasTactical && waveIds.length > 0) {
     const chart = document.getElementById('dbChart');
     chart.style.display = 'block';
-    document.getElementById('dbChartBars').innerHTML = ids.map(id => {
+    document.getElementById('dbChartBars').innerHTML = waveIds.map(id => {
       const a = athletes.find(x => x.id === id);
       const ad = s.athlete_data[id];
       const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
@@ -3055,7 +3521,7 @@ function exportSessionCSV() {
   const headers = [
     'timestamp','spot','wave_size','wave_quality','wind','crowd','focus','duration_min','coach_rating',
     'modules_used',
-    'athlete',
+    'athlete','discipline',
     'paddled','caught','falls','catch_ratio',
     'waves_total','maneuvers',
     'selection_poor','selection_normal','selection_excellent',
@@ -3068,6 +3534,7 @@ function exportSessionCSV() {
     'judge_heats','judge_h1','judge_h2','judge_h3','judge_h4','judge_h5','judge_h6',
     'judge_avg_heat','judge_avg_wave','judge_goal',
     'workout_total','workout_completed','workout_good','workout_regular','workout_poor',
+    'race_count','race_best_time_ms','race_best_lap_ms','race_avg_laps',
     'coach_notes'
   ];
   
@@ -3127,6 +3594,7 @@ function exportSessionCSV() {
       s.coach_rating || '',
       esc(modsStr),
       esc(a ? a.name : id),
+      esc(a ? getAthleteDisciplines(a).join('+') : 'surfboard'),
       usedTactical ? d.paddled : '',
       usedTactical ? d.caught : '',
       usedTactical ? d.falls : '',
@@ -3162,6 +3630,11 @@ function exportSessionCSV() {
       woGood || '',
       woReg || '',
       woPoor || '',
+      // Race data
+      d.race && d.race.sessions.length > 0 ? d.race.sessions.length : '',
+      d.race && d.race.sessions.length > 0 ? Math.min(...d.race.sessions.map(r => r.total_ms || Infinity)) : '',
+      d.race && d.race.sessions.length > 0 ? Math.min(...d.race.sessions.filter(r => r.best_lap_ms).map(r => r.best_lap_ms)) || '' : '',
+      d.race && d.race.sessions.length > 0 ? Math.round(d.race.sessions.reduce((s, r) => s + (r.laps || 0), 0) / d.race.sessions.length) : '',
       esc(s.coach_notes || '')
     ];
     
@@ -3547,16 +4020,37 @@ function renderProgress() {
   const a = DB.athletes.find(x => x.id === _progressAthleteId);
   if (!a) { showView('athletes'); return; }
   
-  const sessions = DB.sessions.filter(s => s.athlete_data && s.athlete_data[a.id]);
+  const allSessions = DB.sessions.filter(s => s.athlete_data && s.athlete_data[a.id]);
+  const athDiscs = getAthleteDisciplines(a);
   document.getElementById('progTitle').textContent = a.name;
-  document.getElementById('progSubtitle').textContent = `${sessions.length} sesiones · Nivel ${a.level || 'Intermedio'}`;
+  
+  // Discipline filter
+  const progDiscFilter = document.getElementById('progDiscFilter');
+  const pfd = window._progDiscFilter || 'all';
+  const fd = pfd !== 'all' ? pfd : null;
+  
+  if (athDiscs.length > 1) {
+    progDiscFilter.style.display = 'flex';
+    progDiscFilter.innerHTML = `<div style="display:flex;gap:4px;flex-wrap:wrap">` +
+      `<button onclick="window._progDiscFilter='all';renderProgress()" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${pfd === 'all' ? 'var(--accent)' : 'var(--border)'};background:${pfd === 'all' ? 'var(--accent)10' : 'transparent'};color:${pfd === 'all' ? 'var(--accent)' : 'var(--text-muted)'}">📊 Todos</button>` +
+      athDiscs.map(d => {
+        const di = getDisciplineInfo(d);
+        const isActive = pfd === d;
+        return `<button onclick="window._progDiscFilter='${d}';renderProgress()" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${isActive ? di.color : 'var(--border)'};background:${isActive ? di.color + '20' : 'transparent'};color:${isActive ? di.color : 'var(--text-muted)'}">${di.icon} ${di.label}</button>`;
+      }).join('') + `</div>`;
+  } else {
+    progDiscFilter.style.display = 'none';
+  }
+  
+  const sessions = allSessions;
+  document.getElementById('progSubtitle').textContent = `${sessions.length} sesiones · Nivel ${a.level || 'Intermedio'}${fd ? ' · ' + getDisciplineInfo(fd).icon + ' ' + getDisciplineInfo(fd).label : ''}`;
   
   if (sessions.length === 0) {
     document.getElementById('progKPIs').innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;width:100%">Sin datos de sesiones aún</div>';
     return;
   }
   
-  // Aggregate stats (module-aware)
+  // Aggregate stats (module-aware, discipline-filtered)
   let totalP = 0, totalC = 0, totalF = 0, totalXP = 0;
   const catchRatios = [];
   const allManeuvers = {};
@@ -3568,20 +4062,39 @@ function renderProgress() {
     const hasTactical = !s.modules_used || mods.includes('tactical');
     
     if (hasTactical) {
-      totalP += d.paddled || 0;
-      totalC += d.caught || 0;
-      totalF += d.falls || 0;
-      
-      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : null;
-      if (ratio !== null) catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
-      
-      d.waves.forEach(w => {
-        if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
-      });
+      if (fd) {
+        // Filter waves by discipline
+        (d.waves || []).forEach(w => {
+          const wd = w.discipline || getAthleteDiscipline(a);
+          if (wd === fd) {
+            if (w.type === 'caught') { totalC++; totalP++; }
+            else if (w.type === 'fall') { totalF++; totalP++; }
+            if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
+          }
+        });
+        if (totalP > 0) {
+          const ratio = Math.round(totalC / totalP * 100);
+          catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
+        }
+      } else {
+        totalP += d.paddled || 0;
+        totalC += d.caught || 0;
+        totalF += d.falls || 0;
+        
+        const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : null;
+        if (ratio !== null) catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
+        
+        (d.waves || []).forEach(w => {
+          if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
+        });
+      }
     }
     
     totalXP += d.xp_earned || 10;
-    (d.biomech || []).forEach(b => allBio.push(b));
+    // Filter bio by discipline
+    (d.biomech || []).forEach(b => {
+      if (!fd || (b.discipline || getAthleteDiscipline(a)) === fd) allBio.push(b);
+    });
   });
   
   const avgRatio = catchRatios.length > 0 ? Math.round(catchRatios.reduce((s, r) => s + r.ratio, 0) / catchRatios.length) : 0;
@@ -3744,7 +4257,7 @@ function renderAthletes() {
     return `<div class="ath-item" onclick="openPlayerCard('${a.id}')" style="cursor:pointer">
       <div class="ath-avi">${initials}</div>
       <div class="ath-info">
-        <div class="ath-name">${a.name}</div>
+        <div class="ath-name">${a.name} ${getAthleteDisciplines(a).map(d => { const di = getDisciplineInfo(d); return `<span class="disc-badge" style="background:${di.color}20;color:${di.color}">${di.icon}</span>`; }).join('')}</div>
         <div class="ath-sub">${LEVEL_NAMES[lvl.level]} (Lv${lvl.level}) · ${a.stance || 'Regular'} · ${sessCount}s ${heatCount}h · ${xp} XP</div>
       </div>
       <span style="color:var(--text-muted);font-size:14px">›</span>
@@ -3752,12 +4265,42 @@ function renderAthletes() {
   }).join('') + '</div>';
 }
 
+function discSelect(btn) {
+  const grid = btn.closest('.disc-grid');
+  const isSelected = btn.classList.contains('selected');
+  const selectedCount = grid.querySelectorAll('.disc-btn.selected').length;
+  
+  // Must keep at least 1 selected
+  if (isSelected && selectedCount <= 1) return;
+  
+  btn.classList.toggle('selected');
+  
+  // Show/hide stance based on whether ANY wave discipline is selected
+  const selectedDiscs = Array.from(grid.querySelectorAll('.disc-btn.selected')).map(b => b.dataset.v);
+  const hasWaveDisc = selectedDiscs.some(d => isDiscWaveBased(d));
+  const stanceField = document.getElementById('maStance')?.closest('.field');
+  if (stanceField) stanceField.style.display = hasWaveDisc ? '' : 'none';
+}
+
+function getDiscValues() {
+  return Array.from(document.querySelectorAll('#maDisc .disc-btn.selected')).map(b => b.dataset.v);
+}
+
+function getDiscValue() {
+  return getDiscValues()[0] || 'surfboard';
+}
+
 function openAddAthleteModal() {
   document.getElementById('maName').value = '';
   document.getElementById('maAge').value = '';
   window._editAthleteId = null;
   segSelect('maStance', document.querySelector('#maStance .seg-btn[data-v="regular"]'));
+  // Reset discipline to surfboard
+  document.querySelectorAll('#maDisc .disc-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('#maDisc .disc-btn[data-v="surfboard"]').classList.add('selected');
+  document.getElementById('maStance').closest('.field').style.display = '';
   document.getElementById('modalAddAthlete').classList.add('active');
+  document.querySelector('#modalAddAthlete .modal-title').textContent = 'Nuevo Atleta';
   setTimeout(() => document.getElementById('maName').focus(), 300);
 }
 
@@ -3771,13 +4314,15 @@ function saveNewAthlete() {
   
   const stance = getSegValue('maStance');
   const age = parseInt(document.getElementById('maAge').value) || null;
+  const discipline = getDiscValue();
+  const disciplines = getDiscValues();
   
   const athletes = DB.athletes;
   
   if (window._editAthleteId) {
     // Edit mode
     const a = athletes.find(x => x.id === window._editAthleteId);
-    if (a) { a.name = name; a.stance = stance; a.age = age; }
+    if (a) { a.name = name; a.stance = stance; a.age = age; a.discipline = discipline; a.disciplines = disciplines; }
     window._editAthleteId = null;
   } else {
     // New athlete
@@ -3786,6 +4331,8 @@ function saveNewAthlete() {
       name,
       stance,
       age,
+      discipline,
+      disciplines,
       level: 1,
       xp_total: 0,
       sessions_count: 0,
@@ -3816,6 +4363,112 @@ function deleteAthlete(id) {
 const XP_THRESHOLDS = [0, 100, 400, 1000, 2000, 3500, 5700, 8700, 12700, 18200];
 const LEVEL_NAMES = { 1:'Kook', 2:'Grom', 3:'Grom+', 4:'Ripper', 5:'Ripper+', 6:'Charger', 7:'Charger+', 8:'Pro', 9:'Pro+', 10:'Legend' };
 const LEVEL_COLORS = { 1:'#94a3b8', 2:'#38bdf8', 3:'#38bdf8', 4:'#22c55e', 5:'#22c55e', 6:'#f59e0b', 7:'#f59e0b', 8:'#a855f7', 9:'#a855f7', 10:'#ef4444' };
+
+// ============================================================
+// DISCIPLINE SYSTEM
+// ============================================================
+const DISCIPLINES = {
+  surfboard:    { label: 'Surfboard', icon: '🏄', color: '#22c55e', hasWaves: true },
+  bodyboard:    { label: 'Bodyboard', icon: '🛹', color: '#3b82f6', hasWaves: true },
+  longboard:    { label: 'Longboard', icon: '🏄‍♂️', color: '#f59e0b', hasWaves: true },
+  kneeboard:    { label: 'Kneeboard', icon: '🧎', color: '#a855f7', hasWaves: true },
+  paddlesurf:   { label: 'Paddle Surf', icon: '🚣', color: '#06b6d4', hasWaves: true },
+  paddlerace:   { label: 'Paddle Race', icon: '🏁', color: '#ef4444', hasWaves: false },
+};
+
+const SURFBOARD_MANEUVERS = [
+  { id: 'takeoff',  label: 'Take Off' },
+  { id: 'bt',       label: 'BT' },
+  { id: 'carving',  label: 'Carving' },
+  { id: 'cutback',  label: 'Cutback' },
+  { id: 'snap',     label: 'Snap' },
+  { id: 'floater',  label: 'Floater' },
+  { id: 'aerial',   label: 'Aerial' },
+  { id: 'tube',     label: 'Tube' },
+  { id: 'reentry',  label: 'Re-entry' },
+];
+
+const BODYBOARD_MANEUVERS = [
+  { id: 'takeoff',      label: 'Take Off' },
+  { id: 'bt',           label: 'BT' },
+  { id: '360',          label: '360' },
+  { id: 'reverse360',   label: 'Reverse 360' },
+  { id: 'reentry',      label: 'Re-entry' },
+  { id: 'rollup',       label: 'Roll Up' },
+  { id: 'rollup360',    label: 'Roll Up 360' },
+  { id: 'backflip',     label: 'Backflip' },
+  { id: 'backflip360',  label: 'Backflip 360' },
+  { id: 'frontflip',    label: 'Frontflip' },
+  { id: 'air',          label: 'Air' },
+  { id: 'invert',       label: 'Invert' },
+  { id: 'air360',       label: 'Air 360' },
+  { id: 'airrev360',    label: 'Air Rev 360' },
+  { id: 'airrollup',    label: 'Air Roll Up' },
+  { id: 'tube',         label: 'Tube' },
+];
+
+const LONGBOARD_MANEUVERS = [
+  ...SURFBOARD_MANEUVERS,
+  { id: 'hangfive',     label: 'Hang Five' },
+  { id: 'hangten',      label: 'Hang Ten' },
+  { id: 'crosscutback', label: 'Cross Cut Back' },
+  { id: 'nose360',      label: 'Nose 360' },
+];
+
+const DISCIPLINE_MANEUVERS = {
+  surfboard:   SURFBOARD_MANEUVERS,
+  bodyboard:   BODYBOARD_MANEUVERS,
+  longboard:   LONGBOARD_MANEUVERS,
+  kneeboard:   SURFBOARD_MANEUVERS,
+  paddlesurf:  SURFBOARD_MANEUVERS,
+  paddlerace:  [], // No maneuvers — time-based
+};
+
+function getAthleteDisciplines(athlete) {
+  if (athlete?.disciplines && athlete.disciplines.length > 0) return athlete.disciplines;
+  if (athlete?.discipline) return [athlete.discipline]; // backward compat
+  return ['surfboard'];
+}
+
+function getAthleteDiscipline(athlete) {
+  return getAthleteDisciplines(athlete)[0];
+}
+
+function getDisciplineInfo(disc) {
+  return DISCIPLINES[disc] || DISCIPLINES.surfboard;
+}
+
+// Active discipline tracking per athlete in session
+window._tacActiveDisc = {};
+
+function getActiveDisc(athleteId) {
+  if (window._tacActiveDisc[athleteId]) return window._tacActiveDisc[athleteId];
+  const ath = DB.athletes.find(a => a.id === athleteId);
+  return getAthleteDiscipline(ath);
+}
+
+function setActiveDisc(athleteId, disc) {
+  window._tacActiveDisc[athleteId] = disc;
+  renderTactical();
+}
+
+function getManeuversForDisc(disc) {
+  return DISCIPLINE_MANEUVERS[disc] || SURFBOARD_MANEUVERS;
+}
+
+function getManeuversForAthlete(athlete) {
+  const disc = getActiveDisc(athlete?.id);
+  return DISCIPLINE_MANEUVERS[disc] || SURFBOARD_MANEUVERS;
+}
+
+function isDiscWaveBased(disc) {
+  return (DISCIPLINES[disc] || DISCIPLINES.surfboard).hasWaves;
+}
+
+function isWaveDiscipline(athlete) {
+  const disc = getActiveDisc(athlete?.id);
+  return isDiscWaveBased(disc);
+}
 
 function calcLevel(xp) {
   let level = 1;
@@ -3898,25 +4551,119 @@ function renderPlayerCard() {
   // Header
   document.getElementById('pcAvi').textContent = initials;
   document.getElementById('pcName').textContent = a.name;
-  document.getElementById('pcSub').textContent = `${a.stance || 'Regular'} · ${a.age ? a.age + ' años' : ''}`;
+  const discs = getAthleteDisciplines(a);
+  const discBadges = discs.map(d => { const di = getDisciplineInfo(d); return `<span class="disc-badge" style="background:${di.color}20;color:${di.color}">${di.icon} ${di.label}</span>`; }).join(' ');
+  document.getElementById('pcSub').innerHTML = `${discBadges} · ${a.stance || 'Regular'} · ${a.age ? a.age + ' años' : ''}`;
   document.getElementById('pcLevel').textContent = `${lvl.name} · Nivel ${lvl.level}`;
   document.getElementById('pcLevel').style.background = `linear-gradient(135deg,${LEVEL_COLORS[lvl.level]},${LEVEL_COLORS[Math.min(10,lvl.level+1)]})`;
   document.getElementById('pcXpFill').style.width = lvl.pct + '%';
   document.getElementById('pcXpText').textContent = `${lvl.xp} / ${lvl.next} XP`;
   
-  // Stats
+  // Discipline filter tabs
+  const pcDiscFilter = document.getElementById('pcDiscFilter');
+  const filterDisc = window._pcDiscFilter || 'all'; // 'all' or specific discipline
+  if (discs.length > 1) {
+    pcDiscFilter.style.display = 'flex';
+    pcDiscFilter.innerHTML = `<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;width:100%">` +
+      `<button onclick="window._pcDiscFilter='all';renderPlayerCard()" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${filterDisc === 'all' ? 'var(--accent)' : 'var(--border)'};background:${filterDisc === 'all' ? 'var(--accent)10' : 'transparent'};color:${filterDisc === 'all' ? 'var(--accent)' : 'var(--text-muted)'}">📊 Todos</button>` +
+      discs.map(d => {
+        const di = getDisciplineInfo(d);
+        const isActive = filterDisc === d;
+        return `<button onclick="window._pcDiscFilter='${d}';renderPlayerCard()" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${isActive ? di.color : 'var(--border)'};background:${isActive ? di.color + '20' : 'transparent'};color:${isActive ? di.color : 'var(--text-muted)'}">${di.icon} ${di.label}</button>`;
+      }).join('') + `</div>`;
+  } else {
+    pcDiscFilter.style.display = 'none';
+    window._pcDiscFilter = 'all';
+  }
+  
+  // Filtered stats based on discipline
+  const fd = filterDisc !== 'all' ? filterDisc : null; // null = all
+  
   const sessCount = a.sessions_count || 0;
-  const heatCount = (a.heat_history || []).length;
-  const totalCaught = getTotalCaught(a);
-  const catchRatio = getOverallCatchRatio(a);
-  const avgScore = getAvgWaveScore(a);
+  const heats = (a.heat_history || []).filter(h => !fd || (h.discipline || getAthleteDiscipline(a)) === fd);
+  const heatCount = heats.length;
+  
+  // Filtered caught/paddled from session waves
+  let totalCaughtF = 0, totalPaddledF = 0;
+  DB.sessions.forEach(s => {
+    if (!s.athlete_data || !s.athlete_data[a.id]) return;
+    const ad = s.athlete_data[a.id];
+    if (fd) {
+      // Count only waves tagged with this discipline
+      (ad.waves || []).forEach(w => {
+        const wd = w.discipline || getAthleteDiscipline(a);
+        if (wd === fd) {
+          if (w.type === 'caught') { totalCaughtF++; totalPaddledF++; }
+          else if (w.type === 'fall') { totalPaddledF++; }
+        }
+      });
+    } else {
+      totalCaughtF += ad.caught || 0;
+      totalPaddledF += ad.paddled || 0;
+    }
+  });
+  const catchRatioF = totalPaddledF > 0 ? Math.round(totalCaughtF / totalPaddledF * 100) : 0;
+  
+  // Filtered avg heat score
+  const heatAvgs = heats.filter(h => h.all_wave_avg > 0).map(h => h.all_wave_avg);
+  const avgScoreF = heatAvgs.length > 0 ? heatAvgs.reduce((s, v) => s + v, 0) / heatAvgs.length : 0;
   
   document.getElementById('pcStats').innerHTML = [
-    { val: sessCount, lbl: 'Sesiones', color: 'var(--accent)' },
-    { val: totalCaught, lbl: 'Olas', color: 'var(--green)' },
-    { val: catchRatio + '%', lbl: 'Catch %', color: catchRatio >= 60 ? 'var(--green)' : catchRatio >= 40 ? 'var(--yellow)' : 'var(--red)' },
-    { val: avgScore > 0 ? avgScore.toFixed(1) : '—', lbl: 'Avg Score', color: avgScore >= 6 ? 'var(--green)' : avgScore >= 4 ? 'var(--yellow)' : 'var(--text-primary)' },
+    { val: fd ? heatCount : sessCount, lbl: fd ? 'Heats' : 'Sesiones', color: 'var(--accent)' },
+    { val: totalCaughtF, lbl: 'Olas', color: 'var(--green)' },
+    { val: catchRatioF + '%', lbl: 'Catch %', color: catchRatioF >= 60 ? 'var(--green)' : catchRatioF >= 40 ? 'var(--yellow)' : 'var(--red)' },
+    { val: avgScoreF > 0 ? avgScoreF.toFixed(1) : '—', lbl: 'Avg Score', color: avgScoreF >= 6 ? 'var(--green)' : avgScoreF >= 4 ? 'var(--yellow)' : 'var(--text-primary)' },
   ].map(s => `<div class="pc-stat"><div class="pc-stat-val" style="color:${s.color}">${s.val}</div><div class="pc-stat-lbl">${s.lbl}</div></div>`).join('');
+  
+  // Per-discipline breakdown (only show in "All" mode)
+  const pcDiscEl = document.getElementById('pcDiscBreakdown');
+  if (discs.length > 1 && !fd) {
+    const sessions = DB.sessions;
+    const discStats = discs.map(d => {
+      const di = getDisciplineInfo(d);
+      let waves = 0, caught = 0, paddled = 0, falls = 0;
+      sessions.forEach(s => {
+        if (!s.athlete_data || !s.athlete_data[a.id]) return;
+        const ad = s.athlete_data[a.id];
+        // Count waves tagged with this discipline
+        (ad.waves || []).forEach(w => {
+          if ((w.discipline || 'surfboard') === d) {
+            if (w.type === 'caught') { caught++; paddled++; }
+            else if (w.type === 'fall') { falls++; paddled++; }
+            waves++;
+          }
+        });
+        // Untagged waves (old data) — only attribute to primary discipline
+        (ad.waves || []).filter(w => !w.discipline).forEach(w => {
+          if (d === getAthleteDiscipline(a)) {
+            if (w.type === 'caught') { caught++; paddled++; }
+            else if (w.type === 'fall') { falls++; paddled++; }
+            waves++;
+          }
+        });
+      });
+      const ratio = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
+      return { disc: d, di, waves, caught, paddled, falls, ratio };
+    }).filter(ds => ds.waves > 0 || ds.disc === discs[0]); // Show all with data + primary always
+    
+    pcDiscEl.style.display = 'block';
+    pcDiscEl.innerHTML = `<div class="card" style="padding:12px">
+      <div class="card-header" style="font-size:13px;margin-bottom:10px">📊 Stats por Disciplina</div>
+      ${discStats.map(ds => {
+        const ratioColor = ds.ratio >= 60 ? 'var(--green)' : ds.ratio >= 40 ? 'var(--yellow)' : ds.paddled > 0 ? 'var(--red)' : 'var(--text-muted)';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span class="disc-badge" style="background:${ds.di.color}20;color:${ds.di.color};min-width:80px;justify-content:center">${ds.di.icon} ${ds.di.label}</span>
+          <div style="flex:1;display:flex;gap:12px;font-size:12px">
+            <span style="color:var(--text-secondary)"><b style="color:var(--green)">${ds.caught}</b> olas</span>
+            <span style="color:var(--text-secondary)"><b style="color:${ratioColor}">${ds.paddled > 0 ? ds.ratio + '%' : '—'}</b> catch</span>
+            ${ds.falls > 0 ? `<span style="color:var(--text-secondary)"><b style="color:var(--red)">${ds.falls}</b> 💥</span>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } else {
+    pcDiscEl.style.display = 'none';
+  }
   
   // Badges
   const badges = getEarnedBadges(a);
@@ -3926,7 +4673,7 @@ function renderPlayerCard() {
     earned.map(b => `<div class="pc-badge earned"><span class="pc-badge-icon">${b.icon}</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('') +
     locked.slice(0, 4).map(b => `<div class="pc-badge locked"><span class="pc-badge-icon">🔒</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('');
   
-  // Catch Ratio Chart (only from tactical sessions)
+  // Catch Ratio Chart (filtered by discipline)
   const sessions = DB.sessions;
   const athSessions = sessions.filter(s => s.athlete_data && s.athlete_data[a.id] && (!s.modules_used || s.modules_used.includes('tactical'))).slice(-8);
   const catchChart = document.getElementById('pcCatchChart');
@@ -3934,15 +4681,26 @@ function renderPlayerCard() {
     catchChart.style.display = 'block';
     document.getElementById('pcCatchBars').innerHTML = athSessions.map((s, i) => {
       const d = s.athlete_data[a.id];
-      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      let ratio;
+      if (fd) {
+        // Filter waves by discipline
+        let fCaught = 0, fPaddled = 0;
+        (d.waves || []).forEach(w => {
+          const wd = w.discipline || getAthleteDiscipline(a);
+          if (wd === fd) { if (w.type === 'caught') { fCaught++; fPaddled++; } else if (w.type === 'fall') { fPaddled++; } }
+        });
+        ratio = fPaddled > 0 ? Math.round(fCaught / fPaddled * 100) : -1; // -1 = no data for this disc
+      } else {
+        ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      }
+      if (ratio === -1) return ''; // Skip sessions with no data for this discipline
       const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
       const label = s.spot.split(' ')[0].slice(0, 6);
       return `<div class="pc-bar-row"><div class="pc-bar-label">${label}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${ratio}%;background:${color}"></div></div><div class="pc-bar-val">${ratio}%</div></div>`;
     }).join('');
   } else { catchChart.style.display = 'none'; }
   
-  // Score Distribution Chart (from heats)
-  const heats = a.heat_history || [];
+  // Score Distribution Chart (from filtered heats)
   const scoreChart = document.getElementById('pcScoreChart');
   if (heats.length > 0) {
     scoreChart.style.display = 'block';
@@ -3951,7 +4709,7 @@ function renderPlayerCard() {
       const pct = Math.min(100, (h.total / 20) * 100);
       const avgPct = h.all_wave_avg > 0 ? Math.min(100, (h.all_wave_avg / 10) * 100) : 0;
       const color = h.all_wave_avg >= 6 ? 'var(--green)' : h.all_wave_avg >= 4 ? 'var(--yellow)' : 'var(--red)';
-      const label = `H${h.heat_number||'?'}`;
+      const label = `${h.discipline ? getDisciplineInfo(h.discipline).icon : ''}H${h.heat_number||'?'}`;
       return `<div class="pc-bar-row"><div class="pc-bar-label">${label}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="pc-bar-val">${h.total.toFixed(1)}</div></div>
       <div class="pc-bar-row" style="margin-top:-2px"><div class="pc-bar-label" style="font-size:9px">avg/w</div><div class="pc-bar-track" style="height:8px"><div class="pc-bar-fill" style="width:${avgPct}%;background:${color};height:100%"></div></div><div class="pc-bar-val" style="font-size:10px">${h.all_wave_avg.toFixed(1)}</div></div>`;
     }).join('');
@@ -3986,7 +4744,8 @@ function renderPlayerCard() {
       const posEmoji = h.position === 1 ? '🥇' : h.position === 2 ? '🥈' : h.position === 3 ? '🥉' : h.position + 'th';
       const d = new Date(h.date);
       const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(d);
-      return `<div class="pc-hist-item"><div><strong>${posEmoji}</strong> H${h.heat_number||'?'} · ${h.category||'?'} · ${h.round||'?'}<div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${h.location||'?'} · avg ${h.all_wave_avg?.toFixed(1)||'?'}/wave</div></div><div style="font-weight:800;font-size:16px">${h.total.toFixed(2)}</div></div>`;
+      const discBdg = h.discipline ? getDisciplineInfo(h.discipline).icon + ' ' : '';
+      return `<div class="pc-hist-item"><div><strong>${posEmoji}</strong> ${discBdg}H${h.heat_number||'?'} · ${h.category||'?'} · ${h.round||'?'}<div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${h.location||'?'} · avg ${h.all_wave_avg?.toFixed(1)||'?'}/wave</div></div><div style="font-weight:800;font-size:16px">${h.total.toFixed(2)}</div></div>`;
     }).join('');
   } else { heatCard.style.display = 'none'; }
   
@@ -4104,7 +4863,16 @@ function editAthlete() {
   document.getElementById('maName').value = a.name;
   document.getElementById('maAge').value = a.age || '';
   segSelect('maStance', document.querySelector(`#maStance .seg-btn[data-v="${a.stance||'regular'}"]`));
+  // Set disciplines (multi-select)
+  const discs = getAthleteDisciplines(a);
+  document.querySelectorAll('#maDisc .disc-btn').forEach(b => {
+    b.classList.toggle('selected', discs.includes(b.dataset.v));
+  });
+  // Hide stance if no wave discipline
+  const hasWaveDisc = discs.some(d => isDiscWaveBased(d));
+  document.getElementById('maStance').closest('.field').style.display = hasWaveDisc ? '' : 'none';
   window._editAthleteId = _pcAthleteId;
+  document.querySelector('#modalAddAthlete .modal-title').textContent = 'Editar Atleta';
   document.getElementById('modalAddAthlete').classList.add('active');
 }
 
@@ -4317,9 +5085,31 @@ function renderLab() {
   sel.innerHTML = '<option value="">— Sin vincular —</option>' +
     athletes.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
   
+  // Hide discipline dropdown initially
+  document.getElementById('labDiscField').style.display = 'none';
+  
   // Render saved frames
   renderLabFrames();
   renderLabClips();
+}
+
+function labAthleteChanged() {
+  const athId = document.getElementById('labAthlete').value;
+  const discField = document.getElementById('labDiscField');
+  const discSel = document.getElementById('labDisc');
+  
+  if (athId) {
+    const ath = DB.athletes.find(a => a.id === athId);
+    if (ath) {
+      const discs = getAthleteDisciplines(ath);
+      if (discs.length > 1) {
+        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.icon} ${di.label}</option>`; }).join('');
+        discField.style.display = 'block';
+        return;
+      }
+    }
+  }
+  discField.style.display = 'none';
 }
 
 function labLoadVideo(input) {
@@ -4635,9 +5425,13 @@ function labCapture() {
   const dataUrl = tmpCanvas.toDataURL('image/jpeg', 0.7);
   
   const athId = document.getElementById('labAthlete').value;
+  const labDiscSel = document.getElementById('labDisc');
+  const labDiscField = document.getElementById('labDiscField');
+  const labDisc = (athId && labDiscField.style.display !== 'none' && labDiscSel.value) ? labDiscSel.value : null;
   const frame = {
     id: DB.genId(),
     athlete_id: athId || null,
+    discipline: labDisc || (athId ? (() => { const a = DB.athletes.find(x => x.id === athId); return a ? getAthleteDiscipline(a) : null; })() : null),
     timestamp: video.currentTime,
     image: dataUrl,
     created_at: new Date().toISOString()
@@ -4674,9 +5468,10 @@ function renderLabFrames() {
     const s = Math.floor(t % 60);
     const timeStr = `${m}:${s.toString().padStart(2,'0')}`;
     const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
+    const discIcon = f.discipline ? getDisciplineInfo(f.discipline).icon : '';
     return `<div class="lab-frame" onclick="labFrameActions('${f.id}')">
       <img src="${f.image}" loading="lazy">
-      <div class="lab-frame-time">${timeStr} ${ath ? '· '+ath : ''}</div>
+      <div class="lab-frame-time">${timeStr} ${ath ? '· '+ath : ''} ${discIcon}</div>
     </div>`;
   }).join('');
 }
@@ -5033,7 +5828,7 @@ function jmGetHeat() {
     if (!h) {
       h = {
         metadata: { heat_number:'', category:'', round:'', location:'', duration:20, is_closed:false, notes:'' },
-        surfers: JM_COLORS.map(c => ({ color:c, name:'', athlete_id:'', goal:0, waves:new Array(20).fill(null), interference:0, interference_waves:[] })),
+        surfers: JM_COLORS.map(c => ({ color:c, name:'', athlete_id:'', discipline:'', goal:0, waves:new Array(20).fill(null), interference:0, interference_waves:[] })),
         priority_order: [],
         started: false
       };
@@ -5056,14 +5851,20 @@ function renderJudge() {
       const lbl = c === 'Red' ? 'color:#fecaca;background:#991b1b' : c === 'Yellow' ? 'color:#fef08a;background:#854d0e' : c === 'Black' ? 'color:#e2e8f0;background:#0f172a' : c === 'White' ? 'color:#0f172a;background:#f0f0f0' : 'color:#bfdbfe;background:#1e3a8a';
       const curId = h.surfers[i].athlete_id || '';
       const curName = h.surfers[i].name || '';
+      const curDisc = h.surfers[i].discipline || '';
       let opts = '<option value="">— Vacío —</option>';
       athletes.forEach(a => {
         const sel = a.id === curId ? 'selected' : '';
         opts += `<option value="${a.id}" ${sel}>${a.name}</option>`;
       });
       opts += `<option value="__custom" ${curId === '__custom' ? 'selected' : ''}>✏️ Otro...</option>`;
+      // Discipline dropdown (populated dynamically by jmSelectSurfer)
+      const ath = curId && curId !== '__custom' ? athletes.find(a => a.id === curId) : null;
+      const athDiscs = ath ? getAthleteDisciplines(ath) : [];
+      const showDisc = athDiscs.length > 1;
+      let discOpts = athDiscs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}" ${d === curDisc ? 'selected' : ''}>${di.icon} ${di.label}</option>`; }).join('');
       return `<div class="jm-surfer-item"><label style="${lbl}">${c}</label><select id="jmSN${i}" onchange="jmSelectSurfer(${i})">
-        ${opts}</select><input placeholder="Nombre manual" id="jmSNcustom${i}" value="${curId === '__custom' ? curName : ''}" onchange="jmUpdateSurfer()" style="display:${curId === '__custom' ? 'block' : 'none'}"><input type="number" placeholder="Goal" step="0.1" min="0" max="20" id="jmSG${i}" value="${h.surfers[i].goal||''}" onchange="jmUpdateSurfer()"></div>`;
+        ${opts}</select><select id="jmSD${i}" onchange="jmSurferDiscChange(${i})" style="display:${showDisc ? 'block' : 'none'};font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-primary)">${discOpts}</select><input placeholder="Nombre manual" id="jmSNcustom${i}" value="${curId === '__custom' ? curName : ''}" onchange="jmUpdateSurfer()" style="display:${curId === '__custom' ? 'block' : 'none'}"><input type="number" placeholder="Goal" step="0.1" min="0" max="20" id="jmSG${i}" value="${h.surfers[i].goal||''}" onchange="jmUpdateSurfer()"></div>`;
     }).join('');
   }
   // Duration
@@ -5114,8 +5915,9 @@ function jmBuildGrid(h) {
   h.surfers.forEach((s, si) => {
     const intLvl = s.interference > 0 ? ` l${s.interference}` : '';
     const intText = s.interference > 0 ? JM_INT_LABELS[s.interference] : 'INT';
+    const discIcon = s.discipline ? getDisciplineInfo(s.discipline).icon + ' ' : '';
     html += `<tr><td class="jm-color-cell ${JM_COLOR_CSS[s.color]}" onclick="jmSendPriority(${si})">
-      ${s.color}${s.name ? '<br><span style="font-size:10px;font-weight:500;opacity:.8">'+s.name.split(' ')[0]+'</span>':''}
+      ${s.color}${s.name ? '<br><span style="font-size:10px;font-weight:500;opacity:.8">'+discIcon+s.name.split(' ')[0]+'</span>':''}
       <span class="jm-int-badge${intLvl}" onclick="event.stopPropagation();jmToggleInt(${si})" title="Tap to cycle interference">${intText}</span>
     </td>`;
     for (let wi = 0; wi < 20; wi++) {
@@ -5138,27 +5940,52 @@ function jmBuildGrid(h) {
 function jmSelectSurfer(i) {
   const sel = document.getElementById(`jmSN${i}`);
   const customInp = document.getElementById(`jmSNcustom${i}`);
+  const discSel = document.getElementById(`jmSD${i}`);
   const val = sel.value;
   const h = jmGetHeat();
   
   if (val === '') {
     h.surfers[i].name = '';
     h.surfers[i].athlete_id = '';
+    h.surfers[i].discipline = '';
     customInp.style.display = 'none';
+    if (discSel) discSel.style.display = 'none';
   } else if (val === '__custom') {
     h.surfers[i].athlete_id = '__custom';
     h.surfers[i].name = customInp.value;
+    h.surfers[i].discipline = '';
     customInp.style.display = 'block';
     customInp.focus();
+    if (discSel) discSel.style.display = 'none';
   } else {
     const ath = DB.athletes.find(a => a.id === val);
     h.surfers[i].name = ath ? ath.name : '';
     h.surfers[i].athlete_id = val;
     customInp.style.display = 'none';
+    
+    // Populate discipline dropdown
+    if (ath && discSel) {
+      const discs = getAthleteDisciplines(ath);
+      if (discs.length > 1) {
+        discSel.innerHTML = discs.map(d => { const di = getDisciplineInfo(d); return `<option value="${d}">${di.icon} ${di.label}</option>`; }).join('');
+        discSel.style.display = 'block';
+        h.surfers[i].discipline = discs[0]; // Default to first
+      } else {
+        discSel.style.display = 'none';
+        h.surfers[i].discipline = discs[0];
+      }
+    }
   }
   jmSave();
   jmBuildGrid(h);
   jmUpdateSequential();
+}
+
+function jmSurferDiscChange(i) {
+  const h = jmGetHeat();
+  const discSel = document.getElementById(`jmSD${i}`);
+  if (discSel) h.surfers[i].discipline = discSel.value;
+  jmSave();
 }
 
 function jmUpdateSurfer() {
@@ -5166,11 +5993,15 @@ function jmUpdateSurfer() {
   JM_COLORS.forEach((c, i) => {
     const sel = document.getElementById('jmSN' + i);
     const customInp = document.getElementById('jmSNcustom' + i);
+    const discSel = document.getElementById('jmSD' + i);
     if (sel && sel.value === '__custom' && customInp) {
       h.surfers[i].name = customInp.value;
       h.surfers[i].athlete_id = '__custom';
     }
     h.surfers[i].goal = parseFloat(document.getElementById('jmSG' + i).value) || 0;
+    if (discSel && discSel.style.display !== 'none') {
+      h.surfers[i].discipline = discSel.value;
+    }
   });
   jmSave();
   jmBuildGrid(h);
@@ -5466,6 +6297,8 @@ function jmCloseHeat() {
   h.surfers.forEach(s => {
     const name = (s.name || '').trim();
     if (!name) return;
+    const trackerKey = s.discipline ? `${name}||${s.discipline}` : name;
+    // Also keep legacy un-keyed entry for backward compat
     if (!tracker[name]) tracker[name] = { heats: [], all_wave_avgs: [], goal: s.goal || 0, athlete_id: s.athlete_id || '' };
     if (!tracker[name].all_wave_avgs) tracker[name].all_wave_avgs = [];
     if (!tracker[name].heats) tracker[name].heats = [];
@@ -5473,6 +6306,12 @@ function jmCloseHeat() {
     if (r) {
       tracker[name].heats.push(r.total);
       tracker[name].all_wave_avgs.push(r.all_wave_avg);
+      // Discipline-keyed tracker
+      if (s.discipline && trackerKey !== name) {
+        if (!tracker[trackerKey]) tracker[trackerKey] = { heats: [], all_wave_avgs: [], goal: s.goal || 0, athlete_id: s.athlete_id || '', discipline: s.discipline };
+        tracker[trackerKey].heats.push(r.total);
+        tracker[trackerKey].all_wave_avgs.push(r.all_wave_avg);
+      }
     }
   });
   DB.judgeTracker = tracker;
@@ -5486,12 +6325,16 @@ function jmCloseHeat() {
       const ath = athletes.find(a => a.id === r.athlete_id);
       if (!ath) return;
       if (!ath.heat_history) ath.heat_history = [];
+      // Find discipline from surfer slot
+      const surferSlot = h.surfers.find(s => s.athlete_id === r.athlete_id);
+      const heatDisc = surferSlot?.discipline || getAthleteDiscipline(ath);
       ath.heat_history.push({
         date: new Date().toISOString(),
         heat_number: h.metadata.heat_number || '',
         category: h.metadata.category || '',
         round: h.metadata.round || '',
         location: h.metadata.location || '',
+        discipline: heatDisc,
         position: r.position,
         total: r.total,
         all_wave_avg: r.all_wave_avg,
