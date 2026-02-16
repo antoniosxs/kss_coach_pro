@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="KSS Coach">
 <link rel="apple-touch-icon" href="kss_coach_192.png">
+<link rel="icon" type="image/png" href="kss_coach_192.png">
 <link rel="manifest" href="manifest.json">
 <title>KSS Coach</title>
 <style>
@@ -365,6 +366,28 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-clip-name{font-weight:700;font-size:14px}
 .lab-clip-meta{font-size:11px;color:var(--text-muted)}
 
+/* ===== KSS BRANDING ===== */
+.kss-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.kss-logo{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.kss-logo-sm{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.kss-logo-lg{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.kss-title{font-size:20px;font-weight:800;color:var(--text-primary)}
+.kss-subtitle{font-size:11px;color:var(--text-secondary);font-weight:600}
+.kss-watermark{position:absolute;bottom:8px;left:8px;z-index:5;opacity:.35;pointer-events:none;width:40px;height:40px;border-radius:50%}
+.lab-fullscreen .kss-watermark{width:52px;height:52px;bottom:12px;left:12px;opacity:.3}
+.kss-global-wm{position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 10px);right:12px;width:32px;height:32px;border-radius:50%;opacity:.08;pointer-events:none;z-index:90}
+.share-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--accent);border:1px solid var(--accent);background:transparent;cursor:pointer;transition:all .15s}
+.share-btn:active{background:var(--accent-glow);transform:scale(.97)}
+.pwa-banner{position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 6px);left:12px;right:12px;background:linear-gradient(135deg,#0c4a6e,#0369a1);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:10px;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.5);animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.pwa-banner-logo{width:36px;height:36px;border-radius:50%;flex-shrink:0}
+.pwa-banner-text{flex:1;font-size:13px;font-weight:600;color:#fff;line-height:1.3}
+.pwa-banner-text small{font-size:11px;color:rgba(255,255,255,.7);display:block;margin-top:2px}
+.pwa-banner-install{padding:8px 16px;border-radius:6px;background:#fff;color:#0369a1;font-size:12px;font-weight:800;border:none;cursor:pointer;flex-shrink:0}
+.pwa-banner-close{padding:4px 8px;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;border:none;background:none;flex-shrink:0}
+.kss-db-header{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:16px}
+.kss-db-logo{width:56px;height:56px;border-radius:50%;object-fit:cover}
+
 /* ===== BIOMETRICS ===== */
 .bio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
 .bio-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
@@ -444,7 +467,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== HOME ==================== -->
 <div class="view active" id="view-home">
-  <div class="dash-hero">
+  <div class="dash-hero" style="display:flex;flex-direction:column;align-items:center">
+    <img class="kss-db-logo" id="homeLogoImg" alt="KSS">
     <div class="dash-hero-title">KSS Coach</div>
     <div class="dash-hero-sub" id="homeGreeting">Surf Coaching System</div>
   </div>
@@ -494,7 +518,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <div class="view" id="view-session-setup">
   <div class="flex-between mb-4">
     <button class="text-sm text-muted" onclick="cancelSession()">← Cancelar</button>
-    <div style="font-size:17px;font-weight:800">Nueva Sesión</div>
+    <div style="display:flex;align-items:center;gap:8px"><img class="kss-logo-sm" id="ssLogoImg" alt="KSS" style="opacity:.6"><span style="font-size:17px;font-weight:800">Nueva Sesión</span></div>
     <div style="width:60px"></div>
   </div>
 
@@ -574,6 +598,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <!-- ==================== SESSION HUB ==================== -->
 <div class="view" id="view-session-hub">
   <div style="text-align:center;margin:16px 0 20px">
+    <img class="kss-logo" id="hubLogoImg" alt="KSS" style="margin:0 auto">
     <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em">● Sesión Activa</div>
     <div style="font-size:22px;font-weight:800;margin-top:4px" id="hubSpot">—</div>
     <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="hubConditions">—</div>
@@ -633,6 +658,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <div style="font-size:11px;color:var(--text-secondary);font-weight:600" id="tacLevel"></div>
     </div>
     <button class="tac-nav-arrow" onclick="tacNext()">›</button>
+    <img class="kss-logo-sm" id="tacLogoImg" alt="KSS" style="position:absolute;top:10px;right:12px;opacity:.35;width:22px;height:22px">
   </div>
 
   <div style="padding:12px 16px">
@@ -866,7 +892,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <!-- ==================== OVERVIEW ==================== -->
 <div class="view" id="view-overview" style="padding-top:8px">
   <div class="flex-between mb-4" style="padding:0 4px">
-    <div style="font-size:17px;font-weight:800">Sesión en Vivo</div>
+    <div style="display:flex;align-items:center;gap:8px"><img class="kss-logo-sm" id="ovLogoImg" alt="KSS" style="opacity:.6"><span style="font-size:17px;font-weight:800">Sesión en Vivo</span></div>
     <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="showView('tactical')">← Tracking</button>
   </div>
   <div id="ovInfo" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;font-weight:600"></div>
@@ -882,7 +908,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <div class="view" id="view-workout">
   <div class="flex-between mb-4" style="padding:0 4px">
     <button class="text-sm text-muted" onclick="showView('session-hub')">← Hub</button>
-    <div style="font-size:17px;font-weight:800">💪 Workout</div>
+    <div style="display:flex;align-items:center;gap:8px"><img class="kss-logo-sm" id="woLogoImg" alt="KSS" style="opacity:.6"><span style="font-size:17px;font-weight:800">💪 Workout</span></div>
     <div style="width:60px"></div>
   </div>
 
@@ -934,7 +960,10 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== DEBRIEF ==================== -->
 <div class="view" id="view-debrief">
-  <div style="font-size:20px;font-weight:800;margin-bottom:4px">📋 Session Debrief</div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <img class="kss-logo" id="dbLogoImg" alt="KSS">
+    <div style="font-size:20px;font-weight:800">📋 Session Debrief</div>
+  </div>
   <div id="dbDate" style="font-size:13px;color:var(--text-secondary);margin-bottom:16px"></div>
 
   <div class="db-condition" id="dbConditions"></div>
@@ -973,13 +1002,16 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <button class="btn btn-accent" onclick="saveAndExport()" style="margin-bottom:10px">💾 Guardar y Exportar CSV</button>
   <button class="btn btn-outline" onclick="saveDebrief(); showView('home')">Guardar sin Exportar</button>
-  <button class="btn btn-outline" onclick="saveTemplate()" style="margin-top:8px;border-color:var(--accent);color:var(--accent)">📋 Guardar como Template</button>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn btn-outline" onclick="saveTemplate()" style="flex:1;border-color:var(--accent);color:var(--accent)">📋 Template</button>
+    <button class="share-btn" onclick="shareSession('debrief')" style="flex:1">📤 Compartir</button>
+  </div>
 </div>
 
 <!-- ==================== ATHLETES ==================== -->
 <div class="view" id="view-athletes">
-  <div class="flex-between mb-4">
-    <div style="font-size:20px;font-weight:800">👥 Mis Atletas</div>
+  <div class="flex-between mb-4" style="align-items:center">
+    <div class="kss-header" style="margin-bottom:0"><img class="kss-logo-sm" id="athLogoImg" alt="KSS"><div class="kss-title">👥 Mis Atletas</div></div>
     <button style="color:var(--accent);font-weight:700;font-size:14px" onclick="openAddAthleteModal()">+ Nuevo</button>
   </div>
   <div id="athList"></div>
@@ -991,7 +1023,10 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== PLAYER CARD (Phase 2) ==================== -->
 <div class="view" id="view-player-card">
-  <button class="text-sm text-muted" onclick="showView('athletes')" style="margin-bottom:8px">← Mis Atletas</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <button class="text-sm text-muted" onclick="showView('athletes')">← Mis Atletas</button>
+    <img class="kss-logo-sm" id="pcLogoImg" alt="KSS" style="opacity:.6">
+  </div>
   
   <div class="pc-header">
     <div class="pc-avi" id="pcAvi">—</div>
@@ -1090,7 +1125,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <div class="view" id="view-drills">
   <div class="flex-between mb-4">
     <button class="text-sm text-muted" onclick="showView(window._drillReturnView||'athletes')">← Volver</button>
-    <div style="font-size:17px;font-weight:800">🏋️ Drill Bank</div>
+    <div style="display:flex;align-items:center;gap:6px"><img class="kss-logo-sm" id="drillsLogoImg" alt="KSS"><span style="font-size:17px;font-weight:800">🏋️ Drill Bank</span></div>
     <div style="width:50px"></div>
   </div>
   
@@ -1164,7 +1199,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== TECH LAB (Phase 3) ==================== -->
 <div class="view" id="view-lab">
-  <div style="font-size:20px;font-weight:800;margin-bottom:16px">🎥 Tech Lab</div>
+  <div class="kss-header"><img class="kss-logo-sm" id="labLogoImg" alt="KSS"><div><div class="kss-title">🎥 Tech Lab</div></div></div>
 
   <!-- Upload / Record -->
   <div class="card" id="labUploadCard">
@@ -1193,6 +1228,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <div class="lab-video-wrap">
         <video class="lab-video" id="labVideo" playsinline></video>
         <canvas class="lab-canvas" id="labCanvas"></canvas>
+        <img class="kss-watermark" id="labWatermark" alt="KSS">
         <button class="lab-fs-expand" onclick="labEnterFullscreen()" id="labFsExpand" title="Pantalla completa">⛶</button>
       </div>
 
@@ -1269,7 +1305,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== SESSION HISTORY ==================== -->
 <div class="view" id="view-history">
-  <div style="font-size:20px;font-weight:800;margin-bottom:4px">📚 Historial de Sesiones</div>
+  <div class="kss-header" style="margin-bottom:4px"><img class="kss-logo-sm" id="histLogoImg" alt="KSS"><div class="kss-title">📚 Historial de Sesiones</div></div>
   <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="histCount"></div>
   
   <!-- Filters -->
@@ -1291,7 +1327,10 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== SESSION DETAIL ==================== -->
 <div class="view" id="view-session-detail">
-  <button class="text-sm text-muted" onclick="showView('history')" style="margin-bottom:8px">← Historial</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <button class="text-sm text-muted" onclick="showView('history')">← Historial</button>
+    <img class="kss-logo-sm" id="sdLogoImg" alt="KSS" style="opacity:.6">
+  </div>
   <div style="font-size:18px;font-weight:800;margin-bottom:4px" id="sdTitle"></div>
   <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="sdMeta"></div>
   
@@ -1315,12 +1354,18 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div id="sdNotes" style="font-size:13px;line-height:1.5"></div>
   </div>
   
-  <button class="btn btn-outline btn-sm" onclick="exportSessionCSVById(window._sdSessionIdx)" style="margin-top:12px">📥 Exportar CSV</button>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-outline btn-sm" onclick="exportSessionCSVById(window._sdSessionIdx)" style="flex:1">📥 Exportar CSV</button>
+    <button class="share-btn" onclick="shareSession('detail')" style="flex:1">📤 Compartir</button>
+  </div>
 </div>
 
 <!-- ==================== PROGRESSION ==================== -->
 <div class="view" id="view-progress">
-  <button class="text-sm text-muted" onclick="showView(_progressReturn || 'athletes')" style="margin-bottom:8px">← Atrás</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <button class="text-sm text-muted" onclick="showView(_progressReturn || 'athletes')">← Atrás</button>
+    <img class="kss-logo-sm" id="progLogoImg" alt="KSS" style="opacity:.6">
+  </div>
   <div style="font-size:20px;font-weight:800;margin-bottom:4px" id="progTitle"></div>
   <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px" id="progSubtitle"></div>
   
@@ -1360,7 +1405,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== SETTINGS ==================== -->
 <div class="view" id="view-settings">
-  <div style="font-size:20px;font-weight:800;margin-bottom:20px">⚙️ Configuración</div>
+  <div class="kss-header"><img class="kss-logo-sm" id="settingsLogoImg" alt="KSS"><div><div class="kss-title">⚙️ Configuración</div><div class="kss-subtitle">KSS Coach · Karibe Surf Score</div></div></div>
 
   <div class="card">
     <div class="card-header">📍 Spots</div>
@@ -1394,7 +1439,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
-    KSS Coach v5.0 · Phase 5<br>Karibe Surf Score
+    <img id="footerLogoImg" alt="KSS" style="width:44px;height:44px;border-radius:50%;margin-bottom:6px;opacity:.6"><br>
+    KSS Coach v6.0 · Phase 6<br>Karibe Surf Score
   </div>
 </div>
 
@@ -1431,6 +1477,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 <!-- ==================== JUDGE MODE ==================== -->
 <div class="view" id="view-judge" style="padding:8px 8px 24px">
+  <img class="kss-logo-sm" id="judgeLogoImg" alt="KSS" style="position:absolute;top:12px;right:12px;opacity:.5">
   <!-- Collapsed metadata -->
   <div class="jm-meta-collapsed" id="jmMetaCollapsed"></div>
   
@@ -1543,7 +1590,23 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </button>
 </nav>
 
+<!-- Global KSS watermark -->
+<img class="kss-global-wm" id="globalWmLogoImg" alt="">
+
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwaBanner" style="display:none">
+  <img class="pwa-banner-logo" id="pwaLogoImg" alt="KSS">
+  <div class="pwa-banner-text">Instalar KSS Coach<small>Acceso rápido desde tu pantalla</small></div>
+  <button class="pwa-banner-install" onclick="pwaInstall()">Instalar</button>
+  <button class="pwa-banner-close" onclick="pwaDismiss()">×</button>
+</div>
+
 <script>
+// ============================================================
+// KSS BRANDING
+// ============================================================
+const KSS_LOGO = 'data:image/png;base64,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';
+
 // ============================================================
 // STORAGE LAYER
 // ============================================================
@@ -3129,6 +3192,115 @@ function exportAllData() {
   link.download = `KSS_Coach_Backup_${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// SHARE SESSION SUMMARY
+// ============================================================
+function shareSession(source) {
+  let s, idx;
+  if (source === 'debrief') {
+    // Current session just ended — it's the last one in DB
+    idx = DB.sessions.length - 1;
+    s = DB.sessions[idx];
+    if (!s) { // Session not yet saved, save it first
+      saveDebrief();
+      idx = DB.sessions.length - 1;
+      s = DB.sessions[idx];
+    }
+  } else {
+    idx = window._sdSessionIdx;
+    s = DB.sessions[idx];
+  }
+  if (!s) return alert('No hay sesión para compartir');
+
+  const athletes = DB.athletes;
+  const date = new Date(s.date).toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const duration = s.duration ? Math.round(s.duration / 60) + ' min' : '—';
+  const modules = s.modules_used || [];
+
+  let text = `🏄 KSS Coach — Resumen de Sesión\n`;
+  text += `📅 ${date}\n`;
+  text += `📍 ${s.spot || '—'}\n`;
+  text += `⏱️ ${duration}\n`;
+  if (s.swell) text += `🌊 ${s.swell} · ${s.wind || ''}\n`;
+  if (modules.length) text += `📦 Módulos: ${modules.join(', ')}\n`;
+  text += `\n`;
+
+  // Per-athlete summary
+  const athData = s.athletes || [];
+  athData.forEach(ad => {
+    const a = athletes.find(x => x.id === ad.id);
+    const name = a ? a.name : ad.id;
+    let line = `👤 ${name}`;
+    if (modules.includes('tactical') && ad.paddled > 0) {
+      const ratio = Math.round((ad.caught / ad.paddled) * 100);
+      line += ` — ${ad.caught}/${ad.paddled} olas (${ratio}%)`;
+    }
+    if (ad.judge_summary) {
+      const js = ad.judge_summary;
+      line += ` — Judge avg: ${js.avg_wave?.toFixed(1) || '—'}`;
+    }
+    if (ad.xp_earned) line += ` · +${ad.xp_earned} XP`;
+    text += line + `\n`;
+  });
+
+  if (s.notes) text += `\n📝 ${s.notes}\n`;
+  if (s.rating) text += `⭐ ${s.rating}/5\n`;
+  text += `\n— Powered by KSS Coach 🌊`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'KSS Coach - Sesión', text }).catch(() => {});
+  } else {
+    // Fallback: copy to clipboard + offer WhatsApp
+    navigator.clipboard.writeText(text).then(() => {
+      const wa = confirm('📋 Resumen copiado al clipboard!\n\n¿Abrir WhatsApp para enviar?');
+      if (wa) {
+        window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+      }
+    }).catch(() => {
+      // Last resort: prompt with text
+      prompt('Copia este resumen:', text);
+    });
+  }
+}
+
+// ============================================================
+// PWA INSTALL PROMPT
+// ============================================================
+let _pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // Show banner if not dismissed before
+  if (!localStorage.getItem('kss_pwa_dismissed')) {
+    setTimeout(() => {
+      const banner = document.getElementById('pwaBanner');
+      if (banner) banner.style.display = 'flex';
+    }, 3000); // Show after 3 seconds
+  }
+});
+
+function pwaInstall() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        document.getElementById('pwaBanner').style.display = 'none';
+      }
+      _pwaPrompt = null;
+    });
+  } else {
+    // Fallback: show instructions
+    alert('Para instalar:\n\n📱 iOS: Safari → Compartir → Agregar a Inicio\n🤖 Android: Menú ⋮ → Instalar app\n💻 Desktop: Barra de dirección → Instalar');
+    document.getElementById('pwaBanner').style.display = 'none';
+  }
+}
+
+function pwaDismiss() {
+  document.getElementById('pwaBanner').style.display = 'none';
+  localStorage.setItem('kss_pwa_dismissed', '1');
 }
 
 // ============================================================
@@ -5488,6 +5660,10 @@ setInterval(() => { if (currentView === 'judge') jmUpdateSequential(); }, 2000);
 // INIT
 // ============================================================
 (function init() {
+  // Populate all KSS logos
+  document.querySelectorAll('[id$="LogoImg"]').forEach(img => img.src = KSS_LOGO);
+  document.getElementById('labWatermark').src = KSS_LOGO;
+  
   // Check for active session
   const s = DB.activeSession;
   if (s) {
