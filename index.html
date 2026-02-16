@@ -459,6 +459,26 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .spark-line{position:relative;width:100%;height:100%}
 .spark-line svg{width:100%;height:100%}
 .sd-ath-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--bg-card)}
+/* Analytics Engine CSS */
+.anl-card-title{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.anl-time-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--text-muted);transition:all .15s}
+.anl-time-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(56,189,248,.08)}
+.anl-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.anl-bar-label{width:70px;font-size:11px;font-weight:600;color:var(--text-secondary);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.anl-bar-track{flex:1;height:18px;background:var(--bg-input);border-radius:4px;overflow:hidden;position:relative}
+.anl-bar-fill{height:100%;border-radius:4px;transition:width .4s ease;min-width:2px}
+.anl-bar-val{width:36px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+.anl-donut{border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.anl-donut-center{position:absolute;width:50px;height:50px;background:var(--bg-card);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.anl-legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.anl-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.anl-cmp-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.anl-cmp-label{width:70px;font-size:11px;font-weight:600;color:var(--text-secondary);text-align:center;flex-shrink:0}
+.anl-cmp-bar{flex:1;height:20px;background:var(--bg-input);border-radius:4px;overflow:hidden;position:relative}
+.anl-cmp-fill-a{position:absolute;left:0;top:0;height:100%;background:var(--accent);border-radius:4px 0 0 4px;transition:width .4s}
+.anl-cmp-fill-b{position:absolute;right:0;top:0;height:100%;background:var(--green);border-radius:0 4px 4px 0;transition:width .4s}
+.anl-spot-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.anl-spot-row:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -487,6 +507,18 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- KPI Row -->
   <div class="dash-row" id="homeKPIs" style="display:none"></div>
+
+  <!-- Analytics Quick Access -->
+  <div id="homeAnalyticsBtn" style="display:none;margin-bottom:12px">
+    <button onclick="showView('analytics')" style="width:100%;padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(139,92,246,.06));display:flex;align-items:center;gap:10px;text-align:left">
+      <span style="font-size:24px">📊</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary)">Analytics</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Tendencias, comparaciones y insights</div>
+      </div>
+      <span style="color:var(--text-muted);font-size:14px">›</span>
+    </button>
+  </div>
 
   <!-- Quick Athletes Strip -->
   <div class="dash-section" id="homeAthSection" style="display:none">
@@ -1484,6 +1516,94 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 </div>
 
+<!-- ==================== ANALYTICS ENGINE (Phase 7) ==================== -->
+<div class="view" id="view-analytics">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <button class="text-sm text-muted" onclick="showView('home')">← Home</button>
+    <img class="kss-logo-sm" id="anlLogoImg" alt="KSS" style="opacity:.6">
+  </div>
+  <div style="font-size:22px;font-weight:800;margin-bottom:2px">📊 Analytics</div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="anlSubtitle">Insights del equipo</div>
+
+  <!-- Scope: Team / Athlete picker -->
+  <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px" id="anlScopePills"></div>
+  <!-- Discipline filter (when athlete selected) -->
+  <div id="anlDiscFilter" style="display:none;margin-bottom:12px;overflow-x:auto"></div>
+  <!-- Time range -->
+  <div style="display:flex;gap:6px;margin-bottom:16px" id="anlTimeRange">
+    <button class="anl-time-btn active" data-r="all" onclick="anlSetRange('all')">Todo</button>
+    <button class="anl-time-btn" data-r="90" onclick="anlSetRange('90')">90d</button>
+    <button class="anl-time-btn" data-r="30" onclick="anlSetRange('30')">30d</button>
+    <button class="anl-time-btn" data-r="7" onclick="anlSetRange('7')">7d</button>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="dash-row" id="anlKPIs" style="margin-bottom:16px"></div>
+
+  <!-- Session Frequency Chart -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">📅 Frecuencia de Sesiones</div>
+    <div id="anlFreqChart" style="height:120px;position:relative;overflow:hidden"></div>
+  </div>
+
+  <!-- Catch Ratio Trend -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">📈 Tendencia Catch Ratio</div>
+    <div id="anlCatchTrend" style="height:160px;position:relative;overflow:hidden"></div>
+  </div>
+
+  <!-- Wave Quality Distribution -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">🌊 Calidad de Olas</div>
+    <div style="display:flex;gap:16px;align-items:center">
+      <div id="anlQualDonut" style="width:100px;height:100px;flex-shrink:0"></div>
+      <div id="anlQualLegend" style="flex:1;font-size:12px"></div>
+    </div>
+  </div>
+
+  <!-- Maneuver Distribution -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">🏄 Maniobras Top</div>
+    <div id="anlManeuvers"></div>
+  </div>
+
+  <!-- Wave Evaluation Breakdown -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">🎯 Evaluación de Olas</div>
+    <div id="anlEvalBars"></div>
+  </div>
+
+  <!-- Biomech Averages -->
+  <div class="card" id="anlBioCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">🦴 Biomecánica</div>
+    <div id="anlBioBars"></div>
+  </div>
+
+  <!-- Heat Performance -->
+  <div class="card" id="anlHeatCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">⚖️ Performance en Heats</div>
+    <div id="anlHeatChart" style="height:140px;position:relative;overflow:hidden"></div>
+    <div id="anlHeatStats" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Athlete Comparison -->
+  <div class="card" id="anlCompareCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">⚡ Comparar Atletas</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <select class="field-input" id="anlCmpA" onchange="anlRenderCompare()" style="flex:1;font-size:12px"></select>
+      <span style="align-self:center;font-weight:800;color:var(--text-muted)">vs</span>
+      <select class="field-input" id="anlCmpB" onchange="anlRenderCompare()" style="flex:1;font-size:12px"></select>
+    </div>
+    <div id="anlCompare"></div>
+  </div>
+
+  <!-- Spot Analysis -->
+  <div class="card" style="padding:12px;margin-bottom:12px">
+    <div class="anl-card-title">📍 Spots Frecuentes</div>
+    <div id="anlSpots"></div>
+  </div>
+</div>
+
 <!-- ==================== SETTINGS ==================== -->
 <div class="view" id="view-settings">
   <div class="kss-header"><img class="kss-logo-sm" id="settingsLogoImg" alt="KSS"><div><div class="kss-title">⚙️ Configuración</div><div class="kss-subtitle">KSS Coach · Karibe Surf Score</div></div></div>
@@ -1515,13 +1635,50 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <div class="card">
     <div class="card-header">📊 Datos</div>
-    <button class="btn btn-outline btn-sm" onclick="exportAllData()" style="margin-bottom:8px">📥 Exportar Todos los Datos (CSV)</button>
-    <button class="btn btn-sm" style="background:var(--red);color:#fff" onclick="confirmClearData()">🗑️ Borrar Todos los Datos</button>
+    
+    <!-- Storage health -->
+    <div id="setStorageHealth" style="margin-bottom:10px;padding:8px 10px;border-radius:8px;background:var(--bg-input);font-size:12px"></div>
+    
+    <!-- Export -->
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px;margin-top:4px">Exportar</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="exportFullBackup()" style="flex:1;min-width:120px">💾 Backup Completo (JSON)</button>
+      <button class="btn btn-outline btn-sm" onclick="exportAllSessionsCSV()" style="flex:1;min-width:120px">📊 Todas las Sesiones (CSV)</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="exportAthletesCSV()" style="flex:1;min-width:120px">👥 Atletas (CSV)</button>
+      <button class="btn btn-outline btn-sm" onclick="exportHeatsCSV()" style="flex:1;min-width:120px">⚖️ Heats (CSV)</button>
+    </div>
+    
+    <!-- Import -->
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px">Importar / Restaurar</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <label class="btn btn-outline btn-sm" style="flex:1;text-align:center;cursor:pointer">
+        📥 Restaurar Backup (JSON)
+        <input type="file" accept=".json,application/json" onchange="importBackup(this)" style="display:none">
+      </label>
+    </div>
+    <div id="setImportStatus" style="display:none;margin-bottom:10px;padding:8px 10px;border-radius:8px;font-size:12px"></div>
+    
+    <!-- Validation -->
+    <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:6px">Integridad</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn btn-outline btn-sm" onclick="validateData()" style="flex:1">🔍 Validar Datos</button>
+      <button class="btn btn-outline btn-sm" onclick="repairData()" style="flex:1">🔧 Reparar</button>
+    </div>
+    <div id="setValidation" style="display:none;margin-bottom:10px;padding:8px 10px;border-radius:8px;font-size:12px"></div>
+
+    <!-- Danger Zone -->
+    <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:6px;margin-top:8px">⚠️ Zona Peligrosa</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" style="background:var(--red);color:#fff;flex:1" onclick="confirmClearData()">🗑️ Borrar Todo</button>
+      <button class="btn btn-sm" style="background:#854d0e;color:#fef08a;flex:1" onclick="clearSessionsOnly()">🗂️ Solo Sesiones</button>
+    </div>
   </div>
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
     <img id="footerLogoImg" alt="KSS" style="width:44px;height:44px;border-radius:50%;margin-bottom:6px;opacity:.6"><br>
-    KSS Coach v6.0 · Phase 6<br>Karibe Surf Score
+    KSS Coach v7.0 · Phase 8<br>Karibe Surf Score
   </div>
 </div>
 
@@ -1802,6 +1959,7 @@ function showView(id) {
   if (id === 'history') renderHistory();
   if (id === 'session-detail') renderSessionDetail();
   if (id === 'progress') renderProgress();
+  if (id === 'analytics') renderAnalytics();
   
   // Session bar
   updateSessionBar();
@@ -1913,6 +2071,10 @@ function renderHome() {
       { val: totalHeats, lbl: 'Heats', color: '#a855f7' },
     ].map(k => `<div class="dash-kpi"><div class="dash-kpi-val" style="color:${k.color}">${k.val}</div><div class="dash-kpi-lbl">${k.lbl}</div></div>`).join('');
   } else { kpiDiv.style.display = 'none'; }
+  
+  // Analytics button
+  const anlBtn = document.getElementById('homeAnalyticsBtn');
+  if (anlBtn) anlBtn.style.display = (sessions.length > 0 || athletes.length > 0) ? 'block' : 'none';
   
   // Athletes strip
   const athSection = document.getElementById('homeAthSection');
@@ -3653,12 +3815,61 @@ function exportSessionCSV() {
   URL.revokeObjectURL(url);
 }
 
-function exportAllData() {
+function exportAllData() { exportFullBackup(); }
+
+// ============================================================
+// DATA LAYER HARDENING (Phase 8)
+// ============================================================
+
+// --- STORAGE HEALTH ---
+function getStorageHealth() {
+  let used = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('kss_')) used += localStorage.getItem(k).length * 2; // UTF-16
+  }
+  const usedMB = (used / 1024 / 1024).toFixed(2);
+  const maxMB = 5; // typical localStorage limit
+  const pct = Math.min(100, Math.round((used / (maxMB * 1024 * 1024)) * 100));
+  return { used, usedMB, maxMB, pct };
+}
+
+function renderStorageHealth() {
+  const h = getStorageHealth();
+  const el = document.getElementById('setStorageHealth');
+  if (!el) return;
+  const color = h.pct >= 80 ? 'var(--red)' : h.pct >= 60 ? 'var(--yellow)' : 'var(--green)';
+  const athletes = DB.athletes.length;
+  const sessions = DB.sessions.length;
+  const frames = DB.labFrames.length;
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+    <span style="font-weight:700">💾 Almacenamiento</span>
+    <span style="font-weight:800;color:${color}">${h.usedMB} MB / ~${h.maxMB} MB</span>
+  </div>
+  <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:6px"><div style="width:${h.pct}%;height:100%;background:${color};border-radius:3px;transition:width .3s"></div></div>
+  <div style="color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap">
+    <span>👥 ${athletes} atletas</span>
+    <span>📋 ${sessions} sesiones</span>
+    <span>🖼️ ${frames} frames</span>
+    ${h.pct >= 70 ? '<span style="color:var(--red);font-weight:700">⚠️ Espacio bajo — elimina frames de Lab o exporta backup</span>' : ''}
+  </div>`;
+}
+
+// --- FULL BACKUP EXPORT (JSON) ---
+function exportFullBackup() {
   const data = {
+    _kss_version: '7.0',
+    _export_date: new Date().toISOString(),
     athletes: DB.athletes,
     sessions: DB.sessions,
     spots: DB.spots,
-    exported_at: new Date().toISOString()
+    templates: DB._get('templates', []),
+    judgeTracker: DB.judgeTracker,
+    labFrames: DB.labFrames,
+    customDrills: DB._get('custom_drills', []),
+    settings: {
+      theme: localStorage.getItem('kss_theme') || 'dark',
+    }
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -3667,6 +3878,378 @@ function exportAllData() {
   link.download = `KSS_Coach_Backup_${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(url);
+  showImportStatus('✅ Backup exportado correctamente', 'var(--green)');
+}
+
+// --- IMPORT/RESTORE BACKUP ---
+function importBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      // Validate structure
+      const issues = [];
+      if (!data.athletes || !Array.isArray(data.athletes)) issues.push('athletes missing/invalid');
+      if (!data.sessions || !Array.isArray(data.sessions)) issues.push('sessions missing/invalid');
+      
+      if (issues.length > 0) {
+        showImportStatus('❌ Archivo inválido: ' + issues.join(', '), 'var(--red)');
+        return;
+      }
+      
+      // Validate athletes have required fields
+      let repairedAthletes = 0;
+      data.athletes.forEach(a => {
+        if (!a.id) { a.id = 'ath_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); repairedAthletes++; }
+        if (!a.name) { a.name = 'Atleta ' + a.id.slice(-4); repairedAthletes++; }
+        if (!a.disciplines && !a.discipline) { a.disciplines = ['surfboard']; repairedAthletes++; }
+        if (a.discipline && !a.disciplines) { a.disciplines = [a.discipline]; delete a.discipline; }
+        if (!Array.isArray(a.disciplines)) a.disciplines = ['surfboard'];
+      });
+      
+      // Validate sessions
+      let repairedSessions = 0;
+      data.sessions.forEach(s => {
+        if (!s.date && s.started_at) { s.date = s.started_at; repairedSessions++; }
+        if (!s.date) { s.date = new Date().toISOString(); repairedSessions++; }
+        if (!s.athlete_data || typeof s.athlete_data !== 'object') { s.athlete_data = {}; repairedSessions++; }
+        if (!s.spot) s.spot = 'Desconocido';
+        Object.values(s.athlete_data).forEach(d => {
+          if (!d.waves) d.waves = [];
+          if (typeof d.paddled !== 'number') d.paddled = d.waves.length;
+          if (typeof d.caught !== 'number') d.caught = d.waves.filter(w => w.type === 'caught').length;
+          if (typeof d.falls !== 'number') d.falls = d.waves.filter(w => w.type === 'fall').length;
+        });
+      });
+      
+      // Confirm with user
+      const summary = `📦 Backup encontrado:\n• ${data.athletes.length} atletas\n• ${data.sessions.length} sesiones\n• ${(data.labFrames || []).length} frames de Lab\n${repairedAthletes + repairedSessions > 0 ? `• ${repairedAthletes + repairedSessions} campos reparados automáticamente\n` : ''}${data._export_date ? '• Exportado: ' + new Date(data._export_date).toLocaleDateString('es') : ''}\n\n⚠️ Esto REEMPLAZARÁ todos los datos actuales.\n¿Continuar?`;
+      
+      if (!confirm(summary)) {
+        showImportStatus('🚫 Importación cancelada', 'var(--yellow)');
+        return;
+      }
+      
+      // Apply data
+      DB.athletes = data.athletes;
+      DB.sessions = data.sessions;
+      if (data.spots) DB.spots = data.spots;
+      if (data.templates) DB._set('templates', data.templates);
+      if (data.judgeTracker) DB.judgeTracker = data.judgeTracker;
+      if (data.labFrames) DB.labFrames = data.labFrames;
+      if (data.customDrills) DB._set('custom_drills', data.customDrills);
+      
+      showImportStatus(`✅ Restauración exitosa: ${data.athletes.length} atletas, ${data.sessions.length} sesiones`, 'var(--green)');
+      renderSettings();
+      
+    } catch (err) {
+      showImportStatus('❌ Error leyendo archivo: ' + err.message, 'var(--red)');
+    }
+  };
+  reader.readAsText(file);
+  input.value = ''; // Reset so same file can be re-imported
+}
+
+function showImportStatus(msg, color) {
+  const el = document.getElementById('setImportStatus');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.borderLeft = `3px solid ${color}`;
+  el.innerHTML = msg;
+  setTimeout(() => { el.style.display = 'none'; }, 8000);
+}
+
+// --- MULTI-SESSION CSV EXPORT ---
+function exportAllSessionsCSV() {
+  const sessions = DB.sessions;
+  const athletes = DB.athletes;
+  if (sessions.length === 0) return alert('No hay sesiones para exportar');
+  
+  const headers = [
+    'session_date','spot','wave_size','wind','crowd','duration_min','modules',
+    'athlete','discipline',
+    'paddled','caught','falls','catch_ratio',
+    'maneuvers',
+    'selection_excellent','selection_normal','selection_poor',
+    'position_excellent','position_normal','position_poor',
+    'commit_excellent','commit_normal','commit_poor',
+    'bio_evals','bio_shoulders','bio_hips','bio_knees','bio_arms','bio_balance',
+    'race_count','race_best_time_ms',
+    'xp_earned','coach_notes'
+  ];
+  
+  let csv = headers.join(',') + '\n';
+  
+  sessions.forEach(s => {
+    const dateStr = s.date || s.started_at || '';
+    const modsStr = (s.modules_used || []).join(';');
+    const dur = s.duration ? Math.round(s.duration / 60) : '';
+    
+    Object.entries(s.athlete_data || {}).forEach(([id, d]) => {
+      const a = athletes.find(x => x.id === id);
+      const discStr = a ? getAthleteDisciplines(a).join('+') : '';
+      
+      // Wave stats
+      const sel = { excellent: 0, normal: 0, poor: 0 };
+      const pos = { excellent: 0, normal: 0, poor: 0 };
+      const com = { excellent: 0, normal: 0, poor: 0 };
+      const maneuvers = {};
+      (d.waves || []).forEach(w => {
+        if (w.selection) sel[w.selection] = (sel[w.selection] || 0) + 1;
+        if (w.position) pos[w.position] = (pos[w.position] || 0) + 1;
+        if (w.commit) com[w.commit] = (com[w.commit] || 0) + 1;
+        if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1);
+      });
+      const manStr = Object.entries(maneuvers).map(([m,c]) => `${m}:${c}`).join(';');
+      const ratio = d.paddled > 0 ? Math.round((d.caught || 0) / d.paddled * 100) : '';
+      
+      // Bio
+      const bio = d.biomech || [];
+      const bioAvg = (field) => {
+        const vals = bio.map(b => b[field] === 'good' ? 3 : b[field] === 'ok' ? 2 : b[field] === 'poor' ? 1 : 0).filter(v => v > 0);
+        return vals.length > 0 ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : '';
+      };
+      
+      // Race
+      const raceCount = d.race ? (d.race.sessions || []).length : 0;
+      const raceBest = raceCount > 0 ? Math.min(...d.race.sessions.map(r => r.total_ms || Infinity)) : '';
+      
+      const row = [
+        dateStr, csvSafe(s.spot || ''), csvSafe(s.swell || ''), csvSafe(s.wind || ''), csvSafe(s.crowd || ''), dur, modsStr,
+        csvSafe(a ? a.name : id), discStr,
+        d.paddled || 0, d.caught || 0, d.falls || 0, ratio,
+        csvSafe(manStr),
+        sel.excellent, sel.normal, sel.poor,
+        pos.excellent, pos.normal, pos.poor,
+        com.excellent, com.normal, com.poor,
+        bio.length, bioAvg('bio_shoulders'), bioAvg('bio_hips'), bioAvg('bio_knees'), bioAvg('bio_arms'), bioAvg('bio_balance'),
+        raceCount, raceBest || '',
+        d.xp_earned || '', csvSafe(d.notes || s.coach_notes || '')
+      ];
+      csv += row.join(',') + '\n';
+    });
+  });
+  
+  downloadCSV(csv, `KSS_AllSessions_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+// --- ATHLETES CSV EXPORT ---
+function exportAthletesCSV() {
+  const athletes = DB.athletes;
+  const sessions = DB.sessions;
+  if (athletes.length === 0) return alert('No hay atletas');
+  
+  const headers = ['name','disciplines','stance','age','level','xp_total','sessions_count','total_caught','total_paddled','catch_ratio','heats','wins','podiums','avg_heat_total','badges_count','created_at'];
+  let csv = headers.join(',') + '\n';
+  
+  athletes.forEach(a => {
+    const discs = getAthleteDisciplines(a).join('+');
+    let totalC = 0, totalP = 0;
+    sessions.forEach(s => {
+      const d = s.athlete_data?.[a.id];
+      if (d) { totalC += d.caught || 0; totalP += d.paddled || 0; }
+    });
+    const heats = a.heat_history || [];
+    const wins = heats.filter(h => h.position === 1).length;
+    const podiums = heats.filter(h => h.position <= 3).length;
+    const avgHeat = heats.length > 0 ? (heats.reduce((s,h) => s + (h.total||0), 0) / heats.length).toFixed(1) : '';
+    const badges = (typeof BADGE_DEFS !== 'undefined' ? BADGE_DEFS : []).filter(b => { try { return b.check(a); } catch { return false; } }).length;
+    const ratio = totalP > 0 ? Math.round(totalC / totalP * 100) : '';
+    
+    csv += [
+      csvSafe(a.name), discs, a.stance || '', a.age || '', a.level || '', a.xp_total || 0,
+      a.sessions_count || 0, totalC, totalP, ratio,
+      heats.length, wins, podiums, avgHeat, badges, a.created_at || ''
+    ].join(',') + '\n';
+  });
+  
+  downloadCSV(csv, `KSS_Athletes_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+// --- HEATS CSV EXPORT ---
+function exportHeatsCSV() {
+  const athletes = DB.athletes;
+  let allHeats = [];
+  athletes.forEach(a => {
+    (a.heat_history || []).forEach(h => {
+      allHeats.push({ ...h, athlete_name: a.name, athlete_id: a.id });
+    });
+  });
+  if (allHeats.length === 0) return alert('No hay heats registrados');
+  
+  const headers = ['date','athlete','discipline','heat_number','category','round','location','position','total','avg_wave','wave_count','interference'];
+  let csv = headers.join(',') + '\n';
+  
+  allHeats.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(h => {
+    csv += [
+      h.date || '', csvSafe(h.athlete_name), h.discipline || '',
+      csvSafe(h.heat_number || ''), csvSafe(h.category || ''), csvSafe(h.round || ''),
+      csvSafe(h.location || ''), h.position || '', (h.total || 0).toFixed(2),
+      (h.all_wave_avg || 0).toFixed(2), h.wave_count || 0, h.interference || 0
+    ].join(',') + '\n';
+  });
+  
+  downloadCSV(csv, `KSS_Heats_${new Date().toISOString().slice(0,10)}.csv`);
+}
+
+function csvSafe(str) {
+  if (str === null || str === undefined) return '';
+  str = String(str);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return '"' + str.replace(/"/g, '""') + '"';
+  }
+  return str;
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// --- DATA VALIDATION ---
+function validateData() {
+  const athletes = DB.athletes;
+  const sessions = DB.sessions;
+  const issues = [];
+  const warnings = [];
+  
+  // Validate athletes
+  const ids = new Set();
+  athletes.forEach((a, i) => {
+    if (!a.id) issues.push(`Atleta #${i+1}: sin ID`);
+    else if (ids.has(a.id)) issues.push(`Atleta "${a.name}": ID duplicado (${a.id})`);
+    else ids.add(a.id);
+    if (!a.name) issues.push(`Atleta #${i+1}: sin nombre`);
+    const discs = getAthleteDisciplines(a);
+    if (discs.length === 0) warnings.push(`${a.name}: sin disciplina asignada`);
+    if (typeof a.xp_total !== 'number') warnings.push(`${a.name}: XP inválido`);
+    if (a.heat_history && !Array.isArray(a.heat_history)) issues.push(`${a.name}: heat_history corrupto`);
+  });
+  
+  // Validate sessions
+  sessions.forEach((s, i) => {
+    if (!s.date && !s.started_at) warnings.push(`Sesión #${i+1}: sin fecha`);
+    if (!s.athlete_data || typeof s.athlete_data !== 'object') {
+      issues.push(`Sesión #${i+1}: athlete_data corrupto`);
+      return;
+    }
+    Object.entries(s.athlete_data).forEach(([id, d]) => {
+      if (!ids.has(id) && id !== '__custom') warnings.push(`Sesión #${i+1}: atleta ${id} no encontrado (datos huérfanos)`);
+      if (!Array.isArray(d.waves)) warnings.push(`Sesión #${i+1}, atleta ${id}: waves no es array`);
+      if (d.caught > d.paddled) warnings.push(`Sesión #${i+1}, atleta ${id}: caught(${d.caught}) > paddled(${d.paddled})`);
+    });
+  });
+  
+  // Check for orphaned session references
+  const sessionAthletes = new Set();
+  sessions.forEach(s => Object.keys(s.athlete_data || {}).forEach(id => sessionAthletes.add(id)));
+  athletes.forEach(a => {
+    if (!sessionAthletes.has(a.id) && (a.sessions_count || 0) > 0) {
+      warnings.push(`${a.name}: sessions_count=${a.sessions_count} pero sin datos de sesión`);
+    }
+  });
+  
+  // Storage check
+  const health = getStorageHealth();
+  if (health.pct >= 80) warnings.push(`Almacenamiento al ${health.pct}% — considera exportar y limpiar frames de Lab`);
+  
+  const el = document.getElementById('setValidation');
+  el.style.display = 'block';
+  if (issues.length === 0 && warnings.length === 0) {
+    el.style.borderLeft = '3px solid var(--green)';
+    el.innerHTML = `✅ <strong>Datos saludables</strong><br><span style="color:var(--text-muted)">${athletes.length} atletas, ${sessions.length} sesiones — sin problemas detectados</span>`;
+  } else {
+    el.style.borderLeft = `3px solid ${issues.length > 0 ? 'var(--red)' : 'var(--yellow)'}`;
+    let html = issues.length > 0 ? `❌ <strong>${issues.length} error(es)</strong><br>` : '';
+    html += warnings.length > 0 ? `⚠️ <strong>${warnings.length} advertencia(s)</strong><br>` : '';
+    html += '<div style="max-height:120px;overflow-y:auto;margin-top:4px;font-size:11px">';
+    issues.forEach(i => html += `<div style="color:var(--red);margin-bottom:2px">❌ ${i}</div>`);
+    warnings.forEach(w => html += `<div style="color:var(--yellow);margin-bottom:2px">⚠️ ${w}</div>`);
+    html += '</div>';
+    el.innerHTML = html;
+  }
+}
+
+// --- DATA REPAIR ---
+function repairData() {
+  let fixes = 0;
+  const athletes = DB.athletes;
+  const sessions = DB.sessions;
+  
+  // Fix athletes
+  athletes.forEach(a => {
+    if (!a.id) { a.id = 'ath_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); fixes++; }
+    if (!a.name) { a.name = 'Atleta ' + a.id.slice(-4); fixes++; }
+    if (a.discipline && !a.disciplines) { a.disciplines = [a.discipline]; delete a.discipline; fixes++; }
+    if (!a.disciplines || !Array.isArray(a.disciplines) || a.disciplines.length === 0) { a.disciplines = ['surfboard']; fixes++; }
+    if (typeof a.xp_total !== 'number') { a.xp_total = 0; fixes++; }
+    if (!Array.isArray(a.heat_history)) { a.heat_history = []; fixes++; }
+    if (typeof a.sessions_count !== 'number') { a.sessions_count = 0; fixes++; }
+  });
+  
+  // Fix sessions
+  sessions.forEach(s => {
+    if (!s.date && s.started_at) { s.date = s.started_at; fixes++; }
+    if (!s.date) { s.date = new Date().toISOString(); fixes++; }
+    if (!s.athlete_data || typeof s.athlete_data !== 'object') { s.athlete_data = {}; fixes++; }
+    if (!s.spot) { s.spot = 'Desconocido'; fixes++; }
+    
+    Object.values(s.athlete_data).forEach(d => {
+      if (!Array.isArray(d.waves)) { d.waves = []; fixes++; }
+      if (typeof d.paddled !== 'number') { d.paddled = d.waves.length; fixes++; }
+      if (typeof d.caught !== 'number') { d.caught = d.waves.filter(w => w.type === 'caught').length; fixes++; }
+      if (typeof d.falls !== 'number') { d.falls = d.waves.filter(w => w.type === 'fall').length; fixes++; }
+      if (d.caught > d.paddled) { d.paddled = d.caught + d.falls; fixes++; }
+      if (!Array.isArray(d.biomech)) d.biomech = [];
+    });
+  });
+  
+  // Recalculate sessions_count for each athlete
+  athletes.forEach(a => {
+    const actual = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]).length;
+    if (a.sessions_count !== actual) { a.sessions_count = actual; fixes++; }
+  });
+  
+  // Save repaired data
+  DB.athletes = athletes;
+  DB.sessions = sessions;
+  
+  const el = document.getElementById('setValidation');
+  el.style.display = 'block';
+  if (fixes > 0) {
+    el.style.borderLeft = '3px solid var(--green)';
+    el.innerHTML = `🔧 <strong>${fixes} campos reparados</strong><br><span style="color:var(--text-muted)">Los datos han sido corregidos y guardados</span>`;
+  } else {
+    el.style.borderLeft = '3px solid var(--green)';
+    el.innerHTML = `✅ <strong>Nada que reparar</strong> — datos ya están saludables`;
+  }
+  renderStorageHealth();
+}
+
+// --- CLEAR SESSIONS ONLY ---
+function clearSessionsOnly() {
+  const count = DB.sessions.length;
+  if (count === 0) return alert('No hay sesiones para borrar');
+  if (!confirm(`¿Borrar ${count} sesiones? Los atletas se mantendrán.\n\nEsta acción NO se puede deshacer.`)) return;
+  if (!confirm('⚠️ CONFIRMAR: ¿Estás seguro? Se perderán todos los datos de sesiones.')) return;
+  
+  DB.sessions = [];
+  // Reset session counts on athletes
+  const athletes = DB.athletes;
+  athletes.forEach(a => { a.sessions_count = 0; });
+  DB.athletes = athletes;
+  
+  alert(`✅ ${count} sesiones eliminadas. Los atletas se mantienen.`);
+  renderSettings();
 }
 
 // ============================================================
@@ -4004,6 +4587,469 @@ function renderSessionDetail() {
     document.getElementById('sdNotesCard').style.display = 'block';
     document.getElementById('sdNotes').textContent = s.coach_notes;
   } else { document.getElementById('sdNotesCard').style.display = 'none'; }
+}
+
+// ============================================================
+// ANALYTICS ENGINE (Phase 7)
+// ============================================================
+let _anlScope = 'team'; // 'team' or athlete id
+let _anlRange = 'all'; // 'all', '7', '30', '90'
+let _anlDisc = 'all';
+
+function anlSetRange(r) {
+  _anlRange = r;
+  document.querySelectorAll('.anl-time-btn').forEach(b => b.classList.toggle('active', b.dataset.r === r));
+  renderAnalytics();
+}
+
+function anlSetScope(scope) {
+  _anlScope = scope;
+  _anlDisc = 'all';
+  renderAnalytics();
+}
+
+function anlSetDisc(d) {
+  _anlDisc = d;
+  renderAnalytics();
+}
+
+// Get filtered sessions based on time range
+function anlGetSessions() {
+  let sessions = DB.sessions.slice();
+  if (_anlRange !== 'all') {
+    const days = parseInt(_anlRange);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    sessions = sessions.filter(s => new Date(s.date || s.started_at) >= cutoff);
+  }
+  return sessions;
+}
+
+// Get all waves across sessions for scope
+function anlGetWaves(sessions) {
+  const athletes = DB.athletes;
+  let waves = [];
+  sessions.forEach(s => {
+    Object.entries(s.athlete_data || {}).forEach(([id, d]) => {
+      if (_anlScope !== 'team' && _anlScope !== id) return;
+      const ath = athletes.find(a => a.id === id);
+      const primaryDisc = ath ? getAthleteDiscipline(ath) : 'surfboard';
+      (d.waves || []).forEach(w => {
+        const disc = w.discipline || primaryDisc;
+        if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+        waves.push({ ...w, athlete_id: id, session_date: s.date || s.started_at, spot: s.spot, discipline: disc });
+      });
+    });
+  });
+  return waves;
+}
+
+// Get biomech evals
+function anlGetBio(sessions) {
+  const athletes = DB.athletes;
+  let bio = [];
+  sessions.forEach(s => {
+    Object.entries(s.athlete_data || {}).forEach(([id, d]) => {
+      if (_anlScope !== 'team' && _anlScope !== id) return;
+      const ath = athletes.find(a => a.id === id);
+      const primaryDisc = ath ? getAthleteDiscipline(ath) : 'surfboard';
+      (d.biomech || []).forEach(b => {
+        const disc = b.discipline || primaryDisc;
+        if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+        bio.push({ ...b, athlete_id: id, discipline: disc });
+      });
+    });
+  });
+  return bio;
+}
+
+// Get heats for scope
+function anlGetHeats() {
+  const athletes = DB.athletes;
+  let heats = [];
+  athletes.forEach(a => {
+    if (_anlScope !== 'team' && _anlScope !== a.id) return;
+    (a.heat_history || []).forEach(h => {
+      if (_anlRange !== 'all') {
+        const days = parseInt(_anlRange);
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+        if (new Date(h.date) < cutoff) return;
+      }
+      const disc = h.discipline || getAthleteDiscipline(a);
+      if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+      heats.push({ ...h, athlete_id: a.id, athlete_name: a.name, discipline: disc });
+    });
+  });
+  return heats;
+}
+
+// SVG line chart builder
+function anlSvgLine(data, w, h, color, fill) {
+  if (data.length < 2) return '';
+  const maxV = Math.max(...data.map(d => d.v), 1);
+  const minV = Math.min(...data.map(d => d.v), 0);
+  const range = maxV - minV || 1;
+  const pad = 4;
+  const pts = data.map((d, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
+    const y = h - pad - ((d.v - minV) / range) * (h - pad * 2);
+    return { x, y };
+  });
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const fillPath = fill ? `<path d="${line} L${pts[pts.length-1].x},${h} L${pts[0].x},${h} Z" fill="${color}" opacity="0.12"/>` : '';
+  const dots = pts.map((p, i) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="${color}"><title>${data[i].label}: ${data[i].v}${data[i].unit || ''}</title></circle>`).join('');
+  // Grid lines
+  const gridY = [0.25, 0.5, 0.75].map(f => {
+    const y = h - pad - f * (h - pad * 2);
+    const val = Math.round(minV + f * range);
+    return `<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/><text x="${pad+2}" y="${y-3}" font-size="8" fill="var(--text-muted)">${val}</text>`;
+  }).join('');
+  return `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${gridY}${fillPath}<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;
+}
+
+// Bar chart builder (vertical)
+function anlSvgBars(data, w, h, defaultColor) {
+  if (data.length === 0) return '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:20px">Sin datos</div>';
+  const maxV = Math.max(...data.map(d => d.v), 1);
+  const pad = 4;
+  const barW = Math.min(24, (w - pad * 2) / data.length - 4);
+  const gap = (w - pad * 2 - barW * data.length) / (data.length + 1);
+  let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}">`;
+  data.forEach((d, i) => {
+    const x = pad + gap + i * (barW + gap);
+    const barH = Math.max(2, (d.v / maxV) * (h - 30));
+    const y = h - 16 - barH;
+    const color = d.color || defaultColor || 'var(--accent)';
+    svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="${color}" opacity="0.8"><title>${d.label}: ${d.v}</title></rect>`;
+    svg += `<text x="${x + barW/2}" y="${h - 4}" text-anchor="middle" font-size="8" fill="var(--text-muted)" font-weight="600">${d.label}</text>`;
+    svg += `<text x="${x + barW/2}" y="${y - 3}" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="700">${d.v}</text>`;
+  });
+  svg += '</svg>';
+  return svg;
+}
+
+// Donut chart builder (CSS conic-gradient)
+function anlDonut(segments, size, centerText) {
+  let total = segments.reduce((s, seg) => s + seg.v, 0);
+  if (total === 0) return '';
+  let gradParts = [];
+  let cumPct = 0;
+  segments.forEach(seg => {
+    const pct = (seg.v / total) * 100;
+    gradParts.push(`${seg.color} ${cumPct.toFixed(1)}% ${(cumPct + pct).toFixed(1)}%`);
+    cumPct += pct;
+  });
+  return `<div class="anl-donut" style="width:${size}px;height:${size}px;background:conic-gradient(${gradParts.join(',')})">
+    <div class="anl-donut-center">${centerText}</div></div>`;
+}
+
+function renderAnalytics() {
+  const athletes = DB.athletes;
+  const sessions = anlGetSessions();
+  const waves = anlGetWaves(sessions);
+  const bio = anlGetBio(sessions);
+  const heats = anlGetHeats();
+
+  // Scope pills
+  const pillsDiv = document.getElementById('anlScopePills');
+  pillsDiv.innerHTML = `<button onclick="anlSetScope('team')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${_anlScope === 'team' ? 'var(--accent)' : 'var(--border)'};background:${_anlScope === 'team' ? 'rgba(56,189,248,.08)' : 'transparent'};color:${_anlScope === 'team' ? 'var(--accent)' : 'var(--text-muted)'};white-space:nowrap">👥 Equipo</button>` +
+    athletes.map(a => {
+      const isActive = _anlScope === a.id;
+      return `<button onclick="anlSetScope('${a.id}')" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${isActive ? 'var(--accent)' : 'var(--border)'};background:${isActive ? 'rgba(56,189,248,.08)' : 'transparent'};color:${isActive ? 'var(--accent)' : 'var(--text-muted)'};white-space:nowrap">${a.name.split(' ')[0]}</button>`;
+    }).join('');
+
+  // Discipline filter (when single athlete selected)
+  const discFilterDiv = document.getElementById('anlDiscFilter');
+  if (_anlScope !== 'team') {
+    const ath = athletes.find(a => a.id === _anlScope);
+    if (ath) {
+      const discs = getAthleteDisciplines(ath);
+      if (discs.length > 1) {
+        discFilterDiv.style.display = 'flex';
+        discFilterDiv.innerHTML = `<div style="display:flex;gap:4px;flex-wrap:wrap">` +
+          `<button onclick="anlSetDisc('all')" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${_anlDisc === 'all' ? 'var(--accent)' : 'var(--border)'};background:${_anlDisc === 'all' ? 'rgba(56,189,248,.08)' : 'transparent'};color:${_anlDisc === 'all' ? 'var(--accent)' : 'var(--text-muted)'}">Todos</button>` +
+          discs.map(d => {
+            const di = getDisciplineInfo(d);
+            const isA = _anlDisc === d;
+            return `<button onclick="anlSetDisc('${d}')" style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid ${isA ? di.color : 'var(--border)'};background:${isA ? di.color + '20' : 'transparent'};color:${isA ? di.color : 'var(--text-muted)'}">${di.icon} ${di.label}</button>`;
+          }).join('') + '</div>';
+      } else { discFilterDiv.style.display = 'none'; }
+    }
+  } else { discFilterDiv.style.display = 'none'; }
+
+  // Subtitle
+  const scopeLabel = _anlScope === 'team' ? 'Equipo completo' : (athletes.find(a => a.id === _anlScope)?.name || '');
+  document.getElementById('anlSubtitle').innerHTML = `${scopeLabel} · ${sessions.length} sesiones${_anlDisc !== 'all' ? ' · ' + getDisciplineInfo(_anlDisc).icon + ' ' + getDisciplineInfo(_anlDisc).label : ''}`;
+
+  // === KPIs ===
+  const caught = waves.filter(w => w.type === 'caught').length;
+  const paddled = waves.length;
+  const falls = waves.filter(w => w.type === 'fall').length;
+  const catchPct = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
+  const avgHeatScore = heats.length > 0 ? (heats.reduce((s, h) => s + (h.total || 0), 0) / heats.length).toFixed(1) : '—';
+
+  document.getElementById('anlKPIs').innerHTML = [
+    { val: sessions.length, lbl: 'Sesiones', color: 'var(--accent)' },
+    { val: caught, lbl: 'Olas', color: 'var(--green)' },
+    { val: catchPct + '%', lbl: 'Catch %', color: catchPct >= 60 ? 'var(--green)' : catchPct >= 40 ? 'var(--yellow)' : 'var(--red)' },
+    { val: heats.length > 0 ? avgHeatScore : bio.length, lbl: heats.length > 0 ? 'Avg Heat' : 'Evals Bio', color: 'var(--accent)' },
+  ].map(k => `<div class="dash-kpi"><div class="dash-kpi-val" style="color:${k.color}">${k.val}</div><div class="dash-kpi-lbl">${k.lbl}</div></div>`).join('');
+
+  // === Session Frequency ===
+  const freqData = {};
+  sessions.forEach(s => {
+    const d = new Date(s.date || s.started_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = new Intl.DateTimeFormat('es', { month: 'short' }).format(d);
+    if (!freqData[key]) freqData[key] = { label: label.slice(0,3), v: 0 };
+    freqData[key].v++;
+  });
+  const freqArr = Object.entries(freqData).sort((a,b) => a[0].localeCompare(b[0])).slice(-8).map(([,d]) => d);
+  document.getElementById('anlFreqChart').innerHTML = freqArr.length > 0 ?
+    anlSvgBars(freqArr, 320, 120, 'var(--accent)') :
+    '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:30px">Sin datos</div>';
+
+  // === Catch Ratio Trend ===
+  const catchBySession = [];
+  sessions.forEach(s => {
+    let p = 0, c = 0;
+    Object.entries(s.athlete_data || {}).forEach(([id, d]) => {
+      if (_anlScope !== 'team' && _anlScope !== id) return;
+      const ath = athletes.find(a => a.id === id);
+      const primaryDisc = ath ? getAthleteDiscipline(ath) : 'surfboard';
+      (d.waves || []).forEach(w => {
+        const disc = w.discipline || primaryDisc;
+        if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+        p++;
+        if (w.type === 'caught') c++;
+      });
+    });
+    if (p > 0) {
+      const dt = new Date(s.date || s.started_at);
+      catchBySession.push({ v: Math.round(c / p * 100), label: new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(dt), unit: '%' });
+    }
+  });
+  document.getElementById('anlCatchTrend').innerHTML = catchBySession.length >= 2 ?
+    anlSvgLine(catchBySession.slice(-12), 320, 160, '#22c55e', true) :
+    '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:40px">Necesita 2+ sesiones con datos</div>';
+
+  // === Wave Quality Distribution ===
+  const qualCounts = { excellent: 0, good: 0, regular: 0, poor: 0 };
+  waves.filter(w => w.type === 'caught' && w.wave_quality).forEach(w => { if (qualCounts[w.wave_quality] !== undefined) qualCounts[w.wave_quality]++; });
+  const qualTotal = Object.values(qualCounts).reduce((a,b) => a+b, 0);
+  const qualColors = { excellent: '#22c55e', good: '#3b82f6', regular: '#f59e0b', poor: '#ef4444' };
+  const qualLabels = { excellent: '⭐ Excelente', good: '🔥 Buena', regular: '👌 Regular', poor: '💩 Pobre' };
+  const qualSegs = Object.entries(qualCounts).filter(([,v]) => v > 0).map(([k,v]) => ({ v, color: qualColors[k], label: qualLabels[k] }));
+
+  if (qualTotal > 0) {
+    document.getElementById('anlQualDonut').innerHTML = anlDonut(qualSegs, 100, qualTotal.toString());
+    document.getElementById('anlQualLegend').innerHTML = qualSegs.map(seg =>
+      `<div class="anl-legend-item"><div class="anl-legend-dot" style="background:${seg.color}"></div><span>${seg.label}: <strong>${seg.v}</strong> (${Math.round(seg.v/qualTotal*100)}%)</span></div>`
+    ).join('');
+  } else {
+    document.getElementById('anlQualDonut').innerHTML = '<div style="width:100px;height:100px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted)">Sin datos</div>';
+    document.getElementById('anlQualLegend').innerHTML = '';
+  }
+
+  // === Top Maneuvers ===
+  const maneuvers = {};
+  waves.filter(w => w.type === 'caught').forEach(w => {
+    if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; });
+  });
+  const sortedM = Object.entries(maneuvers).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const maxM = sortedM.length > 0 ? sortedM[0][1] : 1;
+  document.getElementById('anlManeuvers').innerHTML = sortedM.length > 0 ?
+    sortedM.map(([m, c]) => {
+      const pct = Math.round(c / maxM * 100);
+      return `<div class="anl-bar-row"><div class="anl-bar-label">${m.toUpperCase()}</div><div class="anl-bar-track"><div class="anl-bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="anl-bar-val">${c}</div></div>`;
+    }).join('') :
+    '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Sin datos de maniobras</div>';
+
+  // === Wave Eval Breakdown ===
+  const evalFields = [
+    { key: 'selection', label: '🎯 Selección', vals: { excellent: { lbl: 'Excelente', color: '#22c55e' }, normal: { lbl: 'Normal', color: '#f59e0b' }, poor: { lbl: 'Mala', color: '#ef4444' } } },
+    { key: 'position', label: '📍 Posición', vals: { excellent: { lbl: 'En pico', color: '#22c55e' }, normal: { lbl: 'Ok', color: '#f59e0b' }, poor: { lbl: 'Fuera', color: '#ef4444' } } },
+    { key: 'commit', label: '💪 Compromiso', vals: { excellent: { lbl: 'Full Send', color: '#22c55e' }, normal: { lbl: 'Normal', color: '#f59e0b' }, poor: { lbl: 'Dudó', color: '#ef4444' } } },
+  ];
+  const caughtWaves = waves.filter(w => w.type === 'caught');
+  let evalHtml = '';
+  evalFields.forEach(ef => {
+    const counts = {};
+    let total = 0;
+    caughtWaves.forEach(w => { if (w[ef.key]) { counts[w[ef.key]] = (counts[w[ef.key]] || 0) + 1; total++; } });
+    if (total === 0) return;
+    evalHtml += `<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:4px">${ef.label}</div>`;
+    evalHtml += '<div style="display:flex;height:18px;border-radius:4px;overflow:hidden;gap:1px">';
+    Object.entries(ef.vals).forEach(([k, info]) => {
+      const c = counts[k] || 0;
+      const pct = (c / total * 100);
+      if (pct > 0) evalHtml += `<div style="width:${pct}%;background:${info.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;min-width:${pct > 10 ? '0' : '20px'}" title="${info.lbl}: ${c}">${pct >= 12 ? Math.round(pct) + '%' : ''}</div>`;
+    });
+    evalHtml += '</div></div>';
+  });
+  document.getElementById('anlEvalBars').innerHTML = evalHtml || '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Sin evaluaciones</div>';
+
+  // === Biomech ===
+  const bioCard = document.getElementById('anlBioCard');
+  if (bio.length > 0) {
+    bioCard.style.display = 'block';
+    const bioFields = [
+      { key: 'bio_shoulders', label: 'Hombros', icon: '🦴' },
+      { key: 'bio_hips', label: 'Caderas', icon: '🦴' },
+      { key: 'bio_knees', label: 'Rodillas', icon: '🦵' },
+      { key: 'bio_arms', label: 'Brazos', icon: '💪' },
+      { key: 'bio_balance', label: 'Balance', icon: '⚖️' },
+    ];
+    const valScore = { good: 3, ok: 2, poor: 1 };
+    const bioBars = bioFields.map(bf => {
+      const vals = bio.map(b => valScore[b[bf.key]] || 0).filter(v => v > 0);
+      if (vals.length === 0) return null;
+      const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+      const pct = Math.round((avg / 3) * 100);
+      const color = avg >= 2.5 ? 'var(--green)' : avg >= 1.8 ? 'var(--yellow)' : 'var(--red)';
+      const label = avg >= 2.5 ? 'Bien' : avg >= 1.8 ? 'Regular' : 'Mejorar';
+      return `<div class="anl-bar-row"><div class="anl-bar-label">${bf.icon} ${bf.label}</div><div class="anl-bar-track"><div class="anl-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="anl-bar-val" style="color:${color}">${label}</div></div>`;
+    }).filter(Boolean);
+    document.getElementById('anlBioBars').innerHTML = bioBars.join('') || '<div style="color:var(--text-muted);font-size:12px">Sin datos</div>';
+  } else { bioCard.style.display = 'none'; }
+
+  // === Heat Performance ===
+  const heatCard = document.getElementById('anlHeatCard');
+  if (heats.length > 0) {
+    heatCard.style.display = 'block';
+    const sorted = heats.sort((a,b) => new Date(a.date) - new Date(b.date));
+    const heatLine = sorted.slice(-12).map(h => ({
+      v: parseFloat(h.total.toFixed(1)),
+      label: `H${h.heat_number || '?'}`,
+      unit: 'pts'
+    }));
+    document.getElementById('anlHeatChart').innerHTML = heatLine.length >= 2 ?
+      anlSvgLine(heatLine, 320, 140, '#a855f7', true) :
+      anlSvgBars(heatLine, 320, 140, '#a855f7');
+
+    // Heat stats
+    const avgTotal = heats.reduce((s,h) => s + h.total, 0) / heats.length;
+    const bestTotal = Math.max(...heats.map(h => h.total));
+    const wins = heats.filter(h => h.position === 1).length;
+    const podiums = heats.filter(h => h.position <= 3).length;
+    document.getElementById('anlHeatStats').innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:16px;font-weight:800;color:var(--accent)">${avgTotal.toFixed(1)}</div><div style="font-size:10px;color:var(--text-muted)">Avg Total</div></div>
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:16px;font-weight:800;color:var(--green)">${bestTotal.toFixed(1)}</div><div style="font-size:10px;color:var(--text-muted)">Mejor</div></div>
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:16px;font-weight:800;color:#f59e0b">🥇${wins}</div><div style="font-size:10px;color:var(--text-muted)">Victorias</div></div>
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:16px;font-weight:800;color:#a855f7">🏅${podiums}</div><div style="font-size:10px;color:var(--text-muted)">Podios</div></div>
+    </div>`;
+  } else { heatCard.style.display = 'none'; }
+
+  // === Athlete Comparison ===
+  const compareCard = document.getElementById('anlCompareCard');
+  if (_anlScope === 'team' && athletes.length >= 2) {
+    compareCard.style.display = 'block';
+    const selA = document.getElementById('anlCmpA');
+    const selB = document.getElementById('anlCmpB');
+    // Only rebuild options if empty
+    if (selA.options.length <= 1) {
+      selA.innerHTML = athletes.map((a, i) => `<option value="${a.id}" ${i === 0 ? 'selected' : ''}>${a.name}</option>`).join('');
+      selB.innerHTML = athletes.map((a, i) => `<option value="${a.id}" ${i === 1 ? 'selected' : ''}>${a.name}</option>`).join('');
+    }
+    anlRenderCompare();
+  } else { compareCard.style.display = 'none'; }
+
+  // === Spot Analysis ===
+  const spots = {};
+  sessions.forEach(s => {
+    const spot = s.spot || 'Desconocido';
+    if (!spots[spot]) spots[spot] = { count: 0, caught: 0, paddled: 0 };
+    spots[spot].count++;
+    Object.entries(s.athlete_data || {}).forEach(([id, d]) => {
+      if (_anlScope !== 'team' && _anlScope !== id) return;
+      spots[spot].caught += d.caught || 0;
+      spots[spot].paddled += d.paddled || 0;
+    });
+  });
+  const sortedSpots = Object.entries(spots).sort((a,b) => b[1].count - a[1].count).slice(0, 6);
+  document.getElementById('anlSpots').innerHTML = sortedSpots.length > 0 ?
+    sortedSpots.map(([name, data]) => {
+      const ratio = data.paddled > 0 ? Math.round(data.caught / data.paddled * 100) : 0;
+      const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : data.paddled > 0 ? 'var(--red)' : 'var(--text-muted)';
+      return `<div class="anl-spot-row">
+        <div style="flex:1"><div style="font-size:13px;font-weight:700">${name}</div><div style="font-size:11px;color:var(--text-muted)">${data.count} sesiones · ${data.caught} olas</div></div>
+        <div style="font-size:16px;font-weight:800;color:${ratioColor}">${data.paddled > 0 ? ratio + '%' : '—'}</div>
+      </div>`;
+    }).join('') :
+    '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Sin datos</div>';
+}
+
+function anlRenderCompare() {
+  const idA = document.getElementById('anlCmpA').value;
+  const idB = document.getElementById('anlCmpB').value;
+  if (!idA || !idB || idA === idB) {
+    document.getElementById('anlCompare').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Selecciona 2 atletas diferentes</div>';
+    return;
+  }
+  const sessions = anlGetSessions();
+  const athletes = DB.athletes;
+  const athA = athletes.find(a => a.id === idA);
+  const athB = athletes.find(a => a.id === idB);
+  if (!athA || !athB) return;
+
+  // Gather stats for each
+  function getStats(id) {
+    let caught = 0, paddled = 0, falls = 0, bioScores = [];
+    const ath = athletes.find(a => a.id === id);
+    const primaryDisc = ath ? getAthleteDiscipline(ath) : 'surfboard';
+    sessions.forEach(s => {
+      const d = s.athlete_data?.[id];
+      if (!d) return;
+      (d.waves || []).forEach(w => {
+        const disc = w.discipline || primaryDisc;
+        if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+        paddled++;
+        if (w.type === 'caught') caught++;
+        else if (w.type === 'fall') falls++;
+      });
+      (d.biomech || []).forEach(b => {
+        const disc = b.discipline || primaryDisc;
+        if (_anlDisc !== 'all' && disc !== _anlDisc) return;
+        const vals = [b.bio_shoulders, b.bio_hips, b.bio_knees, b.bio_arms, b.bio_balance].map(v => v === 'good' ? 3 : v === 'ok' ? 2 : v === 'poor' ? 1 : 0).filter(v => v > 0);
+        if (vals.length > 0) bioScores.push(vals.reduce((a,b)=>a+b,0)/vals.length);
+      });
+    });
+    const heatHistory = (ath?.heat_history || []).filter(h => {
+      if (_anlRange !== 'all') { const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - parseInt(_anlRange)); if (new Date(h.date) < cutoff) return false; }
+      if (_anlDisc !== 'all' && (h.discipline || primaryDisc) !== _anlDisc) return false;
+      return true;
+    });
+    const avgHeat = heatHistory.length > 0 ? heatHistory.reduce((s,h) => s + h.total, 0) / heatHistory.length : 0;
+    const catchPct = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
+    const avgBio = bioScores.length > 0 ? bioScores.reduce((a,b)=>a+b,0)/bioScores.length : 0;
+    return { caught, paddled, falls, catchPct, avgHeat, avgBio: Math.round(avgBio * 33.3), heats: heatHistory.length };
+  }
+
+  const sA = getStats(idA);
+  const sB = getStats(idB);
+
+  const metrics = [
+    { label: 'Catch %', a: sA.catchPct, b: sB.catchPct, max: 100, unit: '%' },
+    { label: 'Olas', a: sA.caught, b: sB.caught, max: Math.max(sA.caught, sB.caught, 1) },
+    { label: 'Avg Heat', a: parseFloat(sA.avgHeat.toFixed(1)), b: parseFloat(sB.avgHeat.toFixed(1)), max: 20 },
+    { label: 'Bio Score', a: sA.avgBio, b: sB.avgBio, max: 100, unit: '%' },
+  ];
+
+  const nameA = athA.name.split(' ')[0];
+  const nameB = athB.name.split(' ')[0];
+
+  document.getElementById('anlCompare').innerHTML =
+    `<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px"><span style="color:var(--accent)">${nameA}</span><span style="color:var(--green)">${nameB}</span></div>` +
+    metrics.map(m => {
+      const pctA = m.max > 0 ? Math.round((m.a / m.max) * 50) : 0;
+      const pctB = m.max > 0 ? Math.round((m.b / m.max) * 50) : 0;
+      return `<div class="anl-cmp-row">
+        <div style="width:30px;font-size:11px;font-weight:800;color:var(--accent);text-align:right">${m.a}${m.unit||''}</div>
+        <div class="anl-cmp-bar"><div class="anl-cmp-fill-a" style="width:${pctA}%"></div><div class="anl-cmp-fill-b" style="width:${pctB}%"></div></div>
+        <div style="width:30px;font-size:11px;font-weight:800;color:var(--green);text-align:left">${m.b}${m.unit||''}</div>
+      </div>
+      <div style="text-align:center;font-size:9px;color:var(--text-muted);margin-top:-6px;margin-bottom:6px">${m.label}</div>`;
+    }).join('');
 }
 
 // ============================================================
@@ -5722,6 +6768,9 @@ function renderSettings() {
         <button onclick="removeCustomDrill(${i})" style="color:var(--text-muted);font-size:16px;padding:4px 8px">×</button>
       </div>`
     ).join('') : '<div style="font-size:12px;color:var(--text-muted);padding:4px 0">Sin ejercicios personalizados</div>';
+  
+  // Storage health
+  renderStorageHealth();
 }
 
 function addSpot() {
@@ -5761,12 +6810,20 @@ function removeCustomDrill(i) {
 }
 
 function confirmClearData() {
-  if (confirm('⚠️ ¿Borrar TODOS los datos? Esta acción no se puede deshacer.')) {
-    if (confirm('¿Estás seguro? Se borrarán atletas, sesiones y configuración.')) {
-      localStorage.clear();
-      location.reload();
-    }
-  }
+  const athletes = DB.athletes.length;
+  const sessions = DB.sessions.length;
+  if (athletes === 0 && sessions === 0) return alert('No hay datos para borrar');
+  
+  if (!confirm(`⚠️ ¿Borrar TODOS los datos?\n\n• ${athletes} atletas\n• ${sessions} sesiones\n\nEsta acción NO se puede deshacer.`)) return;
+  
+  // Offer backup before clearing
+  const doBackup = confirm('¿Deseas exportar un backup antes de borrar?\n\n✅ Sí = Exportar backup primero\n❌ No = Borrar sin backup');
+  if (doBackup) exportFullBackup();
+  
+  if (!confirm('🔴 ÚLTIMA CONFIRMACIÓN: ¿Borrar todo permanentemente?')) return;
+  
+  localStorage.clear();
+  location.reload();
 }
 
 // ============================================================
