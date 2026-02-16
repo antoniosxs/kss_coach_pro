@@ -1019,6 +1019,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div id="pcHeats"></div>
   </div>
 
+  <!-- Judge Training Sessions -->
+  <div class="card" id="pcJudgeTrainCard" style="padding:12px;display:none">
+    <div class="card-header" style="font-size:13px;margin-bottom:8px">⚖️ Judging en Entrenamiento</div>
+    <div id="pcJudgeTrainContent"></div>
+  </div>
+
   <!-- Session History -->
   <div class="card" id="pcSessionCard" style="padding:0;overflow:hidden;display:none">
     <div class="card-header" style="font-size:13px;padding:12px 12px 8px">🏄 Session History</div>
@@ -1808,14 +1814,25 @@ function renderHome() {
     feedSection.style.display = 'block';
     const feed = [];
     
-    // Last 5 sessions
+    // Last 5 sessions (module-aware)
     sessions.slice(-5).reverse().forEach(s => {
       const d = new Date(s.date || s.started_at);
       const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(d);
-      const totalCaught = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.caught || 0), 0);
-      const totalPaddled = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.paddled || 0), 0);
-      const ratio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
-      feed.push({ icon: '🏄', text: `<strong>${s.spot}</strong> · ${Object.keys(s.athlete_data || {}).length} atletas · ${totalCaught} olas · ${ratio}% catch`, time: dateStr });
+      const mods = s.modules_used || [];
+      const hasTac = !s.modules_used || mods.includes('tactical');
+      const athCount = Object.keys(s.athlete_data || {}).length;
+      
+      let detail;
+      if (hasTac) {
+        const totalCaught = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.caught || 0), 0);
+        const totalPaddled = Object.values(s.athlete_data || {}).reduce((a, d) => a + (d.paddled || 0), 0);
+        const ratio = totalPaddled > 0 ? Math.round(totalCaught / totalPaddled * 100) : 0;
+        detail = `${athCount} atletas · ${totalCaught} olas · ${ratio}% catch`;
+      } else {
+        const modLabels = mods.map(m => m==='judge'?'⚖️ Judge':m==='workout'?'💪 Workout':m==='biomech'?'🦴 Bio':m).join(', ');
+        detail = `${athCount} atletas · ${modLabels || 'sesión'}`;
+      }
+      feed.push({ icon: '🏄', text: `<strong>${s.spot}</strong> · ${detail}`, time: dateStr });
     });
     
     // Last 3 heats from athletes
@@ -1932,10 +1949,13 @@ function launchSession() {
     focus_area: focus,
     started_at: new Date().toISOString(),
     athlete_data: athleteData,
-    status: 'active'
+    status: 'active',
+    modules_used: [], // auto-detected on close
+    judge_data: null   // captured from tracker on close
   };
   
   DB.activeSession = session;
+  DB.judgeTracker = {}; // Reset tracker for new session
   window._ssSelected = null;
   window._tacIdx = 0;
   window._pendingWave = null;
@@ -2615,14 +2635,32 @@ function renderDebrief() {
   if (s.focus_area) tags += `<span class="db-tag">🎯 ${s.focus_area}</span>`;
   document.getElementById('dbConditions').innerHTML = tags;
   
+  // Detect modules
+  const mods = detectModulesUsed(s);
+  const hasTactical = mods.includes('tactical');
+  const hasJudge = mods.includes('judge');
+  const hasBiomech = mods.includes('biomech');
+  const hasWorkout = mods.includes('workout');
+  
+  // Modules used badge
+  const modLabels = { tactical: '🏄 Tactical', biomech: '🦴 Bio', judge: '⚖️ Judge', workout: '💪 Workout', lab: '🎥 Lab' };
+  const modBadges = mods.map(m => `<span class="hist-badge">${modLabels[m] || m}</span>`).join(' ');
+  
   // Team stats
   const ids = Object.keys(s.athlete_data);
   let totalP = 0, totalC = 0, totalF = 0;
-  ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled; totalC += d.caught; totalF += d.falls; });
+  if (hasTactical) {
+    ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled; totalC += d.caught; totalF += d.falls; });
+  }
   const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
   
-  document.getElementById('dbTeamRatio').textContent = `Catch Ratio: ${teamRatio}%`;
-  document.getElementById('dbTeamStats').textContent = `${ids.length} atletas · ${totalP} remadas · ${totalC} atrapadas · ${totalF} caídas`;
+  if (hasTactical) {
+    document.getElementById('dbTeamRatio').textContent = `Catch Ratio: ${teamRatio}%`;
+    document.getElementById('dbTeamStats').textContent = `${ids.length} atletas · ${totalP} remadas · ${totalC} atrapadas · ${totalF} caídas`;
+  } else {
+    document.getElementById('dbTeamRatio').textContent = '';
+    document.getElementById('dbTeamStats').innerHTML = `${ids.length} atletas · ${modBadges}`;
+  }
   
   // Per athlete
   const athletes = DB.athletes;
@@ -2630,41 +2668,56 @@ function renderDebrief() {
   ids.forEach(id => {
     const a = athletes.find(x => x.id === id);
     const ad = s.athlete_data[id];
-    const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
-    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
-    
-    // Calculate XP
-    let xp = 10; // Attendance
-    const goodWaves = ad.waves.filter(w => w.selection === 'excellent').length;
-    xp += goodWaves * 15;
-    if (ratio >= 70) xp += 25;
-    if (ad.falls === 0 && ad.caught > 0) xp += 40;
-    
-    // Maneuver summary
-    const maneuvers = {};
-    ad.waves.forEach(w => {
-      if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; });
-    });
-    const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
     
     athHtml += `<div class="db-athlete-card">
-      <div class="db-athlete-name">${a ? a.name : 'Atleta'}</div>
-      <div class="db-stat-grid">
+      <div class="db-athlete-name">${a ? a.name : 'Atleta'}</div>`;
+    
+    // Tactical section (only if used)
+    if (hasTactical) {
+      const ratio = ad.paddled > 0 ? Math.round(ad.caught / ad.paddled * 100) : 0;
+      const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      const maneuvers = {};
+      ad.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => { maneuvers[m] = (maneuvers[m] || 0) + 1; }); });
+      const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+      
+      athHtml += `<div class="db-stat-grid">
         <div class="db-stat"><div class="db-stat-v">${ad.paddled}</div><div class="db-stat-l">Remó</div></div>
         <div class="db-stat"><div class="db-stat-v">${ad.caught}</div><div class="db-stat-l">Atrapó</div></div>
         <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
       </div>
       ${ad.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${ad.falls} caída${ad.falls > 1 ? 's' : ''}</div>` : ''}
-      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}
-      ${renderBioSummaryHTML(ad)}
-      ${renderWorkoutSummaryHTML(ad)}
-      <div class="db-xp">✨ +${xp} XP</div>
-    </div>`;
+      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}`;
+    }
+    
+    // Judge section
+    if (hasJudge) {
+      const js = getJudgeSummaryForAthlete(id);
+      if (js) {
+        const scoreColor = js.avg_wave >= 6 ? 'var(--green)' : js.avg_wave >= 4 ? 'var(--yellow)' : js.avg_wave > 0 ? 'var(--red)' : 'var(--text-muted)';
+        athHtml += `<div style="margin-top:8px;padding:8px;background:var(--bg-input);border-radius:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:4px">⚖️ Judging (${js.heat_count} heat${js.heat_count > 1 ? 's' : ''})</div>
+          <div class="db-stat-grid">
+            <div class="db-stat"><div class="db-stat-v" style="color:var(--accent)">${js.avg_total.toFixed(2)}</div><div class="db-stat-l">Avg Heat</div></div>
+            <div class="db-stat"><div class="db-stat-v" style="color:${scoreColor}">${js.avg_wave.toFixed(2)}</div><div class="db-stat-l">Avg/Ola</div></div>
+            ${js.goal > 0 ? `<div class="db-stat"><div class="db-stat-v" style="color:var(--yellow)">${js.goal.toFixed(1)}</div><div class="db-stat-l">Goal</div></div>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${js.heats.map((h, i) => `H${i+1}: ${h.toFixed(2)}`).join(' · ')}</div>
+        </div>`;
+      }
+    }
+    
+    athHtml += renderBioSummaryHTML(ad);
+    athHtml += renderWorkoutSummaryHTML(ad);
+    
+    // XP (calculated now)
+    let xp = ad.xp_earned || 10;
+    athHtml += `<div class="db-xp">✨ +${xp} XP</div>`;
+    athHtml += `</div>`;
   });
   document.getElementById('dbAthletes').innerHTML = athHtml;
   
-  // Visual catch ratio chart
-  if (ids.length > 0) {
+  // Visual catch ratio chart (only if tactical used)
+  if (hasTactical && ids.length > 0) {
     const chart = document.getElementById('dbChart');
     chart.style.display = 'block';
     document.getElementById('dbChartBars').innerHTML = ids.map(id => {
@@ -2674,7 +2727,57 @@ function renderDebrief() {
       const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
       return `<div class="pc-bar-row"><div class="pc-bar-label">${(a ? a.name.split(' ')[0] : '?').slice(0,6)}</div><div class="pc-bar-track"><div class="pc-bar-fill" style="width:${ratio}%;background:${color}"></div></div><div class="pc-bar-val">${ratio}%</div></div>`;
     }).join('');
+  } else {
+    document.getElementById('dbChart').style.display = 'none';
   }
+}
+
+// Helper: get judge summary for an athlete from the tracker
+function getJudgeSummaryForAthlete(athId) {
+  const tracker = DB.judgeTracker;
+  for (const [name, info] of Object.entries(tracker)) {
+    if (info.athlete_id === athId) {
+      const valid = (info.heats || []).filter(h => h != null);
+      const avg = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+      const wAvgs = (info.all_wave_avgs || []).filter(a => a > 0);
+      const allWaveAvg = wAvgs.length > 0 ? wAvgs.reduce((a, b) => a + b, 0) / wAvgs.length : 0;
+      return { heats: info.heats || [], heat_count: valid.length, avg_total: avg, avg_wave: allWaveAvg, goal: info.goal || 0 };
+    }
+  }
+  return null;
+}
+
+function detectModulesUsed(s) {
+  const mods = [];
+  const ids = Object.keys(s.athlete_data || {});
+  
+  // Tactical: any paddled/caught/waves
+  if (ids.some(id => { const d = s.athlete_data[id]; return (d.paddled || 0) > 0 || (d.caught || 0) > 0 || (d.waves || []).length > 0; })) {
+    mods.push('tactical');
+  }
+  
+  // Biomech: any biomech evaluations
+  if (ids.some(id => (s.athlete_data[id].biomech || []).length > 0)) {
+    mods.push('biomech');
+  }
+  
+  // Judge: tracker has data
+  const tracker = DB.judgeTracker;
+  if (Object.keys(tracker).length > 0) {
+    mods.push('judge');
+  }
+  
+  // Workout: any workouts assigned
+  if (ids.some(id => (s.athlete_data[id].workouts || []).length > 0)) {
+    mods.push('workout');
+  }
+  
+  // Lab: check if any frames captured during session
+  if (ids.some(id => (s.athlete_data[id].lab_frames || []).length > 0)) {
+    mods.push('lab');
+  }
+  
+  return mods;
 }
 
 function saveDebrief() {
@@ -2692,18 +2795,76 @@ function saveDebrief() {
   const end = new Date(s.ended_at);
   s.duration_min = Math.round((end - start) / 60000);
   
-  // Add XP to athletes
+  // Detect which modules were actually used
+  s.modules_used = detectModulesUsed(s);
+  
+  // Capture judge tracker data into session
+  const tracker = DB.judgeTracker;
+  if (Object.keys(tracker).length > 0) {
+    s.judge_data = JSON.parse(JSON.stringify(tracker));
+    
+    // Also save per-athlete judge summaries
+    for (const [name, info] of Object.entries(tracker)) {
+      const athId = info.athlete_id;
+      if (athId && s.athlete_data[athId]) {
+        const valid = (info.heats || []).filter(h => h != null);
+        const avg = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+        const wAvgs = (info.all_wave_avgs || []).filter(a => a > 0);
+        const allWaveAvg = wAvgs.length > 0 ? wAvgs.reduce((a, b) => a + b, 0) / wAvgs.length : 0;
+        
+        s.athlete_data[athId].judge_summary = {
+          heats: info.heats || [],
+          heat_count: valid.length,
+          avg_heat_total: parseFloat(avg.toFixed(2)),
+          avg_wave_score: parseFloat(allWaveAvg.toFixed(2)),
+          all_wave_avgs: info.all_wave_avgs || [],
+          goal: info.goal || 0
+        };
+      }
+    }
+  }
+  
+  // Add XP to athletes (module-aware)
   const athletes = DB.athletes;
+  const usedTactical = s.modules_used.includes('tactical');
+  const usedJudge = s.modules_used.includes('judge');
+  const usedWorkout = s.modules_used.includes('workout');
+  const usedBiomech = s.modules_used.includes('biomech');
+  
   Object.keys(s.athlete_data).forEach(id => {
     const a = athletes.find(x => x.id === id);
     if (!a) return;
     const ad = s.athlete_data[id];
-    let xp = 10;
-    const ratio = ad.paddled > 0 ? ad.caught / ad.paddled : 0;
-    if (ratio >= 0.7) xp += 25;
-    if (ad.falls === 0 && ad.caught > 0) xp += 40;
-    const goodWaves = ad.waves.filter(w => w.selection === 'excellent').length;
-    xp += goodWaves * 15;
+    
+    let xp = 10; // Base attendance XP
+    
+    if (usedTactical) {
+      const ratio = ad.paddled > 0 ? ad.caught / ad.paddled : 0;
+      if (ratio >= 0.7) xp += 25;
+      if (ad.falls === 0 && ad.caught > 0) xp += 40;
+      const goodWaves = ad.waves.filter(w => w.selection === 'excellent').length;
+      xp += goodWaves * 15;
+    }
+    
+    if (usedJudge && ad.judge_summary) {
+      xp += ad.judge_summary.heat_count * 10;
+      if (ad.judge_summary.avg_wave_score >= 6) xp += 30;
+      else if (ad.judge_summary.avg_wave_score >= 4) xp += 15;
+    }
+    
+    if (usedWorkout) {
+      const wo = ad.workouts || [];
+      const done = wo.filter(w => w.completed).length;
+      xp += done * 5;
+      xp += wo.filter(w => w.quality === 'good').length * 5;
+    }
+    
+    if (usedBiomech) {
+      const bio = ad.biomech || [];
+      xp += bio.length * 5;
+    }
+    
+    ad.xp_earned = xp; // Store for display
     a.xp_total = (a.xp_total || 0) + xp;
     a.sessions_count = (a.sessions_count || 0) + 1;
   });
@@ -2807,7 +2968,9 @@ function exportSessionCSV() {
   // Flat BI-ready format: one row per athlete, all data as columns
   const headers = [
     'timestamp','spot','wave_size','wave_quality','wind','crowd','focus','duration_min','coach_rating',
-    'athlete','paddled','caught','falls','catch_ratio',
+    'modules_used',
+    'athlete',
+    'paddled','caught','falls','catch_ratio',
     'waves_total','maneuvers',
     'selection_poor','selection_normal','selection_excellent',
     'position_poor','position_normal','position_excellent',
@@ -2816,32 +2979,35 @@ function exportSessionCSV() {
     'bio_evals','bio_shoulders_score','bio_knees_score','bio_arms_score',
     'bio_compression_score','bio_head_score','bio_backfoot_score','bio_weight_score',
     'bio_avg_flow','bio_notes',
+    'judge_heats','judge_h1','judge_h2','judge_h3','judge_h4','judge_h5','judge_h6',
+    'judge_avg_heat','judge_avg_wave','judge_goal',
     'workout_total','workout_completed','workout_good','workout_regular','workout_poor',
     'coach_notes'
   ];
   
+  const modsStr = (s.modules_used || []).join(';');
   let csv = headers.join(',') + '\n';
   
   Object.keys(s.athlete_data).forEach(id => {
     const a = athletes.find(x => x.id === id);
     const d = s.athlete_data[id];
-    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    const usedTactical = (s.modules_used || []).includes('tactical');
+    const ratio = usedTactical && d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : '';
     
-    // Tactical aggregates
+    // Tactical aggregates (only if module used)
     const maneuvers = {};
     let sel = { poor: 0, normal: 0, excellent: 0 };
     let pos = { poor: 0, normal: 0, excellent: 0 };
     let com = { poor: 0, normal: 0, excellent: 0 };
-    d.waves.forEach(w => {
-      if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1);
-      if (w.selection) sel[w.selection] = (sel[w.selection] || 0) + 1;
-      if (w.position) pos[w.position] = (pos[w.position] || 0) + 1;
-      if (w.commit) com[w.commit] = (com[w.commit] || 0) + 1;
-    });
-    let xp = 10;
-    if (ratio >= 70) xp += 25;
-    if (d.falls === 0 && d.caught > 0) xp += 40;
-    xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
+    if (usedTactical) {
+      d.waves.forEach(w => {
+        if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1);
+        if (w.selection) sel[w.selection] = (sel[w.selection] || 0) + 1;
+        if (w.position) pos[w.position] = (pos[w.position] || 0) + 1;
+        if (w.commit) com[w.commit] = (com[w.commit] || 0) + 1;
+      });
+    }
+    const xp = d.xp_earned || 10;
     const manStr = Object.entries(maneuvers).map(([m, c]) => `${m}:${c}`).join(';');
     
     // Biomechanics aggregates
@@ -2859,6 +3025,10 @@ function exportSessionCSV() {
     
     const esc = (v) => `"${String(v || '').replace(/"/g, '""')}"`;
     
+    // Judge data
+    const js = d.judge_summary || {};
+    const jHeats = js.heats || [];
+    
     const row = [
       s.date || s.started_at,
       esc(s.spot),
@@ -2869,32 +3039,43 @@ function exportSessionCSV() {
       esc(s.focus_area || ''),
       s.duration_min || '',
       s.coach_rating || '',
+      esc(modsStr),
       esc(a ? a.name : id),
-      d.paddled,
-      d.caught,
-      d.falls,
+      usedTactical ? d.paddled : '',
+      usedTactical ? d.caught : '',
+      usedTactical ? d.falls : '',
       ratio,
-      d.waves.length,
+      usedTactical ? d.waves.length : '',
       esc(manStr),
-      sel.poor, sel.normal, sel.excellent,
-      pos.poor, pos.normal, pos.excellent,
-      com.poor, com.normal, com.excellent,
+      usedTactical ? sel.poor : '', usedTactical ? sel.normal : '', usedTactical ? sel.excellent : '',
+      usedTactical ? pos.poor : '', usedTactical ? pos.normal : '', usedTactical ? pos.excellent : '',
+      usedTactical ? com.poor : '', usedTactical ? com.normal : '', usedTactical ? com.excellent : '',
       xp,
-      bio.length,
-      bioAvgScore(bio, 'bio_shoulders'),
-      bioAvgScore(bio, 'bio_knees'),
-      bioAvgScore(bio, 'bio_arms'),
-      bioAvgScore(bio, 'bio_compression'),
-      bioAvgScore(bio, 'bio_head'),
-      bioAvgScore(bio, 'bio_backfoot'),
-      bioAvgScore(bio, 'bio_weight'),
+      bio.length || '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_shoulders') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_knees') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_arms') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_compression') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_head') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_backfoot') : '',
+      bio.length > 0 ? bioAvgScore(bio, 'bio_weight') : '',
       avgFlow,
       esc(bioNotes),
-      wo.length,
-      woDone,
-      woGood,
-      woReg,
-      woPoor,
+      jHeats.length || '',
+      jHeats[0] != null ? jHeats[0].toFixed(2) : '',
+      jHeats[1] != null ? jHeats[1].toFixed(2) : '',
+      jHeats[2] != null ? jHeats[2].toFixed(2) : '',
+      jHeats[3] != null ? jHeats[3].toFixed(2) : '',
+      jHeats[4] != null ? jHeats[4].toFixed(2) : '',
+      jHeats[5] != null ? jHeats[5].toFixed(2) : '',
+      js.avg_heat_total != null ? js.avg_heat_total : '',
+      js.avg_wave_score != null ? js.avg_wave_score : '',
+      js.goal || '',
+      wo.length || '',
+      woDone || '',
+      woGood || '',
+      woReg || '',
+      woPoor || '',
       esc(s.coach_notes || '')
     ];
     
@@ -2968,20 +3149,44 @@ function renderHistory() {
     const date = new Date(s.date || s.started_at);
     const dateStr = new Intl.DateTimeFormat('es', { weekday:'short', day:'numeric', month:'short', year:'numeric' }).format(date);
     const sizeNames = { 1:'Flat', 2:'1-2ft', 3:'2-4ft', 4:'4-6ft', 5:'+6ft' };
+    const mods = s.modules_used || [];
+    const hasTactical = !s.modules_used || mods.includes('tactical');
+    const hasJudge = mods.includes('judge');
     
-    // Aggregate stats
+    // Aggregate stats (only from tactical)
     let totalP = 0, totalC = 0, totalF = 0;
-    ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled || 0; totalC += d.caught || 0; totalF += d.falls || 0; });
-    const ratio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
+    if (hasTactical) {
+      ids.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled || 0; totalC += d.caught || 0; totalF += d.falls || 0; });
+    }
     const bioCount = ids.reduce((sum, id) => sum + (s.athlete_data[id].biomech || []).length, 0);
     const woCount = ids.reduce((sum, id) => sum + (s.athlete_data[id].workouts || []).length, 0);
+    const judgeHeats = ids.reduce((sum, id) => sum + ((s.athlete_data[id].judge_summary || {}).heat_count || 0), 0);
     
     let badges = '';
+    if (hasJudge && judgeHeats > 0) badges += `<span class="hist-badge">⚖️ ${judgeHeats}h</span>`;
     if (bioCount > 0) badges += `<span class="hist-badge">🦴 ${bioCount}</span>`;
     if (woCount > 0) badges += `<span class="hist-badge">💪 ${woCount}</span>`;
     if (s.duration_min) badges += `<span class="hist-badge">⏱️ ${s.duration_min}m</span>`;
     
-    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+    // Right side metric
+    let rightHtml = '';
+    if (hasTactical && totalP > 0) {
+      const ratio = Math.round(totalC / totalP * 100);
+      const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      rightHtml = `<div style="font-size:22px;font-weight:800;color:${ratioColor}">${ratio}%</div><div style="font-size:10px;color:var(--text-muted)">catch</div>`;
+    } else if (hasJudge) {
+      const avgScores = ids.map(id => (s.athlete_data[id].judge_summary||{}).avg_wave_score||0).filter(v=>v>0);
+      const teamAvg = avgScores.length > 0 ? (avgScores.reduce((a,b)=>a+b,0)/avgScores.length).toFixed(1) : '—';
+      rightHtml = `<div style="font-size:22px;font-weight:800;color:var(--accent)">${teamAvg}</div><div style="font-size:10px;color:var(--text-muted)">avg/ola</div>`;
+    } else {
+      rightHtml = `<div style="font-size:18px">✓</div>`;
+    }
+    
+    // Bottom stats
+    let statsHtml = `<span>👥 ${athCount}</span>`;
+    if (hasTactical && totalP > 0) statsHtml += `<span>🏄 ${totalC}/${totalP} olas</span>`;
+    if (totalF > 0) statsHtml += `<span>💥 ${totalF}</span>`;
+    statsHtml += badges;
     
     return `<div class="hist-card" onclick="openSessionDetail(${idx})">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -2989,17 +3194,9 @@ function renderHistory() {
           <div class="hist-spot">${s.spot}</div>
           <div class="hist-date">${dateStr} · ${sizeNames[s.wave_size] || ''} · ${s.wind_condition || ''}</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;color:${ratioColor}">${ratio}%</div>
-          <div style="font-size:10px;color:var(--text-muted)">catch</div>
-        </div>
+        <div style="text-align:right">${rightHtml}</div>
       </div>
-      <div class="hist-stats">
-        <span>👥 ${athCount}</span>
-        <span>🏄 ${totalC}/${totalP} olas</span>
-        ${totalF > 0 ? `<span>💥 ${totalF}</span>` : ''}
-        ${badges}
-      </div>
+      <div class="hist-stats">${statsHtml}</div>
     </div>`;
   }).join('');
 }
@@ -3030,13 +3227,18 @@ function renderSessionDetail() {
   const s = DB.sessions[window._sdSessionIdx];
   if (!s) { showView('history'); return; }
   const athletes = DB.athletes;
+  const mods = s.modules_used || [];
+  const hasTactical = !s.modules_used || mods.includes('tactical');
+  const hasJudge = mods.includes('judge');
   
   const date = new Date(s.date || s.started_at);
   const dateStr = new Intl.DateTimeFormat('es', { weekday:'long', day:'numeric', month:'long', year:'numeric' }).format(date);
   const sizeNames = { 1:'Flat', 2:'1-2ft', 3:'2-4ft', 4:'4-6ft', 5:'+6ft' };
   
   document.getElementById('sdTitle').textContent = s.spot;
-  document.getElementById('sdMeta').textContent = `${dateStr} · ${s.duration_min ? s.duration_min + ' min' : ''}`;
+  const modLabels = { tactical:'🏄 Tactical', biomech:'🦴 Bio', judge:'⚖️ Judge', workout:'💪 Workout', lab:'🎥 Lab' };
+  const modBadges = mods.length > 0 ? mods.map(m => modLabels[m]||m).join(' · ') : '';
+  document.getElementById('sdMeta').textContent = `${dateStr} · ${s.duration_min ? s.duration_min + ' min' : ''}${modBadges ? ' · ' + modBadges : ''}`;
   
   // Conditions
   document.getElementById('sdConditions').innerHTML = `
@@ -3055,43 +3257,66 @@ function renderSessionDetail() {
   ids.forEach(id => {
     const a = athletes.find(x => x.id === id);
     const d = s.athlete_data[id];
-    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
-    const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
-    totalP += d.paddled || 0;
-    totalC += d.caught || 0;
-    
-    const maneuvers = {};
-    d.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1); });
-    const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
     
     athHtml += `<div class="sd-ath-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:800;font-size:14px">${a ? a.name : 'Atleta'}</div>
-        <div style="font-size:20px;font-weight:800;color:${ratioColor}">${ratio}%</div>
-      </div>
-      <div class="db-stat-grid">
+      <div style="font-weight:800;font-size:14px;margin-bottom:8px">${a ? a.name : 'Atleta'}</div>`;
+    
+    if (hasTactical && d.paddled > 0) {
+      const ratio = Math.round(d.caught / d.paddled * 100);
+      const ratioColor = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      totalP += d.paddled || 0;
+      totalC += d.caught || 0;
+      
+      const maneuvers = {};
+      d.waves.forEach(w => { if (w.maneuvers) w.maneuvers.forEach(m => maneuvers[m] = (maneuvers[m] || 0) + 1); });
+      const manStr = Object.entries(maneuvers).map(([m, c]) => `${m.toUpperCase()}×${c}`).join(' ');
+      
+      athHtml += `<div class="db-stat-grid">
         <div class="db-stat"><div class="db-stat-v">${d.paddled}</div><div class="db-stat-l">Remó</div></div>
         <div class="db-stat"><div class="db-stat-v">${d.caught}</div><div class="db-stat-l">Atrapó</div></div>
-        <div class="db-stat"><div class="db-stat-v">${d.falls || 0}</div><div class="db-stat-l">Caídas</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
       </div>
-      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">🏄 ${manStr}</div>` : ''}
-      ${renderBioSummaryHTML(d)}
-      ${renderWorkoutSummaryHTML(d)}
-    </div>`;
+      ${d.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${d.falls} caída${d.falls > 1 ? 's' : ''}</div>` : ''}
+      ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">🏄 ${manStr}</div>` : ''}`;
+    }
+    
+    // Judge summary
+    if (d.judge_summary) {
+      const js = d.judge_summary;
+      const scoreColor = js.avg_wave_score >= 6 ? 'var(--green)' : js.avg_wave_score >= 4 ? 'var(--yellow)' : 'var(--red)';
+      athHtml += `<div style="margin-top:8px;padding:8px;background:var(--bg-input);border-radius:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:4px">⚖️ Judging (${js.heat_count} heat${js.heat_count>1?'s':''})</div>
+        <div class="db-stat-grid">
+          <div class="db-stat"><div class="db-stat-v" style="color:var(--accent)">${js.avg_heat_total.toFixed(2)}</div><div class="db-stat-l">Avg Heat</div></div>
+          <div class="db-stat"><div class="db-stat-v" style="color:${scoreColor}">${js.avg_wave_score.toFixed(2)}</div><div class="db-stat-l">Avg/Ola</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${js.heats.map((h,i)=>`H${i+1}: ${h.toFixed(2)}`).join(' · ')}</div>
+      </div>`;
+    }
+    
+    athHtml += renderBioSummaryHTML(d);
+    athHtml += renderWorkoutSummaryHTML(d);
+    athHtml += `</div>`;
   });
   document.getElementById('sdAthletes').innerHTML = athHtml;
   
-  const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
-  document.getElementById('sdTeamStats').innerHTML = `
-    <div class="db-stat-grid">
+  // Team stats (adapted to modules)
+  if (hasTactical && totalP > 0) {
+    const teamRatio = Math.round(totalC / totalP * 100);
+    document.getElementById('sdTeamStats').innerHTML = `
+      <div class="db-stat-grid">
+        <div class="db-stat"><div class="db-stat-v">${ids.length}</div><div class="db-stat-l">Atletas</div></div>
+        <div class="db-stat"><div class="db-stat-v">${totalC}/${totalP}</div><div class="db-stat-l">Olas</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:${teamRatio>=60?'var(--green)':teamRatio>=40?'var(--yellow)':'var(--red)'}">${teamRatio}%</div><div class="db-stat-l">Catch</div></div>
+      </div>`;
+  } else {
+    document.getElementById('sdTeamStats').innerHTML = `<div class="db-stat-grid">
       <div class="db-stat"><div class="db-stat-v">${ids.length}</div><div class="db-stat-l">Atletas</div></div>
-      <div class="db-stat"><div class="db-stat-v">${totalC}/${totalP}</div><div class="db-stat-l">Olas</div></div>
-      <div class="db-stat"><div class="db-stat-v" style="color:${teamRatio>=60?'var(--green)':teamRatio>=40?'var(--yellow)':'var(--red)'}">${teamRatio}%</div><div class="db-stat-l">Catch</div></div>
-    </div>
-  `;
+    </div>`;
+  }
   
-  // Catch ratio chart
-  if (ids.length > 1) {
+  // Catch ratio chart (only if tactical)
+  if (hasTactical && ids.length > 1 && totalP > 0) {
     document.getElementById('sdCharts').innerHTML = `<div class="card" style="padding:12px;margin-bottom:12px">
       <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px">📊 Catch Ratio Comparado</div>
       ${ids.map(id => {
@@ -3136,7 +3361,7 @@ function renderProgress() {
     return;
   }
   
-  // Aggregate stats
+  // Aggregate stats (module-aware)
   let totalP = 0, totalC = 0, totalF = 0, totalXP = 0;
   const catchRatios = [];
   const allManeuvers = {};
@@ -3144,23 +3369,23 @@ function renderProgress() {
   
   sessions.forEach(s => {
     const d = s.athlete_data[a.id];
-    totalP += d.paddled || 0;
-    totalC += d.caught || 0;
-    totalF += d.falls || 0;
+    const mods = s.modules_used || [];
+    const hasTactical = !s.modules_used || mods.includes('tactical');
     
-    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : null;
-    if (ratio !== null) catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
+    if (hasTactical) {
+      totalP += d.paddled || 0;
+      totalC += d.caught || 0;
+      totalF += d.falls || 0;
+      
+      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : null;
+      if (ratio !== null) catchRatios.push({ date: s.date || s.started_at, ratio, spot: s.spot });
+      
+      d.waves.forEach(w => {
+        if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
+      });
+    }
     
-    d.waves.forEach(w => {
-      if (w.maneuvers) w.maneuvers.forEach(m => allManeuvers[m] = (allManeuvers[m] || 0) + 1);
-    });
-    
-    let xp = 10;
-    if (ratio >= 70) xp += 25;
-    if (d.falls === 0 && d.caught > 0) xp += 40;
-    xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
-    totalXP += xp;
-    
+    totalXP += d.xp_earned || 10;
     (d.biomech || []).forEach(b => allBio.push(b));
   });
   
@@ -3241,17 +3466,12 @@ function renderProgress() {
     document.getElementById('progManeuvers').innerHTML = '<div style="color:var(--text-muted);font-size:12px">Sin datos</div>';
   }
   
-  // XP timeline
+  // XP timeline (uses xp_earned from session data)
   if (sessions.length >= 2) {
     let cumXP = 0;
     const xpPts = sessions.map(s => {
       const d = s.athlete_data[a.id];
-      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
-      let xp = 10;
-      if (ratio >= 70) xp += 25;
-      if (d.falls === 0 && d.caught > 0) xp += 40;
-      xp += d.waves.filter(w => w.selection === 'excellent').length * 15;
-      cumXP += xp;
+      cumXP += d.xp_earned || 10;
       return { date: s.date || s.started_at, xp: cumXP };
     });
     
@@ -3274,16 +3494,32 @@ function renderProgress() {
     document.getElementById('progXPChart').innerHTML = `<div style="text-align:center;font-size:20px;font-weight:800;color:var(--accent);padding:20px">${totalXP} XP</div>`;
   }
   
-  // Session list
+  // Session list (module-aware)
   document.getElementById('progSessions').innerHTML = sessions.slice().reverse().map(s => {
     const d = s.athlete_data[a.id];
-    const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+    const mods = s.modules_used || [];
+    const hasTac = !s.modules_used || mods.includes('tactical');
     const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(s.date || s.started_at));
-    const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
     const idx = DB.sessions.indexOf(s);
+    
+    let detail, rightSide;
+    if (hasTac && d.paddled > 0) {
+      const ratio = Math.round(d.caught / d.paddled * 100);
+      const color = ratio >= 60 ? 'var(--green)' : ratio >= 40 ? 'var(--yellow)' : 'var(--red)';
+      detail = `${d.caught}/${d.paddled} olas`;
+      rightSide = `<div style="font-weight:800;font-size:16px;color:${color}">${ratio}%</div>`;
+    } else if (d.judge_summary) {
+      detail = `${d.judge_summary.heat_count} heats`;
+      rightSide = `<div style="font-weight:800;font-size:16px;color:var(--accent)">${d.judge_summary.avg_heat_total.toFixed(1)}</div>`;
+    } else {
+      const modIcons = mods.map(m => m==='workout'?'💪':m==='biomech'?'🦴':m==='lab'?'🎥':'').join('');
+      detail = modIcons || 'sesión';
+      rightSide = `<div style="font-size:12px;color:var(--text-muted)">✓</div>`;
+    }
+    
     return `<div class="pc-hist-item" onclick="openSessionDetail(${idx})" style="cursor:pointer">
-      <div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${d.caught}/${d.paddled} olas</div></div>
-      <div style="font-weight:800;font-size:16px;color:${color}">${ratio}%</div>
+      <div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${detail}</div></div>
+      ${rightSide}
     </div>`;
   }).join('');
 }
@@ -3415,14 +3651,20 @@ const BADGE_DEFS = [
 function getTotalCaught(a) {
   const sessions = DB.sessions;
   let total = 0;
-  sessions.forEach(s => { if (s.athlete_data && s.athlete_data[a.id]) total += s.athlete_data[a.id].caught || 0; });
+  sessions.forEach(s => {
+    if (s.athlete_data && s.athlete_data[a.id] && (!s.modules_used || s.modules_used.includes('tactical')))
+      total += s.athlete_data[a.id].caught || 0;
+  });
   return total;
 }
 
 function getTotalPaddled(a) {
   const sessions = DB.sessions;
   let total = 0;
-  sessions.forEach(s => { if (s.athlete_data && s.athlete_data[a.id]) total += s.athlete_data[a.id].paddled || 0; });
+  sessions.forEach(s => {
+    if (s.athlete_data && s.athlete_data[a.id] && (!s.modules_used || s.modules_used.includes('tactical')))
+      total += s.athlete_data[a.id].paddled || 0;
+  });
   return total;
 }
 
@@ -3489,9 +3731,9 @@ function renderPlayerCard() {
     earned.map(b => `<div class="pc-badge earned"><span class="pc-badge-icon">${b.icon}</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('') +
     locked.slice(0, 4).map(b => `<div class="pc-badge locked"><span class="pc-badge-icon">🔒</span><div class="pc-badge-info"><div class="pc-badge-name">${b.name}</div><div class="pc-badge-desc">${b.desc}</div></div></div>`).join('');
   
-  // Catch Ratio Chart (from sessions)
+  // Catch Ratio Chart (only from tactical sessions)
   const sessions = DB.sessions;
-  const athSessions = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]).slice(-8);
+  const athSessions = sessions.filter(s => s.athlete_data && s.athlete_data[a.id] && (!s.modules_used || s.modules_used.includes('tactical'))).slice(-8);
   const catchChart = document.getElementById('pcCatchChart');
   if (athSessions.length > 0) {
     catchChart.style.display = 'block';
@@ -3553,18 +3795,74 @@ function renderPlayerCard() {
     }).join('');
   } else { heatCard.style.display = 'none'; }
   
-  // Session History
+  // Session History (module-aware display)
   const athSess = sessions.filter(s => s.athlete_data && s.athlete_data[a.id]);
   const sessCard = document.getElementById('pcSessionCard');
   if (athSess.length > 0) {
     sessCard.style.display = 'block';
     document.getElementById('pcSessions').innerHTML = athSess.slice().reverse().slice(0, 10).map(s => {
       const d = s.athlete_data[a.id];
-      const ratio = d.paddled > 0 ? Math.round(d.caught / d.paddled * 100) : 0;
+      const mods = s.modules_used || [];
+      const hasTac = !s.modules_used || mods.includes('tactical');
       const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(s.date || s.started_at));
-      return `<div class="pc-hist-item"><div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${d.caught}/${d.paddled} olas · ${d.falls||0} caídas</div></div><div style="font-weight:800;font-size:16px;color:${ratio>=60?'var(--green)':ratio>=40?'var(--yellow)':'var(--red)'}">${ratio}%</div></div>`;
+      
+      let detail = '';
+      let rightSide = '';
+      
+      if (hasTac && d.paddled > 0) {
+        const ratio = Math.round(d.caught / d.paddled * 100);
+        detail = `${d.caught}/${d.paddled} olas`;
+        rightSide = `<div style="font-weight:800;font-size:16px;color:${ratio>=60?'var(--green)':ratio>=40?'var(--yellow)':'var(--red)'}">${ratio}%</div>`;
+      } else if (d.judge_summary) {
+        detail = `${d.judge_summary.heat_count} heats · avg ${d.judge_summary.avg_wave_score.toFixed(1)}/ola`;
+        rightSide = `<div style="font-weight:800;font-size:16px;color:var(--accent)">${d.judge_summary.avg_heat_total.toFixed(1)}</div>`;
+      } else {
+        const modLabels = mods.map(m => m === 'workout' ? '💪' : m === 'biomech' ? '🦴' : m === 'lab' ? '🎥' : '').join('');
+        detail = modLabels || 'sesión';
+        rightSide = `<div style="font-size:12px;color:var(--text-muted)">✓</div>`;
+      }
+      
+      return `<div class="pc-hist-item"><div><strong>${s.spot}</strong><div style="font-size:11px;color:var(--text-muted)">${dateStr} · ${detail}</div></div>${rightSide}</div>`;
     }).join('');
   } else { sessCard.style.display = 'none'; }
+  
+  // Judge Training Sessions (from session judge_summary)
+  const judgeSessions = athSess.filter(s => s.athlete_data[a.id].judge_summary);
+  const judgeTrainCard = document.getElementById('pcJudgeTrainCard');
+  if (judgeTrainCard) {
+    if (judgeSessions.length > 0) {
+      judgeTrainCard.style.display = 'block';
+      let totalHeats = 0, allAvgWaves = [], allAvgTotals = [];
+      judgeSessions.forEach(s => {
+        const js = s.athlete_data[a.id].judge_summary;
+        totalHeats += js.heat_count || 0;
+        if (js.avg_wave_score > 0) allAvgWaves.push(js.avg_wave_score);
+        if (js.avg_heat_total > 0) allAvgTotals.push(js.avg_heat_total);
+      });
+      const overallWaveAvg = allAvgWaves.length > 0 ? allAvgWaves.reduce((a,b)=>a+b,0)/allAvgWaves.length : 0;
+      const overallHeatAvg = allAvgTotals.length > 0 ? allAvgTotals.reduce((a,b)=>a+b,0)/allAvgTotals.length : 0;
+      const wColor = overallWaveAvg >= 6 ? 'var(--green)' : overallWaveAvg >= 4 ? 'var(--yellow)' : 'var(--red)';
+      
+      let html = `<div class="db-stat-grid" style="margin-bottom:8px">
+        <div class="db-stat"><div class="db-stat-v">${judgeSessions.length}</div><div class="db-stat-l">Sesiones</div></div>
+        <div class="db-stat"><div class="db-stat-v">${totalHeats}</div><div class="db-stat-l">Heats</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:${wColor}">${overallWaveAvg.toFixed(1)}</div><div class="db-stat-l">Avg/Ola</div></div>
+        <div class="db-stat"><div class="db-stat-v" style="color:var(--accent)">${overallHeatAvg.toFixed(1)}</div><div class="db-stat-l">Avg Heat</div></div>
+      </div>`;
+      
+      // Recent sessions
+      html += judgeSessions.slice(-5).reverse().map(s => {
+        const js = s.athlete_data[a.id].judge_summary;
+        const dateStr = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(s.date || s.started_at));
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">
+          <div>${s.spot} · ${dateStr} · ${js.heat_count} heat${js.heat_count>1?'s':''}</div>
+          <div style="font-weight:700;color:var(--accent)">${js.avg_heat_total.toFixed(1)}</div>
+        </div>`;
+      }).join('');
+      
+      document.getElementById('pcJudgeTrainContent').innerHTML = html;
+    } else { judgeTrainCard.style.display = 'none'; }
+  }
   
   // Biomechanics history across sessions
   const allBio = athSess.flatMap(s => (s.athlete_data[a.id].biomech || []).map(b => ({ ...b, spot: s.spot, date: s.date || s.started_at })));
