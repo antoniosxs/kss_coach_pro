@@ -395,22 +395,23 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-stk-item-img img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
 .lab-stk-item-name{font-size:9px;color:rgba(255,255,255,.5);margin-top:3px;text-align:center}
 
-/* Lab Fullscreen Mode */
-.lab-fullscreen{position:fixed!important;top:0;left:0;right:0;bottom:0;z-index:9999;background:#000;display:flex;flex-direction:column;border-radius:0;margin:0;padding:0;padding-top:var(--safe-t);padding-bottom:var(--safe-b)}
-.lab-fullscreen .lab-video-wrap{flex:1;border-radius:0;margin:0;min-height:0}
-.lab-fullscreen .lab-video{max-height:none;height:100%;object-fit:contain}
-.lab-fullscreen .lab-controls-wrap{background:rgba(0,0,0,.85);padding:4px 12px}
+/* Lab Fullscreen Mode - use ID to beat media query specificity */
+.lab-fullscreen,#labFsContainer.lab-fullscreen{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:9999!important;background:#000!important;display:flex!important;flex-direction:column!important;border-radius:0!important;margin:0!important;padding:0!important;padding-top:var(--safe-t)!important;padding-bottom:var(--safe-b)!important;height:auto!important;width:auto!important}
+.lab-fullscreen .lab-video-wrap{flex:1!important;border-radius:0!important;margin:0!important;min-height:0!important}
+.lab-fullscreen .lab-video{max-height:none!important;height:100%!important;object-fit:contain!important}
+.lab-fullscreen .lab-controls-wrap{position:relative!important;background:rgba(0,0,0,.85)!important;padding:4px 12px!important;opacity:1!important;pointer-events:auto!important}
+.lab-fullscreen .lab-controls-wrap.mob-hidden{opacity:0!important;pointer-events:none!important}
 .lab-fullscreen .lab-controls{padding:6px 0}
 .lab-fullscreen .lab-tools{padding:0 12px;margin-bottom:6px;background:rgba(0,0,0,.85);justify-content:center}
-.lab-fullscreen .lab-tool{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;padding:10px 14px;font-size:13px}
+.lab-fullscreen .lab-tool{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;padding:8px 10px;font-size:13px}
 .lab-fullscreen .lab-tool.active{background:var(--accent);border-color:var(--accent)}
-.lab-fullscreen .lab-szrow{background:rgba(0,0,0,.85);padding:4px 12px;margin-bottom:0}
+.lab-fullscreen .lab-szrow{background:rgba(0,0,0,.85);padding:4px 12px;margin-bottom:0;display:flex!important}
 .lab-fullscreen .lab-szrow .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
 .lab-fullscreen .lab-color-row{display:flex;gap:8px;padding:4px 12px;background:rgba(0,0,0,.85);align-items:center;justify-content:center}
 .lab-fullscreen .lab-timeline{background:rgba(255,255,255,.15)}
 .lab-fullscreen .lab-time{color:rgba(255,255,255,.7)}
-.lab-fullscreen .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;width:44px;height:44px}
-.lab-fullscreen .lab-stk-bar{background:rgba(0,0,0,.85);border-color:rgba(255,255,255,.15)}
+.lab-fullscreen .lab-ctrl-btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;width:40px;height:40px}
+.lab-fullscreen .lab-stk-bar{position:relative!important;top:auto!important;left:auto!important;right:auto!important;background:rgba(0,0,0,.85)!important;border-color:rgba(255,255,255,.15)!important;margin:0 12px 4px!important}
 .lab-fs-close{position:absolute;top:calc(var(--safe-t) + 8px);right:12px;z-index:10000;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.3);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .lab-fs-close:active{transform:scale(.9)}
 .lab-fs-expand{position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,.6);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -431,56 +432,52 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-video-inner{transform-origin:center center;will-change:transform;position:relative}
 
 /* ===== LAB MOBILE RESPONSIVE ===== */
-/* Mobile compact (portrait + small screens) */
+/* Mobile portrait: compact controls BELOW video */
 @media (max-width:768px) {
-  .lab-tool{padding:6px 8px;font-size:11px}
+  .lab-video{max-height:40vh}
   .lab-tool .lab-tool-text{display:none}
+  .lab-tool{padding:7px 10px;font-size:15px}
   .lab-szrow{margin-bottom:6px}
   .lab-szrow .lab-ctrl-btn{height:28px;font-size:10px}
   .lab-sz-label,.lab-sz-sep{display:none}
   .lab-controls .lab-ctrl-btn{width:36px;height:36px;font-size:16px}
-  .lab-color-row{margin-bottom:8px!important;gap:5px!important}
+  .lab-color-row{margin-bottom:8px!important;gap:6px!important}
   .lab-color-row>span{display:none!important}
-  .lab-color-dot{width:18px;height:18px}
-  .lab-color-row .lab-ctrl-btn{width:24px!important;height:24px!important;font-size:9px!important}
+  .lab-color-dot{width:20px;height:20px}
+  .lab-color-row .lab-ctrl-btn{width:26px!important;height:26px!important;font-size:9px!important}
+  .lab-controls-wrap{padding:4px 0 0}
 }
 
-/* Mobile landscape (overlay mode) - the key mobile UX */
-@media (max-height:500px) {
-  #labFsContainer{position:relative;display:flex;flex-direction:column;height:calc(100dvh - 90px);min-height:240px}
-  #labFsContainer .lab-video-wrap{flex:1;min-height:0;margin-bottom:0;border-radius:10px}
-  #labFsContainer .lab-video{max-height:none;height:100%;object-fit:contain}
+/* Mobile landscape: overlay controls ON video */
+@media (orientation:landscape) and (max-height:500px) {
+  #labFsContainer:not(.lab-fullscreen) .lab-video-wrap{margin-bottom:0;border-radius:10px}
+  #labFsContainer:not(.lab-fullscreen) .lab-video{max-height:calc(100dvh - 80px);object-fit:contain}
   
-  #labFsContainer .lab-controls-wrap{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(transparent,rgba(0,0,0,.9) 30%);padding:24px 8px 6px!important;border-radius:0 0 10px 10px;transition:opacity .3s}
-  #labFsContainer .lab-controls-wrap.mob-hidden{opacity:0;pointer-events:none}
+  #labFsContainer:not(.lab-fullscreen) .lab-controls-wrap{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(transparent,rgba(0,0,0,.9) 30%);padding:24px 8px 6px!important;border-radius:0 0 10px 10px;transition:opacity .3s}
+  #labFsContainer:not(.lab-fullscreen) .lab-controls-wrap.mob-hidden{opacity:0;pointer-events:none}
   
-  .lab-controls{padding:2px 0!important;gap:5px!important}
-  .lab-controls .lab-ctrl-btn{width:30px;height:30px;font-size:13px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12);color:#fff}
-  .lab-timeline{height:4px!important}
-  .lab-time{font-size:10px!important;color:rgba(255,255,255,.6)!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-controls{padding:2px 0!important;gap:5px!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-controls .lab-ctrl-btn{width:30px;height:30px;font-size:13px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12);color:#fff}
+  #labFsContainer:not(.lab-fullscreen) .lab-timeline{height:4px!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-time{font-size:10px!important;color:rgba(255,255,255,.6)!important}
   
-  .lab-szrow{display:none!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-szrow{display:none!important}
   
-  .lab-tools{margin-bottom:2px!important;gap:2px!important;justify-content:center;flex-wrap:nowrap}
-  .lab-tool{padding:5px 7px;font-size:13px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;border-radius:6px}
-  .lab-tool .lab-tool-text{display:none}
-  .lab-tool.active{background:var(--accent);border-color:var(--accent)}
+  #labFsContainer:not(.lab-fullscreen) .lab-tools{margin-bottom:2px!important;gap:2px!important;justify-content:center;flex-wrap:nowrap}
+  #labFsContainer:not(.lab-fullscreen) .lab-tool{padding:5px 7px;font-size:13px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;border-radius:6px}
+  #labFsContainer:not(.lab-fullscreen) .lab-tool.active{background:var(--accent);border-color:var(--accent)}
   
-  .lab-color-row{margin-bottom:0!important;gap:4px!important;justify-content:center}
-  .lab-color-row>span{display:none!important}
-  .lab-color-dot{width:16px;height:16px}
-  .lab-color-row .lab-ctrl-btn{width:22px!important;height:22px!important;font-size:8px!important;background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.12)!important;color:#fff!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-color-row{margin-bottom:0!important;gap:4px!important;justify-content:center}
+  #labFsContainer:not(.lab-fullscreen) .lab-color-row>span{display:none!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-color-dot{width:16px;height:16px}
+  #labFsContainer:not(.lab-fullscreen) .lab-color-row .lab-ctrl-btn{width:22px!important;height:22px!important;font-size:8px!important;background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.12)!important;color:#fff!important}
   
-  .lab-stk-bar{position:absolute;top:6px;left:6px;right:6px;z-index:25;background:rgba(0,0,0,.8)!important;border-color:rgba(255,255,255,.12)!important;margin:0!important;padding:4px 8px!important}
-  .lab-stk-bar-btn{width:28px;height:28px;font-size:13px}
+  #labFsContainer:not(.lab-fullscreen) .lab-stk-bar{position:absolute;top:6px;left:6px;right:6px;z-index:25;background:rgba(0,0,0,.8)!important;border-color:rgba(255,255,255,.12)!important;margin:0!important;padding:4px 8px!important}
+  #labFsContainer:not(.lab-fullscreen) .lab-stk-bar-btn{width:28px;height:28px;font-size:13px}
 }
 
-/* Landscape fullscreen adjustments */
-@media (max-height:500px) {
-  .lab-fullscreen{padding-top:0!important;padding-bottom:0!important}
-  .lab-fullscreen .lab-video-wrap{border-radius:0!important}
-  .lab-fullscreen .lab-controls-wrap{border-radius:0!important;padding:20px 12px 4px!important}
-}
+/* Fullscreen - both orientations: always overlay controls */
+.lab-fullscreen .lab-tool .lab-tool-text{display:none}
 
 /* ===== BEGINNER MODE ===== */
 .beg-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;z-index:10;background:var(--bg)}
@@ -6343,8 +6340,19 @@ let labIsFullscreen = false;
 
 function labEnterFullscreen() {
   const container = document.getElementById('labFsContainer');
+  const video = document.getElementById('labVideo');
   const nav = document.querySelector('.bottom-nav');
   
+  // iOS Safari: only video element supports native fullscreen
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (isIOS && video.webkitEnterFullscreen) {
+    // Use native iOS video fullscreen
+    try { video.webkitEnterFullscreen(); } catch(e) {}
+    return;
+  }
+  
+  // Desktop + Android: CSS fullscreen with native API
   container.classList.add('lab-fullscreen');
   if (nav) nav.style.display = 'none';
   document.getElementById('labFsClose').style.display = 'flex';
@@ -6352,16 +6360,13 @@ function labEnterFullscreen() {
   document.body.style.overflow = 'hidden';
   labIsFullscreen = true;
   
-  // Try native fullscreen API (works on some mobile browsers)
   try {
     if (container.requestFullscreen) container.requestFullscreen();
     else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
   } catch(e) { /* CSS fullscreen fallback is fine */ }
   
-  // Force screen to stay on if possible
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen'); } catch(e) {}
   
-  // Resize canvas after layout settles
   setTimeout(labResizeCanvas, 100);
 }
 
@@ -6383,6 +6388,7 @@ function labExitFullscreen() {
   } catch(e) {}
   
   setTimeout(labResizeCanvas, 100);
+  setTimeout(labMobCheckOrientation, 150);
 }
 
 // Listen for ESC / native fullscreen exit
@@ -7386,14 +7392,18 @@ function labInitGestures() {
 
 // ============ MOBILE AUTO-HIDE CONTROLS ============
 let labMobTimer = null;
+function labIsLandscape() {
+  return window.innerWidth > window.innerHeight && window.innerHeight < 500;
+}
+
 function labMobShowControls() {
   const wrap = document.getElementById('labControlsWrap');
   if (!wrap) return;
   wrap.classList.remove('mob-hidden');
   clearTimeout(labMobTimer);
   labMobTimer = setTimeout(() => {
-    // Only auto-hide in landscape mobile (narrow height)
-    if (window.innerHeight <= 500) {
+    // Auto-hide only in landscape mobile or fullscreen
+    if (labIsLandscape() || labIsFullscreen) {
       wrap.classList.add('mob-hidden');
     }
   }, 3500);
@@ -7402,12 +7412,12 @@ function labMobShowControls() {
 function labMobCheckOrientation() {
   const wrap = document.getElementById('labControlsWrap');
   if (!wrap) return;
-  if (window.innerHeight > 500) {
+  if (!labIsLandscape() && !labIsFullscreen) {
     // Portrait or desktop: always visible
     wrap.classList.remove('mob-hidden');
     clearTimeout(labMobTimer);
   } else {
-    // Landscape: start auto-hide
+    // Landscape or fullscreen: auto-hide
     labMobShowControls();
   }
 }
@@ -7415,7 +7425,7 @@ function labMobCheckOrientation() {
 // Listen for resize/orientation changes
 window.addEventListener('resize', labMobCheckOrientation);
 
-// Also keep controls visible while user interacts with them
+// Keep controls visible while user interacts with them
 document.addEventListener('touchstart', function(e) {
   const wrap = document.getElementById('labControlsWrap');
   if (wrap && wrap.contains(e.target)) {
