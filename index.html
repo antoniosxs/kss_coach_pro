@@ -502,6 +502,51 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .beg-graduate-badge{text-align:center;padding:20px;margin:0 16px 12px;background:linear-gradient(135deg,#22c55e,#059669);border-radius:12px;color:#fff}
 .beg-graduate-badge .icon{font-size:40px;margin-bottom:6px}
 
+/* ===== DUAL VIDEO ===== */
+.lab-dual-wrap{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px}
+@media (max-width:600px) and (orientation:portrait){.lab-dual-wrap{grid-template-columns:1fr;gap:4px}}
+.lab-dual-slot{position:relative;background:#000;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent}
+.lab-dual-slot.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.lab-dual-slot video{width:100%;display:block;max-height:35vh;object-fit:contain}
+.lab-dual-label{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;z-index:2}
+.lab-dual-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:120px;color:var(--text-muted);font-size:12px;gap:6px;background:var(--bg-input);border-radius:8px;border:2px dashed var(--border);cursor:pointer}
+.lab-sync-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.lab-sync-bar label{font-size:12px;font-weight:700;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer}
+.lab-sync-bar input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent)}
+.lab-mode-toggle{display:flex;gap:4px;margin-bottom:10px}
+.lab-mode-btn{flex:1;padding:10px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text-secondary);cursor:pointer;text-align:center}
+.lab-mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ===== LIGHTBOX ===== */
+.lab-lightbox{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10002;background:rgba(0,0,0,.95);flex-direction:column;align-items:center;justify-content:center;padding:16px;padding-top:calc(var(--safe-t) + 16px);padding-bottom:calc(var(--safe-b) + 16px)}
+.lab-lightbox.active{display:flex}
+.lab-lightbox img{max-width:100%;max-height:calc(100vh - 120px);object-fit:contain;border-radius:8px;touch-action:pinch-zoom}
+.lab-lb-actions{display:flex;gap:10px;margin-top:14px}
+.lab-lb-btn{padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none}
+.lab-lb-btn.dl{background:var(--accent);color:#fff}
+.lab-lb-btn.del{background:var(--red);color:#fff}
+.lab-lb-btn.close{background:rgba(255,255,255,.15);color:#fff}
+.lab-lb-close{position:absolute;top:calc(var(--safe-t) + 8px);right:12px;background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lab-lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lab-lb-nav.prev{left:8px}
+.lab-lb-nav.next{right:8px}
+.lab-lb-info{color:rgba(255,255,255,.6);font-size:11px;margin-top:6px;text-align:center}
+
+/* ===== FRAME GRID OVERLAY ===== */
+.lab-frame{position:relative}
+.lab-frame-actions{position:absolute;top:4px;right:4px;display:flex;gap:3px;opacity:0;transition:opacity .15s}
+.lab-frame:hover .lab-frame-actions,.lab-frame:active .lab-frame-actions{opacity:1}
+.lab-frame-act{width:26px;height:26px;border-radius:6px;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lab-frame-act:active{transform:scale(.9)}
+
+/* ===== A→B LOOP ===== */
+.lab-ab-bar{display:none;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-card);border:1px solid var(--accent);border-radius:8px;margin-bottom:8px}
+.lab-ab-bar.active{display:flex}
+.lab-ab-label{font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
+.lab-ab-time{font-size:12px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums}
+.lab-ab-sep{color:var(--text-muted);font-size:12px}
+.lab-ab-clear{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;margin-left:auto}
+
 /* ===== KSS BRANDING ===== */
 .kss-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .kss-logo{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
@@ -1539,15 +1584,36 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <!-- Upload / Record -->
   <div class="card" id="labUploadCard">
     <div class="card-header" style="margin-bottom:10px">Cargar Video</div>
-    <div style="display:flex;gap:8px">
-      <label class="btn btn-accent" style="flex:1;text-align:center;cursor:pointer;padding:14px">
-        📷 Grabar
-        <input type="file" accept="video/*" capture="environment" onchange="labLoadVideo(this)" style="display:none">
-      </label>
-      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;padding:14px">
-        📁 Galería
-        <input type="file" accept="video/*" onchange="labLoadVideo(this)" style="display:none">
-      </label>
+    <!-- Mode toggle -->
+    <div class="lab-mode-toggle">
+      <button class="lab-mode-btn active" id="labModeSingle" onclick="labSetMode('single')">🎬 Single</button>
+      <button class="lab-mode-btn" id="labModeDual" onclick="labSetMode('dual')">🎬🎬 Dual</button>
+    </div>
+    <!-- Single mode uploads -->
+    <div id="labUploadSingle">
+      <div style="display:flex;gap:8px">
+        <label class="btn btn-accent" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+          📷 Grabar
+          <input type="file" accept="video/*" capture="environment" onchange="labLoadVideo(this)" style="display:none">
+        </label>
+        <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;padding:14px">
+          📁 Galería
+          <input type="file" accept="video/*" onchange="labLoadVideo(this)" style="display:none">
+        </label>
+      </div>
+    </div>
+    <!-- Dual mode uploads -->
+    <div id="labUploadDual" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <label class="btn btn-accent" style="flex:1;text-align:center;cursor:pointer;padding:10px;font-size:12px">
+          📁 Video A
+          <input type="file" accept="video/*" onchange="labLoadDualVideo(this,'A')" style="display:none">
+        </label>
+        <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;padding:10px;font-size:12px">
+          📁 Video B
+          <input type="file" accept="video/*" onchange="labLoadDualVideo(this,'B')" style="display:none">
+        </label>
+      </div>
     </div>
     <!-- Athlete selector -->
     <div class="field" style="margin-top:10px;margin-bottom:0">
@@ -1557,6 +1623,39 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="field" id="labDiscField" style="margin-top:6px;margin-bottom:0;display:none">
       <label class="field-label">Disciplina</label>
       <select class="field-input" id="labDisc"></select>
+    </div>
+  </div>
+
+  <!-- DUAL VIDEO PLAYER -->
+  <div id="labDualSection" style="display:none">
+    <div class="lab-dual-wrap">
+      <div class="lab-dual-slot active" id="labDualA" onclick="labDualSelect('A')">
+        <div class="lab-dual-label">A</div>
+        <video class="lab-video" id="labDualVideoA" playsinline></video>
+      </div>
+      <div class="lab-dual-slot" id="labDualB" onclick="labDualSelect('B')">
+        <div class="lab-dual-label">B</div>
+        <video class="lab-video" id="labDualVideoB" playsinline></video>
+      </div>
+    </div>
+    <div class="lab-sync-bar">
+      <label><input type="checkbox" id="labDualSync" checked> 🔗 Sync (controlar ambos)</label>
+      <span style="font-size:11px;color:var(--text-muted)" id="labDualActive">Activo: A</span>
+    </div>
+    <!-- Dual controls -->
+    <div class="lab-controls">
+      <button class="lab-ctrl-btn" onclick="labDualStep(-1)">⏪</button>
+      <button class="lab-ctrl-btn" id="labDualPlayBtn" onclick="labDualTogglePlay()">▶️</button>
+      <button class="lab-ctrl-btn" onclick="labDualStep(1)">⏩</button>
+      <input type="range" class="lab-timeline" id="labDualTimeline" min="0" max="100" value="0" step="0.1" oninput="labDualSeek(this.value)">
+      <div class="lab-time" id="labDualTime">0:00</div>
+    </div>
+    <div class="lab-szrow">
+      <span class="lab-sz-label">Speed</span>
+      <button class="lab-ctrl-btn lab-dspd-btn" onclick="labDualSpeed(0.25)">0.25x</button>
+      <button class="lab-ctrl-btn lab-dspd-btn" onclick="labDualSpeed(0.5)">0.5x</button>
+      <button class="lab-ctrl-btn lab-dspd-btn active" onclick="labDualSpeed(1)">1x</button>
+      <button class="lab-ctrl-btn lab-dspd-btn" onclick="labDualSpeed(2)">2x</button>
     </div>
   </div>
 
@@ -1591,6 +1690,15 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         <button class="lab-stk-bar-btn accent" onclick="labOpenStickerModal()">📂</button>
       </div>
 
+      <!-- A→B Loop bar -->
+      <div class="lab-ab-bar" id="labAbBar">
+        <span class="lab-ab-label">🔁 Loop</span>
+        <span class="lab-ab-time" id="labAbA">—</span>
+        <span class="lab-ab-sep">→</span>
+        <span class="lab-ab-time" id="labAbB">—</span>
+        <button class="lab-ab-clear" onclick="labAbClear()">✕ Clear</button>
+      </div>
+
       <!-- Controls (auto-hide on mobile) -->
       <div class="lab-controls-wrap" id="labControlsWrap">
         <div class="lab-controls">
@@ -1621,6 +1729,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
           <button class="lab-tool" onclick="labSetTool('angle',this)">📐<span class="lab-tool-text"> Ángulo</span></button>
           <button class="lab-tool" onclick="labClearDraw()">🗑️<span class="lab-tool-text"> Borrar</span></button>
           <button class="lab-tool" onclick="labOpenStickerModal()">🏄<span class="lab-tool-text"> Stickers</span></button>
+          <button class="lab-tool" onclick="labAbMark('A')">🅰️</button>
+          <button class="lab-tool" onclick="labAbMark('B')">🅱️</button>
           <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸<span class="lab-tool-text"> Capturar</span></button>
         </div>
 
@@ -1647,6 +1757,19 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <button class="lab-stk-modal-close" onclick="labCloseStickerModal()">✕</button>
     </div>
     <div class="lab-stk-grid" id="labStkGrid"></div>
+  </div>
+
+  <!-- LIGHTBOX for frame viewing -->
+  <div class="lab-lightbox" id="labLightbox">
+    <button class="lab-lb-close" onclick="labLbClose()">✕</button>
+    <button class="lab-lb-nav prev" onclick="labLbNav(-1)">‹</button>
+    <button class="lab-lb-nav next" onclick="labLbNav(1)">›</button>
+    <img id="labLbImg" src="" alt="Capture">
+    <div class="lab-lb-info" id="labLbInfo"></div>
+    <div class="lab-lb-actions">
+      <button class="lab-lb-btn dl" onclick="labLbDownload()">💾 Descargar</button>
+      <button class="lab-lb-btn del" onclick="labLbDelete()">🗑️ Eliminar</button>
+    </div>
   </div>
 
   <!-- Captured Frames -->
@@ -6455,6 +6578,7 @@ function labLoadVideo(input) {
   
   video.onloadedmetadata = () => {
     document.getElementById('labPlayerSection').style.display = 'block';
+    document.getElementById('labDualSection').style.display = 'none';
     document.getElementById('labTimeline').max = video.duration;
     labResizeCanvas();
     labAnnotations = [];
@@ -6471,6 +6595,7 @@ function labLoadVideo(input) {
     if (!video.paused) {
       document.getElementById('labTimeline').value = video.currentTime;
       labUpdateTime();
+      labAbCheck();
     }
   };
   
@@ -6797,6 +6922,23 @@ function labCapture() {
   // Draw annotations + stickers on top
   ctx.drawImage(canvas, 0, 0);
   
+  // Burn timestamp + athlete name overlay
+  const t = video.currentTime;
+  const timeStr = Math.floor(t/60) + ':' + Math.floor(t%60).toString().padStart(2,'0') + '.' + Math.floor((t%1)*10);
+  const athId2 = document.getElementById('labAthlete').value;
+  const athName = athId2 ? (DB.athletes.find(a => a.id === athId2)?.name || '') : '';
+  const label = athName ? `${timeStr} · ${athName}` : timeStr;
+  const fontSize = Math.max(16, Math.floor(video.videoWidth / 40));
+  ctx.font = `bold ${fontSize}px -apple-system, sans-serif`;
+  ctx.textBaseline = 'bottom';
+  const pad = fontSize * 0.5;
+  const tw = ctx.measureText(label).width;
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.roundRect ? ctx.roundRect(pad - 4, video.videoHeight - fontSize - pad - 6, tw + 12, fontSize + 10, 6) : ctx.fillRect(pad - 4, video.videoHeight - fontSize - pad - 6, tw + 12, fontSize + 10);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.fillText(label, pad + 2, video.videoHeight - pad);
+  
   // Restore tool + selection
   labDrawTool = prevTool;
   labActiveSticker = prevActive;
@@ -6843,26 +6985,89 @@ function renderLabFrames() {
   }
   section.style.display = 'block';
   
-  document.getElementById('labFrames').innerHTML = frames.slice().reverse().map(f => {
+  document.getElementById('labFrames').innerHTML = frames.slice().reverse().map((f, ri) => {
+    const idx = frames.length - 1 - ri; // real index
     const t = f.timestamp || 0;
     const m = Math.floor(t / 60);
     const s = Math.floor(t % 60);
     const timeStr = `${m}:${s.toString().padStart(2,'0')}`;
     const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
     const discIcon = f.discipline ? getDisciplineInfo(f.discipline).icon : '';
-    return `<div class="lab-frame" onclick="labFrameActions('${f.id}')">
+    return `<div class="lab-frame" onclick="labLbOpen(${idx})">
       <img src="${f.image}" loading="lazy">
       <div class="lab-frame-time">${timeStr} ${ath ? '· '+ath : ''} ${discIcon}</div>
+      <div class="lab-frame-actions">
+        <button class="lab-frame-act" onclick="event.stopPropagation();labDownloadFrame(${idx})" title="Descargar">💾</button>
+        <button class="lab-frame-act" onclick="event.stopPropagation();labDeleteFrame(${idx})" title="Eliminar">🗑</button>
+      </div>
     </div>`;
   }).join('');
 }
 
-function labFrameActions(id) {
-  const action = confirm('¿Eliminar este frame?\n\nOK = Eliminar\nCancel = Mantener');
-  if (action) {
-    DB.labFrames = DB.labFrames.filter(f => f.id !== id);
+function labDeleteFrame(idx) {
+  const frames = DB.labFrames;
+  if (idx >= 0 && idx < frames.length) {
+    frames.splice(idx, 1);
+    DB.labFrames = frames;
     renderLabFrames();
   }
+}
+
+function labDownloadFrame(idx) {
+  const frames = DB.labFrames;
+  const f = frames[idx];
+  if (!f) return;
+  const a = document.createElement('a');
+  a.href = f.image;
+  const t = f.timestamp || 0;
+  const timeStr = Math.floor(t/60) + 'm' + Math.floor(t%60) + 's';
+  a.download = `KSS_capture_${timeStr}_${new Date(f.created_at||Date.now()).toISOString().slice(0,10)}.jpg`;
+  a.click();
+}
+
+// ============ LIGHTBOX ============
+let labLbIdx = 0;
+function labLbOpen(idx) {
+  const frames = DB.labFrames;
+  if (idx < 0 || idx >= frames.length) return;
+  labLbIdx = idx;
+  labLbRender();
+  document.getElementById('labLightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function labLbClose() {
+  document.getElementById('labLightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function labLbRender() {
+  const frames = DB.labFrames;
+  const f = frames[labLbIdx];
+  if (!f) return;
+  document.getElementById('labLbImg').src = f.image;
+  const t = f.timestamp || 0;
+  const timeStr = Math.floor(t/60) + ':' + Math.floor(t%60).toString().padStart(2,'0');
+  const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name || '') : '';
+  document.getElementById('labLbInfo').textContent = `${timeStr} ${ath ? '· '+ath : ''} · ${labLbIdx+1}/${frames.length}`;
+}
+
+function labLbNav(dir) {
+  const frames = DB.labFrames;
+  labLbIdx = (labLbIdx + dir + frames.length) % frames.length;
+  labLbRender();
+}
+
+function labLbDownload() {
+  labDownloadFrame(labLbIdx);
+}
+
+function labLbDelete() {
+  labDeleteFrame(labLbIdx);
+  const frames = DB.labFrames;
+  if (frames.length === 0) { labLbClose(); return; }
+  labLbIdx = Math.min(labLbIdx, frames.length - 1);
+  labLbRender();
 }
 
 function labCompareMode() {
@@ -8389,6 +8594,158 @@ function jmExportTracker() {
   a.download = `KSS_Session_Tracker_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// LAB: MODE TOGGLE (SINGLE / DUAL)
+// ============================================================
+let labMode = 'single';
+function labSetMode(mode) {
+  labMode = mode;
+  document.getElementById('labModeSingle').classList.toggle('active', mode === 'single');
+  document.getElementById('labModeDual').classList.toggle('active', mode === 'dual');
+  document.getElementById('labUploadSingle').style.display = mode === 'single' ? 'block' : 'none';
+  document.getElementById('labUploadDual').style.display = mode === 'dual' ? 'block' : 'none';
+  // Hide/show sections
+  document.getElementById('labPlayerSection').style.display = 'none';
+  document.getElementById('labDualSection').style.display = 'none';
+}
+
+// ============================================================
+// LAB: DUAL VIDEO
+// ============================================================
+let labDualActiveSlot = 'A';
+function labLoadDualVideo(input, slot) {
+  const file = input.files[0];
+  if (!file) return;
+  const vid = document.getElementById('labDualVideo' + slot);
+  vid.src = URL.createObjectURL(file);
+  vid.load();
+  vid.onloadedmetadata = () => {
+    document.getElementById('labDualSection').style.display = 'block';
+    if (slot === labDualActiveSlot) {
+      document.getElementById('labDualTimeline').max = vid.duration;
+    }
+  };
+  vid.ontimeupdate = () => {
+    if (slot === labDualActiveSlot && !vid.paused) {
+      document.getElementById('labDualTimeline').value = vid.currentTime;
+      labDualUpdateTime();
+    }
+  };
+}
+
+function labDualSelect(slot) {
+  labDualActiveSlot = slot;
+  document.getElementById('labDualA').classList.toggle('active', slot === 'A');
+  document.getElementById('labDualB').classList.toggle('active', slot === 'B');
+  document.getElementById('labDualActive').textContent = 'Activo: ' + slot;
+  const vid = document.getElementById('labDualVideo' + slot);
+  if (vid.duration) {
+    document.getElementById('labDualTimeline').max = vid.duration;
+    document.getElementById('labDualTimeline').value = vid.currentTime;
+    labDualUpdateTime();
+  }
+}
+
+function labDualGetVids() {
+  const sync = document.getElementById('labDualSync').checked;
+  if (sync) return [document.getElementById('labDualVideoA'), document.getElementById('labDualVideoB')].filter(v => v.src);
+  return [document.getElementById('labDualVideo' + labDualActiveSlot)];
+}
+
+function labDualTogglePlay() {
+  const vids = labDualGetVids();
+  const btn = document.getElementById('labDualPlayBtn');
+  const primary = document.getElementById('labDualVideo' + labDualActiveSlot);
+  if (primary.paused) {
+    vids.forEach(v => { if (v.src) v.play(); });
+    btn.textContent = '⏸️';
+  } else {
+    vids.forEach(v => v.pause());
+    btn.textContent = '▶️';
+  }
+}
+
+function labDualStep(dir) {
+  const vids = labDualGetVids();
+  vids.forEach(v => {
+    v.pause();
+    v.currentTime = Math.max(0, Math.min(v.duration || 0, v.currentTime + dir * 0.033));
+  });
+  document.getElementById('labDualPlayBtn').textContent = '▶️';
+  const active = document.getElementById('labDualVideo' + labDualActiveSlot);
+  document.getElementById('labDualTimeline').value = active.currentTime;
+  labDualUpdateTime();
+}
+
+function labDualSeek(val) {
+  const vids = labDualGetVids();
+  const t = parseFloat(val);
+  vids.forEach(v => { if (v.src && v.duration) v.currentTime = Math.min(t, v.duration); });
+  labDualUpdateTime();
+}
+
+function labDualSpeed(rate) {
+  const vids = [document.getElementById('labDualVideoA'), document.getElementById('labDualVideoB')];
+  vids.forEach(v => { if (v.src) v.playbackRate = rate; });
+  document.querySelectorAll('.lab-dspd-btn').forEach(b => b.classList.toggle('active', b.textContent === rate + 'x'));
+}
+
+function labDualUpdateTime() {
+  const vid = document.getElementById('labDualVideo' + labDualActiveSlot);
+  const t = vid.currentTime || 0;
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  const ms = Math.floor((t % 1) * 10);
+  document.getElementById('labDualTime').textContent = `${m}:${s.toString().padStart(2,'0')}.${ms}`;
+}
+
+// ============================================================
+// LAB: A→B LOOP
+// ============================================================
+let labAbA = null, labAbB = null, labAbActive = false;
+
+function labAbFmt(t) {
+  return Math.floor(t/60) + ':' + Math.floor(t%60).toString().padStart(2,'0') + '.' + Math.floor((t%1)*10);
+}
+
+function labAbMark(point) {
+  const video = document.getElementById('labVideo');
+  if (!video.duration) return;
+  
+  if (point === 'A') {
+    labAbA = video.currentTime;
+    labAbB = null;
+    labAbActive = false;
+    document.getElementById('labAbA').textContent = labAbFmt(labAbA);
+    document.getElementById('labAbB').textContent = '—';
+    document.getElementById('labAbBar').classList.add('active');
+  } else if (point === 'B' && labAbA !== null) {
+    labAbB = video.currentTime;
+    if (labAbB <= labAbA) { labAbB = null; return; }
+    document.getElementById('labAbB').textContent = labAbFmt(labAbB);
+    labAbActive = true;
+    // Start loop
+    video.currentTime = labAbA;
+    video.play();
+    document.getElementById('labPlayBtn').textContent = '⏸️';
+  }
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+function labAbClear() {
+  labAbA = null; labAbB = null; labAbActive = false;
+  document.getElementById('labAbBar').classList.remove('active');
+}
+
+// Hook into timeupdate for A→B loop
+function labAbCheck() {
+  if (!labAbActive || labAbA === null || labAbB === null) return;
+  const video = document.getElementById('labVideo');
+  if (video.currentTime >= labAbB) {
+    video.currentTime = labAbA;
+  }
 }
 
 // ============================================================
