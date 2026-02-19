@@ -430,6 +430,58 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* Video wrapper zoom support */
 .lab-video-inner{transform-origin:center center;will-change:transform;position:relative}
 
+/* ===== LAB MOBILE RESPONSIVE ===== */
+/* Mobile compact (portrait + small screens) */
+@media (max-width:768px) {
+  .lab-tool{padding:6px 8px;font-size:11px}
+  .lab-tool .lab-tool-text{display:none}
+  .lab-szrow{margin-bottom:6px}
+  .lab-szrow .lab-ctrl-btn{height:28px;font-size:10px}
+  .lab-sz-label,.lab-sz-sep{display:none}
+  .lab-controls .lab-ctrl-btn{width:36px;height:36px;font-size:16px}
+  .lab-color-row{margin-bottom:8px!important;gap:5px!important}
+  .lab-color-row>span{display:none!important}
+  .lab-color-dot{width:18px;height:18px}
+  .lab-color-row .lab-ctrl-btn{width:24px!important;height:24px!important;font-size:9px!important}
+}
+
+/* Mobile landscape (overlay mode) - the key mobile UX */
+@media (max-height:500px) {
+  #labFsContainer{position:relative;display:flex;flex-direction:column;height:calc(100dvh - 90px);min-height:240px}
+  #labFsContainer .lab-video-wrap{flex:1;min-height:0;margin-bottom:0;border-radius:10px}
+  #labFsContainer .lab-video{max-height:none;height:100%;object-fit:contain}
+  
+  #labFsContainer .lab-controls-wrap{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(transparent,rgba(0,0,0,.9) 30%);padding:24px 8px 6px!important;border-radius:0 0 10px 10px;transition:opacity .3s}
+  #labFsContainer .lab-controls-wrap.mob-hidden{opacity:0;pointer-events:none}
+  
+  .lab-controls{padding:2px 0!important;gap:5px!important}
+  .lab-controls .lab-ctrl-btn{width:30px;height:30px;font-size:13px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12);color:#fff}
+  .lab-timeline{height:4px!important}
+  .lab-time{font-size:10px!important;color:rgba(255,255,255,.6)!important}
+  
+  .lab-szrow{display:none!important}
+  
+  .lab-tools{margin-bottom:2px!important;gap:2px!important;justify-content:center;flex-wrap:nowrap}
+  .lab-tool{padding:5px 7px;font-size:13px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:#fff;border-radius:6px}
+  .lab-tool .lab-tool-text{display:none}
+  .lab-tool.active{background:var(--accent);border-color:var(--accent)}
+  
+  .lab-color-row{margin-bottom:0!important;gap:4px!important;justify-content:center}
+  .lab-color-row>span{display:none!important}
+  .lab-color-dot{width:16px;height:16px}
+  .lab-color-row .lab-ctrl-btn{width:22px!important;height:22px!important;font-size:8px!important;background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.12)!important;color:#fff!important}
+  
+  .lab-stk-bar{position:absolute;top:6px;left:6px;right:6px;z-index:25;background:rgba(0,0,0,.8)!important;border-color:rgba(255,255,255,.12)!important;margin:0!important;padding:4px 8px!important}
+  .lab-stk-bar-btn{width:28px;height:28px;font-size:13px}
+}
+
+/* Landscape fullscreen adjustments */
+@media (max-height:500px) {
+  .lab-fullscreen{padding-top:0!important;padding-bottom:0!important}
+  .lab-fullscreen .lab-video-wrap{border-radius:0!important}
+  .lab-fullscreen .lab-controls-wrap{border-radius:0!important;padding:20px 12px 4px!important}
+}
+
 /* ===== BEGINNER MODE ===== */
 .beg-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;z-index:10;background:var(--bg)}
 .beg-wave-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 16px 10px}
@@ -1566,13 +1618,13 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </div>
 
         <div class="lab-tools" id="labTools">
-          <button class="lab-tool" onclick="labSetTool('none',this)">👆 Mover</button>
-          <button class="lab-tool" onclick="labSetTool('pen',this)">✏️ Dibujar</button>
-          <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️ Flecha</button>
-          <button class="lab-tool" onclick="labSetTool('angle',this)">📐 Ángulo</button>
-          <button class="lab-tool" onclick="labClearDraw()">🗑️ Borrar</button>
-          <button class="lab-tool" onclick="labOpenStickerModal()">🏄 Stickers</button>
-          <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸 Capturar</button>
+          <button class="lab-tool" onclick="labSetTool('none',this)">👆<span class="lab-tool-text"> Mover</span></button>
+          <button class="lab-tool" onclick="labSetTool('pen',this)">✏️<span class="lab-tool-text"> Dibujar</span></button>
+          <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️<span class="lab-tool-text"> Flecha</span></button>
+          <button class="lab-tool" onclick="labSetTool('angle',this)">📐<span class="lab-tool-text"> Ángulo</span></button>
+          <button class="lab-tool" onclick="labClearDraw()">🗑️<span class="lab-tool-text"> Borrar</span></button>
+          <button class="lab-tool" onclick="labOpenStickerModal()">🏄<span class="lab-tool-text"> Stickers</span></button>
+          <button class="lab-tool" onclick="labCapture()" style="background:var(--green);border-color:var(--green);color:#fff">📸<span class="lab-tool-text"> Capturar</span></button>
         </div>
 
         <div class="lab-color-row" style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
@@ -6406,6 +6458,7 @@ function labLoadVideo(input) {
     labApplyZoom();
     labInitZoomGestures();
     labInitGestures();
+    labMobCheckOrientation();
   };
   
   video.ontimeupdate = () => {
@@ -7300,11 +7353,14 @@ function labInitGestures() {
             showEl('labGestPlay', 400);
             document.getElementById('labGestPlay').textContent = video.paused ? '▶️' : '⏸️';
           }
+          // Any single tap on mobile = show controls briefly
+          labMobShowControls();
           tapCount = 0;
         }, 250);
       } else if (tapCount === 2) {
         clearTimeout(tapTimer);
         tapCount = 0;
+        labMobShowControls();
         // Double tap
         if (side === 'left') {
           video.currentTime = Math.max(0, video.currentTime - 2);
@@ -7327,6 +7383,45 @@ function labInitGestures() {
     labTogglePlay();
   });
 }
+
+// ============ MOBILE AUTO-HIDE CONTROLS ============
+let labMobTimer = null;
+function labMobShowControls() {
+  const wrap = document.getElementById('labControlsWrap');
+  if (!wrap) return;
+  wrap.classList.remove('mob-hidden');
+  clearTimeout(labMobTimer);
+  labMobTimer = setTimeout(() => {
+    // Only auto-hide in landscape mobile (narrow height)
+    if (window.innerHeight <= 500) {
+      wrap.classList.add('mob-hidden');
+    }
+  }, 3500);
+}
+
+function labMobCheckOrientation() {
+  const wrap = document.getElementById('labControlsWrap');
+  if (!wrap) return;
+  if (window.innerHeight > 500) {
+    // Portrait or desktop: always visible
+    wrap.classList.remove('mob-hidden');
+    clearTimeout(labMobTimer);
+  } else {
+    // Landscape: start auto-hide
+    labMobShowControls();
+  }
+}
+
+// Listen for resize/orientation changes
+window.addEventListener('resize', labMobCheckOrientation);
+
+// Also keep controls visible while user interacts with them
+document.addEventListener('touchstart', function(e) {
+  const wrap = document.getElementById('labControlsWrap');
+  if (wrap && wrap.contains(e.target)) {
+    labMobShowControls();
+  }
+}, { passive: true });
 
 // ============================================================
 // PHASE 3: BIOMETRICS
@@ -8293,9 +8388,15 @@ let begIdx = 0;
 let begEval = {};
 let begWaves = {}; // key: athlete_id, value: array of wave evals
 
+function begGetIds() {
+  const s = DB.activeSession;
+  return s && s.athlete_data ? Object.keys(s.athlete_data) : [];
+}
+
 function renderBeginner() {
   const s = DB.activeSession;
-  if (!s || !s.athletes || s.athletes.length === 0) return;
+  const ids = begGetIds();
+  if (!s || ids.length === 0) return;
   
   // Load existing data
   if (s.beginnerData) {
@@ -8304,19 +8405,14 @@ function renderBeginner() {
     });
   }
   
-  // Initialize begWaves for all athletes
-  s.athletes.forEach(id => {
-    if (!begWaves[id]) begWaves[id] = [];
-  });
-  
-  begIdx = Math.min(begIdx, s.athletes.length - 1);
+  ids.forEach(id => { if (!begWaves[id]) begWaves[id] = []; });
+  begIdx = Math.min(begIdx, ids.length - 1);
   begResetEval();
   begUpdateUI();
 }
 
 function begResetEval() {
   begEval = { catching: null, popup: null, balance: null, direction: null, waveType: null, stance: null };
-  // Reset button states
   ['begCatching','begPopup','begBalance','begDirection','begWaveType','begStance'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.querySelectorAll('.beg-eval-btn').forEach(b => b.classList.remove('selected'));
@@ -8334,25 +8430,26 @@ function begSel(group, value, el) {
 }
 
 function begPrev() {
-  const s = DB.activeSession;
-  if (!s) return;
-  begIdx = (begIdx - 1 + s.athletes.length) % s.athletes.length;
+  const ids = begGetIds();
+  if (ids.length === 0) return;
+  begIdx = (begIdx - 1 + ids.length) % ids.length;
   begResetEval();
   begUpdateUI();
 }
 
 function begNext() {
-  const s = DB.activeSession;
-  if (!s) return;
-  begIdx = (begIdx + 1) % s.athletes.length;
+  const ids = begGetIds();
+  if (ids.length === 0) return;
+  begIdx = (begIdx + 1) % ids.length;
   begResetEval();
   begUpdateUI();
 }
 
 function begUpdateUI() {
   const s = DB.activeSession;
-  if (!s) return;
-  const aid = s.athletes[begIdx];
+  const ids = begGetIds();
+  if (!s || ids.length === 0) return;
+  const aid = ids[begIdx];
   const ath = DB.athletes.find(a => a.id === aid);
   document.getElementById('begName').textContent = ath ? ath.name : '—';
   
@@ -8362,7 +8459,6 @@ function begUpdateUI() {
   document.getElementById('begSolo').textContent = waves.filter(w => w.catching === 'solo').length;
   document.getElementById('begComplete').textContent = waves.filter(w => w.balance === 'complete').length;
   
-  // Wave history
   const list = document.getElementById('begWaveList');
   if (waves.length === 0) {
     list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:12px">Sin intentos aún</div>';
@@ -8391,10 +8487,10 @@ function begTagHTML(val, text, color) {
 
 function begLogWave() {
   const s = DB.activeSession;
-  if (!s) return;
-  const aid = s.athletes[begIdx];
+  const ids = begGetIds();
+  if (!s || ids.length === 0) return;
+  const aid = ids[begIdx];
   
-  // Validate minimum
   if (!begEval.catching && !begEval.popup) {
     alert('Selecciona al menos Entrada y Pop-up');
     return;
@@ -8409,10 +8505,9 @@ function begLogWave() {
   if (!begWaves[aid]) begWaves[aid] = [];
   begWaves[aid].push(wave);
   
-  // Save to session data
   if (!s.beginnerData) s.beginnerData = {};
   s.beginnerData[aid] = begWaves[aid];
-  saveDB();
+  DB.saveActive();
   
   if (navigator.vibrate) navigator.vibrate(30);
   begResetEval();
@@ -8421,12 +8516,13 @@ function begLogWave() {
 
 function begDeleteWave(idx) {
   const s = DB.activeSession;
-  if (!s) return;
-  const aid = s.athletes[begIdx];
+  const ids = begGetIds();
+  if (!s || ids.length === 0) return;
+  const aid = ids[begIdx];
   if (begWaves[aid]) {
     begWaves[aid].splice(idx, 1);
     if (s.beginnerData) s.beginnerData[aid] = begWaves[aid];
-    saveDB();
+    DB.saveActive();
     begUpdateUI();
   }
 }
