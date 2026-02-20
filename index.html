@@ -670,6 +670,45 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .anl-cmp-fill-b{position:absolute;right:0;top:0;height:100%;background:var(--green);border-radius:0 4px 4px 0;transition:width .4s}
 .anl-spot-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
 .anl-spot-row:last-child{border-bottom:none}
+/* Skill checklist */
+.anl-skill{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.anl-skill:last-child{border-bottom:none}
+.anl-skill-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid}
+.anl-skill-badge.locked{background:var(--bg-input);border-color:var(--border);opacity:.5}
+.anl-skill-badge.unlocked{border-color:var(--green);background:rgba(34,197,94,.1)}
+.anl-skill-badge.mastered{border-color:#f59e0b;background:rgba(245,158,11,.1)}
+.anl-skill-info{flex:1;min-width:0}
+.anl-skill-name{font-size:13px;font-weight:700}
+.anl-skill-req{font-size:10px;color:var(--text-muted)}
+.anl-skill-progress{height:4px;background:var(--bg-input);border-radius:2px;margin-top:3px;overflow:hidden}
+.anl-skill-fill{height:100%;border-radius:2px;transition:width .3s}
+.anl-bio-tab{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer}
+.anl-bio-tab.active{border-color:var(--accent);background:rgba(56,189,248,.08);color:var(--accent)}
+/* === Frame Selector Modal === */
+.fs-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s}
+.fs-modal{background:var(--bg-card);border-radius:16px;max-width:520px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border)}
+.fs-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.fs-header h3{font-size:16px;font-weight:800;color:var(--text-primary);margin:0}
+.fs-close{background:none;border:none;color:var(--text-secondary);font-size:22px;cursor:pointer;padding:4px 8px}
+.fs-body{padding:16px 20px;overflow-y:auto;flex:1}
+.fs-section-title{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;margin-bottom:10px;letter-spacing:.05em}
+.fs-frames-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.fs-frame{position:relative;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s;aspect-ratio:16/9}
+.fs-frame.selected{border-color:#8b5cf6;box-shadow:0 0 12px rgba(139,92,246,.4)}
+.fs-frame img{width:100%;height:100%;object-fit:cover}
+.fs-frame .fs-check{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.fs-frame.selected .fs-check{background:#8b5cf6;border-color:#8b5cf6}
+.fs-frame .fs-label{position:absolute;bottom:0;left:0;right:0;padding:3px 6px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:10px;color:#fff;font-weight:600}
+.fs-options{display:flex;gap:8px;margin-bottom:16px}
+.fs-opt{flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--bg-input);cursor:pointer;text-align:center;transition:all .2s}
+.fs-opt.active{border-color:#8b5cf6;background:rgba(139,92,246,.1)}
+.fs-opt-icon{font-size:22px;margin-bottom:4px}
+.fs-opt-label{font-size:12px;font-weight:700;color:var(--text-primary)}
+.fs-opt-desc{font-size:10px;color:var(--text-secondary);margin-top:2px}
+.fs-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+.fs-footer .btn{flex:1}
+.fs-select-actions{display:flex;gap:8px;margin-bottom:10px}
+.fs-select-actions button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text-secondary);font-size:11px;font-weight:600;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1398,6 +1437,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <button class="btn btn-outline" onclick="saveTemplate()" style="flex:1;border-color:var(--accent);color:var(--accent)">📋 Template</button>
     <button class="share-btn" onclick="shareSession('debrief')" style="flex:1">📤 Compartir</button>
   </div>
+  <button class="btn" onclick="saveDebrief();exportSessionImage('debrief')" style="margin-top:8px;background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff;width:100%">📸 Exportar Imagen para WhatsApp</button>
 </div>
 
 <!-- ==================== ATHLETES ==================== -->
@@ -1883,6 +1923,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <button class="btn btn-outline btn-sm" onclick="exportSessionCSVById(window._sdSessionIdx)" style="flex:1">📥 Exportar CSV</button>
     <button class="share-btn" onclick="shareSession('detail')" style="flex:1">📤 Compartir</button>
   </div>
+  <button class="btn btn-sm" onclick="exportSessionImage('detail')" style="margin-top:8px;background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff;width:100%">📸 Imagen WhatsApp</button>
 </div>
 
 <!-- ==================== PROGRESSION ==================== -->
@@ -2014,6 +2055,27 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <div class="card" style="padding:12px;margin-bottom:12px">
     <div class="anl-card-title">📍 Spots Frecuentes</div>
     <div id="anlSpots"></div>
+  </div>
+
+  <!-- Beginner Progression -->
+  <div class="card" id="anlBeginnerCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">🌱 Progresión Principiante</div>
+    <div id="anlBeginnerContent"></div>
+  </div>
+
+  <!-- Biometric Trends -->
+  <div class="card" id="anlBioTrendCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">🏋️ Tendencias Biométricas</div>
+    <div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap" id="anlBioTrendTabs"></div>
+    <div id="anlBioTrendChart" style="height:160px;position:relative;overflow:hidden"></div>
+    <div id="anlBioTrendSummary" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Skill Checklist / Badges -->
+  <div class="card" id="anlSkillCard" style="padding:12px;margin-bottom:12px;display:none">
+    <div class="anl-card-title">🏅 Nivel de Habilidades</div>
+    <div id="anlSkillBar" style="margin-bottom:12px"></div>
+    <div id="anlSkillList"></div>
   </div>
 </div>
 
@@ -3841,6 +3903,7 @@ function renderDebrief() {
     // XP (calculated now)
     let xp = ad.xp_earned || 10;
     athHtml += `<div class="db-xp">✨ +${xp} XP</div>`;
+    athHtml += `<button onclick="saveDebrief();exportSessionImage('debrief','${id}')" style="width:100%;margin-top:6px;padding:6px;border-radius:6px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.08);color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer">📸 Imagen individual</button>`;
     athHtml += `</div>`;
   });
   document.getElementById('dbAthletes').innerHTML = athHtml;
@@ -4669,6 +4732,740 @@ function clearSessionsOnly() {
 // ============================================================
 // SHARE SESSION SUMMARY
 // ============================================================
+
+
+// ============ EXPORT SESSION AS IMAGE ============
+// === EXPORT SESSION IMAGE — ENHANCED v2 ===
+// Globals for frame selector modal
+window._fsSource = null;
+window._fsSingleAthId = null;
+window._fsFrames = [];
+window._fsSelectedIdx = new Set();
+window._fsEmbedMode = 'embed'; // 'embed' or 'separate'
+
+function exportSessionImage(source, singleAthId) {
+  let s;
+  if (source === 'debrief') {
+    const sessions = DB.sessions;
+    s = sessions[sessions.length - 1];
+    if (!s) { saveDebrief(); s = DB.sessions[DB.sessions.length - 1]; }
+  } else {
+    s = DB.sessions[window._sdSessionIdx];
+  }
+  if (!s) return alert('No hay sesión');
+
+  window._fsSource = source;
+  window._fsSingleAthId = singleAthId || null;
+
+  // Gather available frames for selected athletes
+  const allIds = Object.keys(s.athlete_data || {});
+  const ids = singleAthId ? allIds.filter(id => id === singleAthId) : allIds;
+  const allLabFrames = DB.labFrames || [];
+  const sessionStart = s.started_at ? new Date(s.started_at).getTime() : 0;
+  const sessionEnd = s.ended_at ? new Date(s.ended_at).getTime() : Date.now();
+
+  // Get frames that belong to session athletes (captured during session or unfiltered for this athlete)
+  const relevantFrames = allLabFrames.map((f, idx) => ({ ...f, _globalIdx: idx }))
+    .filter(f => {
+      if (!f.athlete_id) return ids.length === 1; // unassigned frames only for single athlete
+      if (!ids.includes(f.athlete_id)) return false;
+      // If frame has created_at, check if it's within session window (+/- 1 hour buffer)
+      if (f.created_at) {
+        const ft = new Date(f.created_at).getTime();
+        return ft >= (sessionStart - 3600000) && ft <= (sessionEnd + 3600000);
+      }
+      return true;
+    });
+
+  window._fsFrames = relevantFrames;
+  window._fsSelectedIdx = new Set();
+  window._fsEmbedMode = 'embed';
+
+  // If no frames, skip modal and export directly
+  if (relevantFrames.length === 0) {
+    _doExportSessionImage(source, singleAthId, [], false);
+    return;
+  }
+
+  // Build modal content
+  const athletes = DB.athletes;
+  let html = '';
+
+  // Resolution info
+  html += `<div style="margin-bottom:14px;padding:10px;border-radius:8px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2)">
+    <div style="font-size:12px;color:#22d3ee;font-weight:700">✨ Retina 2x · Texto sin cortar · Judge data incluido</div>
+  </div>`;
+
+  // Frame selection
+  html += `<div class="fs-section-title">📹 Frames del Lab (${relevantFrames.length})</div>`;
+  html += `<div class="fs-select-actions">
+    <button onclick="fsSelectAll()">✅ Todos</button>
+    <button onclick="fsSelectNone()">❌ Ninguno</button>
+  </div>`;
+  html += `<div class="fs-frames-grid">`;
+  relevantFrames.forEach((f, i) => {
+    const ath = f.athlete_id ? (athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
+    const t = f.timestamp || 0;
+    const m = Math.floor(t / 60);
+    const sec = Math.floor(t % 60);
+    const timeStr = `${m}:${sec.toString().padStart(2, '0')}`;
+    html += `<div class="fs-frame" id="fsFrame${i}" onclick="fsToggleFrame(${i})">
+      <img src="${f.image}" loading="lazy">
+      <div class="fs-check" id="fsCheck${i}"></div>
+      <div class="fs-label">${timeStr} ${ath}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Export mode options
+  html += `<div class="fs-section-title">Modo de frames</div>`;
+  html += `<div class="fs-options">
+    <div class="fs-opt active" id="fsOptEmbed" onclick="fsSetMode('embed')">
+      <div class="fs-opt-icon">🖼️</div>
+      <div class="fs-opt-label">Embebidos</div>
+      <div class="fs-opt-desc">Frames dentro de la imagen</div>
+    </div>
+    <div class="fs-opt" id="fsOptSeparate" onclick="fsSetMode('separate')">
+      <div class="fs-opt-icon">📦</div>
+      <div class="fs-opt-label">Separados</div>
+      <div class="fs-opt-desc">Card + frames individuales</div>
+    </div>
+  </div>`;
+
+  document.getElementById('fsBody').innerHTML = html;
+  document.getElementById('fsOverlay').style.display = 'flex';
+}
+
+function fsClose() {
+  document.getElementById('fsOverlay').style.display = 'none';
+}
+
+function fsToggleFrame(i) {
+  if (window._fsSelectedIdx.has(i)) window._fsSelectedIdx.delete(i);
+  else window._fsSelectedIdx.add(i);
+  const el = document.getElementById('fsFrame' + i);
+  const chk = document.getElementById('fsCheck' + i);
+  if (window._fsSelectedIdx.has(i)) {
+    el.classList.add('selected');
+    chk.textContent = '✓';
+  } else {
+    el.classList.remove('selected');
+    chk.textContent = '';
+  }
+}
+
+function fsSelectAll() {
+  window._fsFrames.forEach((_, i) => {
+    window._fsSelectedIdx.add(i);
+    document.getElementById('fsFrame' + i)?.classList.add('selected');
+    const chk = document.getElementById('fsCheck' + i);
+    if (chk) chk.textContent = '✓';
+  });
+}
+
+function fsSelectNone() {
+  window._fsSelectedIdx.clear();
+  window._fsFrames.forEach((_, i) => {
+    document.getElementById('fsFrame' + i)?.classList.remove('selected');
+    const chk = document.getElementById('fsCheck' + i);
+    if (chk) chk.textContent = '';
+  });
+}
+
+function fsSetMode(mode) {
+  window._fsEmbedMode = mode;
+  document.getElementById('fsOptEmbed').classList.toggle('active', mode === 'embed');
+  document.getElementById('fsOptSeparate').classList.toggle('active', mode === 'separate');
+}
+
+function fsDoExport() {
+  const selectedFrames = [...window._fsSelectedIdx].sort((a, b) => a - b).map(i => window._fsFrames[i]);
+  const embed = window._fsEmbedMode === 'embed' && selectedFrames.length > 0;
+  fsClose();
+  _doExportSessionImage(window._fsSource, window._fsSingleAthId, selectedFrames, embed);
+}
+
+function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames) {
+  let s;
+  if (source === 'debrief') {
+    const sessions = DB.sessions;
+    s = sessions[sessions.length - 1];
+    if (!s) { saveDebrief(); s = DB.sessions[DB.sessions.length - 1]; }
+  } else {
+    s = DB.sessions[window._sdSessionIdx];
+  }
+  if (!s) return alert('No hay sesión');
+
+  const SCALE = 2; // Retina 2x
+  const athletes = DB.athletes;
+  const allIds = Object.keys(s.athlete_data || {});
+  const ids = singleAthId ? allIds.filter(id => id === singleAthId) : allIds;
+  if (ids.length === 0) return alert('Sin datos del atleta');
+  const isSingle = !!singleAthId;
+
+  const discEmoji = { surfboard: '🏄', bodyboard: '🛹', longboard: '🏄‍♂️', kneeboard: '🧎', paddlesurf: '🚣', paddlerace: '🏁' };
+
+  // === Word-wrap helper ===
+  const wrapText = (ctx, text, maxW) => {
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach(w => {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = w;
+      } else {
+        line = test;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  };
+
+  // === Build athlete data ===
+  const athData = ids.map(id => {
+    const a = athletes.find(x => x.id === id);
+    const ad = s.athlete_data[id];
+    const waves = ad.waves || [];
+    const caught = waves.filter(w => w.type === 'caught');
+    const bio = ad.biomech || [];
+
+    const qualCounts = { excellent: 0, good: 0, regular: 0, poor: 0 };
+    caught.forEach(w => { if (w.wave_quality && qualCounts[w.wave_quality] !== undefined) qualCounts[w.wave_quality]++; });
+    const hasQual = Object.values(qualCounts).some(v => v > 0);
+
+    const evalScore = v => v === 'excellent' || v === 'good' ? 3 : v === 'normal' || v === 'ok' ? 2 : v === 'poor' ? 1 : 0;
+    let selSum = 0, selN = 0, posSum = 0, posN = 0, comSum = 0, comN = 0;
+    caught.forEach(w => {
+      if (w.selection) { selSum += evalScore(w.selection); selN++; }
+      if (w.position) { posSum += evalScore(w.position); posN++; }
+      if (w.commit) { comSum += evalScore(w.commit); comN++; }
+    });
+    const hasEval = selN > 0 || posN > 0 || comN > 0;
+
+    const bioScore = v => v === 'good' || v === 'full' ? 3 : v === 'ok' || v === 'partial' ? 2 : v === 'poor' || v === 'none' ? 1 : 0;
+    const bioFields = ['bio_shoulders', 'bio_knees', 'bio_arms', 'bio_compression', 'bio_head', 'bio_backfoot', 'bio_weight', 'bio_flow'];
+    const bioLabels = { bio_shoulders: 'Hombros', bio_knees: 'Rodillas', bio_arms: 'Brazos', bio_compression: 'Compresión', bio_head: 'Cabeza', bio_backfoot: 'Pie Trasero', bio_weight: 'Peso', bio_flow: 'Flow' };
+    const bioLabelsShort = { bio_shoulders: 'Hombr', bio_knees: 'Rodil', bio_arms: 'Brazos', bio_compression: 'Compr', bio_head: 'Cabeza', bio_backfoot: 'Pie T', bio_weight: 'Peso', bio_flow: 'Flow' };
+    let bioData = [];
+    if (bio.length > 0) {
+      bioFields.forEach(f => {
+        let sum = 0, n = 0;
+        bio.forEach(b => { if (b[f]) { sum += bioScore(b[f]); n++; } });
+        if (n > 0) bioData.push({ field: f, label: isSingle ? bioLabels[f] : bioLabelsShort[f], avg: sum / n });
+      });
+    }
+    const bioNotes = bio.map(b => b.notes).filter(n => n && n.trim());
+
+    const manCounts = {};
+    caught.forEach(w => (w.maneuvers || []).forEach(m => { manCounts[m] = (manCounts[m] || 0) + 1; }));
+    const topMan = Object.entries(manCounts).sort((a, b) => b[1] - a[1]).slice(0, isSingle ? 10 : 5);
+
+    const waveDetail = isSingle ? caught.map((w, i) => {
+      const qMap = { excellent: '⭐', good: '🔥', regular: '👌', poor: '💩' };
+      const mans = (w.maneuvers || []).map(m => m.toUpperCase()).join(', ');
+      return { num: i + 1, qual: qMap[w.wave_quality] || '', mans, sel: w.selection, pos: w.position, com: w.commit };
+    }) : [];
+
+    // Judge summary data
+    const js = ad.judge_summary || null;
+
+    // Calculate row height
+    let rowH;
+    if (isSingle) {
+      rowH = 80;
+      if (hasQual) rowH += 28;
+      if (hasEval) rowH += 28;
+      if (js) rowH += 75; // Judge section
+      if (bioData.length > 0) rowH += 20 + bioData.length * 22;
+      if (bioNotes.length > 0) {
+        // Calculate wrapped note heights
+        bioNotes.forEach(n => { rowH += Math.ceil(n.length / 55) * 16 + 4; });
+        rowH += 18;
+      }
+      if (topMan.length > 0) rowH += 28;
+      if (waveDetail.length > 0) rowH += 22 + waveDetail.length * 20;
+      rowH += 10;
+    } else {
+      rowH = 70;
+      if (hasQual) rowH += 28;
+      if (hasEval) rowH += 28;
+      if (js) rowH += 55; // Judge section (compact)
+      if (bioData.length > 0) rowH += 32;
+      if (bioNotes.length > 0) rowH += Math.min(bioNotes.length, 2) * 16 + 8;
+      if (topMan.length > 0) rowH += 24;
+      rowH += 10;
+    }
+
+    return { id, a, ad, waves, caught, qualCounts, hasQual, selAvg: selN ? selSum/selN : 0, posAvg: posN ? posSum/posN : 0, comAvg: comN ? comSum/comN : 0, hasEval, bioData, bioNotes, topMan, waveDetail, js, rowH };
+  });
+
+  const W = 720;
+  const headerH = isSingle ? 220 : 260;
+  const athTotalH = athData.reduce((s, d) => s + d.rowH, 0) + 30;
+  const footerH = 80; // More space for notes wrapping
+
+  // Calculate embedded frames area height
+  let framesH = 0;
+  if (embedFrames && selectedFrames.length > 0) {
+    const cols = selectedFrames.length === 1 ? 1 : selectedFrames.length === 2 ? 2 : selectedFrames.length <= 4 ? 2 : 3;
+    const rows = Math.ceil(selectedFrames.length / cols);
+    const fW = (W - 60 - (cols - 1) * 10) / cols;
+    const fH = fW * 9 / 16;
+    framesH = 40 + rows * (fH + 10) + 10; // Title + frames + padding
+  }
+
+  // Calculate footer note wrapping
+  let footerNoteLines = [];
+  if (s.notes) {
+    // Create a temp canvas to measure text
+    const tmpC = document.createElement('canvas');
+    const tmpCtx = tmpC.getContext('2d');
+    tmpCtx.font = '500 12px -apple-system, sans-serif';
+    footerNoteLines = wrapText(tmpCtx, s.notes, W - 80);
+  }
+  const footerNotesH = footerNoteLines.length > 0 ? footerNoteLines.length * 18 + 8 : 0;
+  const totalFooterH = footerH + footerNotesH;
+
+  const H = headerH + athTotalH + framesH + totalFooterH;
+
+  const c = document.createElement('canvas');
+  c.width = W * SCALE;
+  c.height = H * SCALE;
+  const ctx = c.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#0f172a'); bg.addColorStop(0.5, '#1e293b'); bg.addColorStop(1, '#0f172a');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Top accent strip
+  const strip = ctx.createLinearGradient(0, 0, W, 0);
+  strip.addColorStop(0, '#06b6d4'); strip.addColorStop(1, '#8b5cf6');
+  ctx.fillStyle = strip; ctx.fillRect(0, 0, W, 4);
+
+  // Helper functions
+  const drawText = (text, x, y, font, color, align) => {
+    ctx.font = font; ctx.fillStyle = color;
+    ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(text, x, y);
+  };
+
+  const drawWrappedText = (text, x, y, font, color, maxW, lineH) => {
+    ctx.font = font; ctx.fillStyle = color;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    const lines = wrapText(ctx, text, maxW);
+    lines.forEach((line, i) => {
+      ctx.fillText(line, x, y + i * lineH);
+    });
+    return lines.length * lineH;
+  };
+
+  const drawPill = (text, x, y, bgColor, textColor) => {
+    ctx.font = '600 13px -apple-system, sans-serif';
+    const m = ctx.measureText(text);
+    const pw = m.width + 16, ph = 24;
+    ctx.fillStyle = bgColor;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, pw, ph, 12); else ctx.rect(x, y, pw, ph);
+    ctx.fill();
+    ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + pw / 2, y + ph / 2);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    return pw + 6;
+  };
+
+  const drawMiniBar = (x, y, w, h, pct, color) => {
+    ctx.fillStyle = 'rgba(255,255,255,.08)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, h/2); else ctx.rect(x, y, w, h);
+    ctx.fill();
+    if (pct > 0) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      const fw = Math.max(h, w * pct);
+      if (ctx.roundRect) ctx.roundRect(x, y, fw, h, h/2); else ctx.rect(x, y, fw, h);
+      ctx.fill();
+    }
+  };
+
+  const scoreColor = v => v >= 2.5 ? '#22c55e' : v >= 1.8 ? '#facc15' : '#ef4444';
+  const scoreDot = v => v >= 2.5 ? '🟢' : v >= 1.8 ? '🟡' : '🔴';
+  const judgeScoreColor = v => v >= 6 ? '#22c55e' : v >= 4 ? '#facc15' : '#ef4444';
+
+  // === HEADER ===
+  drawText('KSS', 30, 20, '800 28px -apple-system, sans-serif', '#06b6d4');
+  drawText('COACH', 88, 20, '800 28px -apple-system, sans-serif', '#94a3b8');
+  if (isSingle) drawText('REPORTE INDIVIDUAL', 200, 26, '700 13px -apple-system, sans-serif', '#8b5cf6');
+
+  const dt = new Date(s.date || s.started_at);
+  const dateStr = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
+  drawText(dateStr.charAt(0).toUpperCase() + dateStr.slice(1), 30, 58, '500 14px -apple-system, sans-serif', '#94a3b8');
+  drawText('📍 ' + (s.spot || '—'), 30, 84, '800 24px -apple-system, sans-serif', '#ffffff');
+  if (s.duration) drawText('⏱️ ' + Math.round(s.duration / 60) + ' min', W - 30, 84, '600 14px -apple-system, sans-serif', '#94a3b8', 'right');
+
+  const sizeNames = { 1: 'Flat', 2: '1-2ft', 3: '2-4ft', 4: '4-6ft', 5: '+6ft' };
+  const windNames = { glassy: 'Glassy', offshore: 'Offshore', onshore: 'Onshore', cross: 'Cross' };
+  let px = 30; const pillY = 120;
+  if (s.wave_size) px += drawPill('🌊 ' + sizeNames[s.wave_size], px, pillY, 'rgba(6,182,212,.2)', '#22d3ee');
+  if (s.wave_quality) px += drawPill('⭐'.repeat(s.wave_quality), px, pillY, 'rgba(234,179,8,.15)', '#facc15');
+  if (s.wind_condition) px += drawPill(windNames[s.wind_condition], px, pillY, 'rgba(148,163,184,.15)', '#94a3b8');
+  if (s.focus_area) px += drawPill('🎯 ' + s.focus_area, px, pillY, 'rgba(139,92,246,.15)', '#a78bfa');
+
+  if (!isSingle) {
+    let totalP = 0, totalC = 0;
+    allIds.forEach(id => { const d = s.athlete_data[id]; totalP += d.paddled || 0; totalC += d.caught || 0; });
+    const teamRatio = totalP > 0 ? Math.round(totalC / totalP * 100) : 0;
+    const kpiY = 165, kpiW = (W - 80) / 4;
+    [
+      { val: allIds.length + '', lbl: 'Atletas', color: '#38bdf8' },
+      { val: totalP + '', lbl: 'Remadas', color: '#a78bfa' },
+      { val: totalC + '', lbl: 'Atrapadas', color: '#22c55e' },
+      { val: teamRatio + '%', lbl: 'Catch Rate', color: teamRatio >= 60 ? '#22c55e' : teamRatio >= 40 ? '#facc15' : '#ef4444' }
+    ].forEach((k, i) => {
+      const kx = 30 + i * (kpiW + 12);
+      ctx.fillStyle = 'rgba(255,255,255,.05)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(kx, kpiY, kpiW, 70, 10); else ctx.rect(kx, kpiY, kpiW, 70);
+      ctx.fill();
+      drawText(k.val, kx + kpiW / 2, kpiY + 12, '800 22px -apple-system, sans-serif', k.color, 'center');
+      drawText(k.lbl, kx + kpiW / 2, kpiY + 42, '500 11px -apple-system, sans-serif', '#64748b', 'center');
+    });
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(30, headerH - 5); ctx.lineTo(W - 30, headerH - 5); ctx.stroke();
+
+  // === ATHLETES ===
+  let ay = headerH + 10;
+  athData.forEach((d, i) => {
+    const { a, ad, caught, qualCounts, hasQual, selAvg, posAvg, comAvg, hasEval, bioData, bioNotes, topMan, waveDetail, js, rowH } = d;
+    const name = a ? a.name : 'Atleta';
+    const paddled = ad.paddled || 0;
+    const ratio = paddled > 0 ? Math.round((ad.caught || 0) / paddled * 100) : 0;
+
+    if (i % 2 === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,.02)';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(20, ay, W - 40, rowH - 4, 8); ctx.fill(); }
+      else ctx.fillRect(20, ay, W - 40, rowH - 4);
+    }
+
+    ctx.fillStyle = 'rgba(6,182,212,.2)';
+    ctx.beginPath(); ctx.arc(52, ay + 28, 20, 0, Math.PI * 2); ctx.fill();
+    drawText(name.charAt(0).toUpperCase(), 52, ay + 15, '700 18px -apple-system, sans-serif', '#06b6d4', 'center');
+
+    const discStr = a ? getAthleteDisciplines(a).map(dc => discEmoji[dc] || '🏄').join(' ') : '';
+    drawText(name, 82, ay + 8, '700 15px -apple-system, sans-serif', '#e2e8f0');
+    if (discStr) drawText(discStr, 82, ay + 28, '400 13px -apple-system, sans-serif', '#64748b');
+
+    if (paddled > 0) {
+      const ratioColor = ratio >= 60 ? '#22c55e' : ratio >= 40 ? '#facc15' : '#ef4444';
+      drawText(ratio + '%', W - 40, ay + 8, '800 22px -apple-system, sans-serif', ratioColor, 'right');
+      drawText((ad.caught || 0) + '/' + paddled + ' olas', W - 40, ay + 34, '400 12px -apple-system, sans-serif', '#64748b', 'right');
+      drawMiniBar(82, ay + 48, 200, 6, ratio / 100, ratioColor);
+    } else if (ad.race && ad.race.sessions.length > 0) {
+      const best = ad.race.sessions.reduce((b, r) => !b || r.total_ms < b.total_ms ? r : b, null);
+      drawText('🏁 ' + ad.race.sessions.length + ' carrera(s)', W - 40, ay + 8, '600 14px -apple-system, sans-serif', '#06b6d4', 'right');
+      if (best) drawText('Mejor: ' + best.total_time, W - 40, ay + 28, '400 12px -apple-system, sans-serif', '#22c55e', 'right');
+    }
+
+    let lineY = ay + 60;
+
+    if (hasQual) {
+      const qEmoji = { excellent: '⭐', good: '🔥', regular: '👌', poor: '💩' };
+      const qColor = { excellent: '#facc15', good: '#22c55e', regular: '#94a3b8', poor: '#ef4444' };
+      let qx = 82;
+      Object.entries(qualCounts).forEach(([k, v]) => {
+        if (v > 0) { drawText(qEmoji[k] + v, qx, lineY, '500 12px -apple-system, sans-serif', qColor[k]); qx += ctx.measureText(qEmoji[k] + v).width + 14; }
+      });
+      lineY += 22;
+    }
+
+    if (hasEval) {
+      let ex = 82;
+      if (selAvg > 0) { drawText(scoreDot(selAvg) + ' Selección', ex, lineY, '500 11px -apple-system, sans-serif', scoreColor(selAvg)); ex += 110; }
+      if (posAvg > 0) { drawText(scoreDot(posAvg) + ' Posición', ex, lineY, '500 11px -apple-system, sans-serif', scoreColor(posAvg)); ex += 100; }
+      if (comAvg > 0) { drawText(scoreDot(comAvg) + ' Commit', ex, lineY, '500 11px -apple-system, sans-serif', scoreColor(comAvg)); }
+      lineY += 22;
+    }
+
+    // === JUDGE DATA SECTION ===
+    if (js && js.heat_count > 0) {
+      // Judge section background
+      ctx.fillStyle = 'rgba(139,92,246,.06)';
+      const jBoxH = isSingle ? 65 : 45;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(82, lineY, W - 122, jBoxH, 8); else ctx.rect(82, lineY, W - 122, jBoxH);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(139,92,246,.2)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(82, lineY, W - 122, jBoxH, 8); else ctx.rect(82, lineY, W - 122, jBoxH);
+      ctx.stroke();
+
+      drawText('⚖️ Judge · ' + js.heat_count + ' heat' + (js.heat_count > 1 ? 's' : ''), 96, lineY + 6, '700 11px -apple-system, sans-serif', '#a78bfa');
+
+      const jAvgColor = judgeScoreColor(js.avg_wave_score || 0);
+      if (isSingle) {
+        drawText('Avg Heat:', 96, lineY + 24, '500 11px -apple-system, sans-serif', '#94a3b8');
+        drawText((js.avg_heat_total || 0).toFixed(2), 170, lineY + 24, '800 12px -apple-system, sans-serif', '#22d3ee');
+        drawText('Avg/Ola:', 230, lineY + 24, '500 11px -apple-system, sans-serif', '#94a3b8');
+        drawText((js.avg_wave_score || 0).toFixed(2), 296, lineY + 24, '800 12px -apple-system, sans-serif', jAvgColor);
+        if (js.goal > 0) {
+          drawText('Goal:', 360, lineY + 24, '500 11px -apple-system, sans-serif', '#94a3b8');
+          drawText(js.goal.toFixed(1), 400, lineY + 24, '800 12px -apple-system, sans-serif', '#facc15');
+        }
+        // Heat breakdown
+        const heatStr = (js.heats || []).map((h, i) => `H${i+1}: ${h.toFixed(2)}`).join('  ·  ');
+        drawText(heatStr, 96, lineY + 44, '400 10px -apple-system, sans-serif', '#64748b');
+        lineY += 75;
+      } else {
+        drawText((js.avg_heat_total || 0).toFixed(2), W - 140, lineY + 6, '800 14px -apple-system, sans-serif', '#22d3ee', 'right');
+        drawText('avg heat', W - 48, lineY + 8, '400 10px -apple-system, sans-serif', '#64748b');
+        drawText('Ola: ' + (js.avg_wave_score || 0).toFixed(2), 96, lineY + 26, '600 11px -apple-system, sans-serif', jAvgColor);
+        const shortHeats = (js.heats || []).map((h, i) => `H${i+1}:${h.toFixed(1)}`).join(' ');
+        drawText(shortHeats, 200, lineY + 26, '400 10px -apple-system, sans-serif', '#64748b');
+        lineY += 55;
+      }
+    }
+
+    // Biomech
+    if (bioData.length > 0) {
+      if (isSingle) {
+        drawText('🦴 Biomecánica', 82, lineY, '700 13px -apple-system, sans-serif', '#94a3b8');
+        lineY += 20;
+        bioData.forEach(b => {
+          const col = scoreColor(b.avg);
+          const sl = b.avg >= 2.5 ? 'Bien' : b.avg >= 1.8 ? 'Regular' : 'Mejorar';
+          drawText(b.label, 96, lineY, '500 12px -apple-system, sans-serif', '#94a3b8');
+          drawMiniBar(210, lineY + 3, 120, 6, b.avg / 3, col);
+          drawText(sl, 340, lineY, '600 11px -apple-system, sans-serif', col);
+          lineY += 20;
+        });
+        lineY += 2;
+      } else {
+        let bx = 82;
+        drawText('🦴', bx, lineY, '400 12px -apple-system, sans-serif', '#94a3b8'); bx += 20;
+        bioData.slice(0, 6).forEach(b => {
+          const col = scoreColor(b.avg);
+          drawText(b.label, bx, lineY + 1, '500 10px -apple-system, sans-serif', col);
+          bx += ctx.measureText(b.label).width + 4;
+          drawMiniBar(bx, lineY + 5, 24, 4, b.avg / 3, col);
+          bx += 32;
+        });
+        lineY += 24;
+      }
+    }
+
+    // Bio notes with word-wrap
+    if (bioNotes.length > 0) {
+      const maxNotes = isSingle ? bioNotes.length : Math.min(bioNotes.length, 2);
+      drawText('📝 Notas bio:', 82, lineY, '600 11px -apple-system, sans-serif', '#94a3b8');
+      lineY += 16;
+      for (let ni = 0; ni < maxNotes; ni++) {
+        const noteH = drawWrappedText('• ' + bioNotes[ni], 96, lineY, '400 11px -apple-system, sans-serif', '#cbd5e1', W - 140, 16);
+        lineY += noteH + 2;
+      }
+      if (!isSingle && bioNotes.length > 2) drawText('+ ' + (bioNotes.length - 2) + ' más', 96, lineY - 2, '400 10px -apple-system, sans-serif', '#64748b');
+      lineY += 4;
+    }
+
+    // Maneuvers
+    if (topMan.length > 0) {
+      let mx = 82;
+      topMan.forEach(([m, count]) => {
+        const txt = m.toUpperCase() + '×' + count;
+        ctx.font = '600 13px -apple-system, sans-serif';
+        const tw = ctx.measureText(txt).width;
+        if (mx + tw + 28 > W - 40) { mx = 82; lineY += 26; }
+        drawPill(txt, mx, lineY, 'rgba(139,92,246,.15)', '#c4b5fd');
+        mx += tw + 28;
+      });
+      lineY += 24;
+    }
+
+    // Wave detail (single mode)
+    if (isSingle && waveDetail.length > 0) {
+      drawText('🌊 Detalle Ola por Ola', 82, lineY, '700 12px -apple-system, sans-serif', '#94a3b8');
+      lineY += 20;
+      const evalDot = v => v === 'excellent' || v === 'good' ? '🟢' : v === 'normal' || v === 'ok' ? '🟡' : v === 'poor' ? '🔴' : '';
+      waveDetail.forEach(w => {
+        let wx = 96;
+        drawText('#' + w.num, wx, lineY, '700 11px -apple-system, sans-serif', '#64748b'); wx += 30;
+        if (w.qual) { drawText(w.qual, wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 20; }
+        if (w.sel) { drawText(evalDot(w.sel), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
+        if (w.pos) { drawText(evalDot(w.pos), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
+        if (w.com) { drawText(evalDot(w.com), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
+        if (w.mans) drawText(w.mans, wx, lineY, '400 10px -apple-system, sans-serif', '#a78bfa');
+        lineY += 18;
+      });
+    }
+
+    ay += rowH;
+  });
+
+  // === EMBEDDED FRAMES ===
+  if (embedFrames && selectedFrames.length > 0) {
+    const fy = ay + 10;
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(30, fy); ctx.lineTo(W - 30, fy); ctx.stroke();
+
+    drawText('📹 Frames del Lab', 30, fy + 8, '700 14px -apple-system, sans-serif', '#94a3b8');
+    let frameY = fy + 32;
+
+    const cols = selectedFrames.length === 1 ? 1 : selectedFrames.length === 2 ? 2 : selectedFrames.length <= 4 ? 2 : 3;
+    const gap = 10;
+    const fW = (W - 60 - (cols - 1) * gap) / cols;
+    const fH = fW * 9 / 16;
+
+    // Load and draw frames
+    let loaded = 0;
+    const total = selectedFrames.length;
+
+    const drawFramesFinal = (images) => {
+      images.forEach((imgData, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        const fx = 30 + col * (fW + gap);
+        const fry = frameY + row * (fH + gap);
+
+        // Frame background
+        ctx.fillStyle = 'rgba(0,0,0,.3)';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(fx, fry, fW, fH, 6); else ctx.rect(fx, fry, fW, fH);
+        ctx.fill();
+
+        if (imgData.img) {
+          ctx.save();
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(fx, fry, fW, fH, 6); else ctx.rect(fx, fry, fW, fH);
+          ctx.clip();
+          // Draw image to fill frame area
+          const iw = imgData.img.naturalWidth || imgData.img.width;
+          const ih = imgData.img.naturalHeight || imgData.img.height;
+          const scale = Math.max(fW / iw, fH / ih);
+          const sw = iw * scale, sh = ih * scale;
+          ctx.drawImage(imgData.img, fx + (fW - sw) / 2, fry + (fH - sh) / 2, sw, sh);
+          ctx.restore();
+        }
+
+        // Frame label
+        const f = selectedFrames[idx];
+        const t = f.timestamp || 0;
+        const m = Math.floor(t / 60);
+        const sec = Math.floor(t % 60);
+        const timeStr = `${m}:${sec.toString().padStart(2, '0')}`;
+        const ath = f.athlete_id ? (athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0] || '') : '';
+
+        ctx.fillStyle = 'rgba(0,0,0,.6)';
+        ctx.fillRect(fx, fry + fH - 20, fW, 20);
+        drawText(`${timeStr} ${ath}`, fx + 6, fry + fH - 16, '600 10px -apple-system, sans-serif', '#ffffff');
+      });
+
+      // Now draw footer and finalize
+      _drawFooterAndFinalize();
+    };
+
+    // Load all frame images
+    const imagePromises = selectedFrames.map(f => {
+      return new Promise(resolve => {
+        if (!f.image) return resolve({ img: null });
+        const img = new Image();
+        img.onload = () => resolve({ img });
+        img.onerror = () => resolve({ img: null });
+        img.src = f.image;
+      });
+    });
+
+    Promise.all(imagePromises).then(drawFramesFinal);
+
+  } else {
+    _drawFooterAndFinalize();
+  }
+
+  function _drawFooterAndFinalize() {
+    // === FOOTER ===
+    const fy = H - totalFooterH + 10;
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.beginPath(); ctx.moveTo(30, fy - 5); ctx.lineTo(W - 30, fy - 5); ctx.stroke();
+
+    let footY = fy + 2;
+    if (footerNoteLines.length > 0) {
+      drawText('📝', 30, footY, '400 12px -apple-system, sans-serif', '#94a3b8');
+      footerNoteLines.forEach((line, i) => {
+        drawText(line, 50, footY + i * 18, '400 12px -apple-system, sans-serif', '#94a3b8');
+      });
+      footY += footerNoteLines.length * 18 + 8;
+    }
+    if (s.rating) drawText('⭐'.repeat(s.rating), W - 30, fy + 2, '400 14px -apple-system, sans-serif', '#facc15', 'right');
+    if (s.coach_rating) drawText('⭐'.repeat(s.coach_rating), W - 30, fy + 2, '400 14px -apple-system, sans-serif', '#facc15', 'right');
+
+    drawText('Powered by KSS Coach · Karibe Surf Score', W / 2, H - 30, '400 11px -apple-system, sans-serif', '#475569', 'center');
+
+    // Export the main card
+    c.toBlob(function(blob) {
+      const athName = isSingle && athData[0]?.a ? '_' + athData[0].a.name.replace(/\s/g, '_') : '';
+      const fname = 'KSS_Session_' + (s.spot || 'surf').replace(/\s/g, '_') + athName + '_' + new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(dt).replace(/\//g, '-') + '.png';
+
+      // If separate mode with frames, share multiple files
+      if (!embedFrames && selectedFrames.length > 0) {
+        _exportSeparateFrames(blob, fname, selectedFrames, athName, dt, s);
+      } else {
+        const file = new File([blob], fname, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ title: 'KSS Coach - Sesión', files: [file] }).catch(() => {});
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = fname; a.click();
+          URL.revokeObjectURL(url);
+          showUndoToast('📸 Imagen HD guardada!', null, 2500);
+        }
+      }
+    }, 'image/png');
+  }
+}
+
+function _exportSeparateFrames(cardBlob, cardFname, selectedFrames, athName, dt, s) {
+  const files = [new File([cardBlob], cardFname, { type: 'image/png' })];
+  const dateStr = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(dt).replace(/\//g, '-');
+
+  let processed = 0;
+  const processFrame = (idx) => {
+    if (idx >= selectedFrames.length) {
+      // All done, share or download
+      if (navigator.canShare && navigator.canShare({ files })) {
+        navigator.share({ title: 'KSS Coach - Sesión + Frames', files }).catch(() => {});
+      } else {
+        // Download each file
+        files.forEach(f => {
+          const url = URL.createObjectURL(f);
+          const a = document.createElement('a');
+          a.href = url; a.download = f.name; a.click();
+          URL.revokeObjectURL(url);
+        });
+        showUndoToast(`📸 Card + ${selectedFrames.length} frames guardados!`, null, 3000);
+      }
+      return;
+    }
+
+    const f = selectedFrames[idx];
+    // Convert data URL to blob
+    fetch(f.image).then(r => r.blob()).then(blob => {
+      const ath = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.split(' ')[0]?.replace(/\s/g, '_') || '') : '';
+      const t = f.timestamp || 0;
+      const m = Math.floor(t / 60);
+      const sec = Math.floor(t % 60);
+      const frameFname = `KSS_Frame_${ath}_${m}m${sec}s_${dateStr}.jpg`;
+      files.push(new File([blob], frameFname, { type: 'image/jpeg' }));
+      processFrame(idx + 1);
+    }).catch(() => processFrame(idx + 1));
+  };
+
+  processFrame(0);
+}
+
 function shareSession(source) {
   let s, idx;
   if (source === 'debrief') {
@@ -4963,6 +5760,7 @@ function renderSessionDetail() {
     
     athHtml += renderBioSummaryHTML(d);
     athHtml += renderWorkoutSummaryHTML(d);
+    athHtml += `<button onclick="exportSessionImage('detail','${id}')" style="width:100%;margin-top:6px;padding:6px;border-radius:6px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.08);color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer">📸 Imagen individual</button>`;
     athHtml += `</div>`;
   });
   document.getElementById('sdAthletes').innerHTML = athHtml;
@@ -5391,6 +6189,258 @@ function renderAnalytics() {
       </div>`;
     }).join('') :
     '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Sin datos</div>';
+
+  // === Beginner Progression ===
+  anlRenderBeginner(sessions, athletes);
+
+  // === Biometric Trends ===
+  anlRenderBioTrend(athletes);
+
+  // === Skill Checklist ===
+  anlRenderSkills(waves, athletes);
+}
+
+// ============ BEGINNER PROGRESSION ============
+function anlRenderBeginner(sessions, athletes) {
+  const card = document.getElementById('anlBeginnerCard');
+  const begSessions = sessions.filter(s => s.beginnerData && Object.keys(s.beginnerData).length > 0);
+  
+  if (begSessions.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  
+  // Aggregate beginner data per session
+  const metrics = [];
+  begSessions.forEach(s => {
+    const dt = new Date(s.date || s.started_at);
+    const label = new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(dt);
+    let totalWaves = 0, standing = 0, solo = 0, complete = 0, greenWave = 0;
+    
+    Object.entries(s.beginnerData).forEach(([aid, waves]) => {
+      if (_anlScope !== 'team' && _anlScope !== aid) return;
+      waves.forEach(w => {
+        totalWaves++;
+        if (w.popup === 'standing') standing++;
+        if (w.catching === 'solo') solo++;
+        if (w.balance === 'complete') complete++;
+        if (w.waveType === 'green') greenWave++;
+      });
+    });
+    
+    if (totalWaves > 0) {
+      metrics.push({
+        label, totalWaves,
+        standingPct: Math.round(standing / totalWaves * 100),
+        soloPct: Math.round(solo / totalWaves * 100),
+        completePct: Math.round(complete / totalWaves * 100),
+        greenPct: Math.round(greenWave / totalWaves * 100)
+      });
+    }
+  });
+  
+  if (metrics.length === 0) { card.style.display = 'none'; return; }
+  
+  const last = metrics[metrics.length - 1];
+  const first = metrics[0];
+  
+  // KPI boxes
+  const kpis = [
+    { lbl: 'Pop-Up de Pie', val: last.standingPct + '%', delta: metrics.length > 1 ? last.standingPct - first.standingPct : null, color: last.standingPct >= 70 ? 'var(--green)' : last.standingPct >= 40 ? 'var(--yellow)' : 'var(--red)' },
+    { lbl: 'Remada Solo', val: last.soloPct + '%', delta: metrics.length > 1 ? last.soloPct - first.soloPct : null, color: last.soloPct >= 70 ? 'var(--green)' : last.soloPct >= 40 ? 'var(--yellow)' : 'var(--red)' },
+    { lbl: 'Ola Completa', val: last.completePct + '%', delta: metrics.length > 1 ? last.completePct - first.completePct : null, color: last.completePct >= 60 ? 'var(--green)' : last.completePct >= 30 ? 'var(--yellow)' : 'var(--red)' },
+    { lbl: 'Ola Verde', val: last.greenPct + '%', delta: metrics.length > 1 ? last.greenPct - first.greenPct : null, color: last.greenPct >= 40 ? 'var(--green)' : last.greenPct >= 15 ? 'var(--yellow)' : 'var(--text-muted)' },
+  ];
+  
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">';
+  kpis.forEach(k => {
+    const deltaStr = k.delta !== null ? `<span style="font-size:10px;color:${k.delta >= 0 ? 'var(--green)' : 'var(--red)'}">${k.delta >= 0 ? '↑' : '↓'}${Math.abs(k.delta)}%</span>` : '';
+    html += `<div style="text-align:center;padding:8px;background:var(--bg-input);border-radius:8px">
+      <div style="font-size:18px;font-weight:800;color:${k.color}">${k.val}</div>
+      <div style="font-size:10px;color:var(--text-muted)">${k.lbl} ${deltaStr}</div>
+    </div>`;
+  });
+  html += '</div>';
+  
+  // Trend chart (standing popup % over sessions)
+  if (metrics.length >= 2) {
+    const lineData = metrics.slice(-10).map(m => ({ v: m.standingPct, label: m.label, unit: '%' }));
+    html += `<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">📈 Pop-Up de Pie (tendencia)</div>`;
+    html += `<div style="height:100px;position:relative;overflow:hidden">${anlSvgLine(lineData, 320, 100, '#22c55e', true)}</div>`;
+  }
+  
+  document.getElementById('anlBeginnerContent').innerHTML = html;
+}
+
+// ============ BIOMETRIC TRENDS ============
+let _anlBioMetric = 'weight';
+
+function anlRenderBioTrend(athletes) {
+  const card = document.getElementById('anlBioTrendCard');
+  
+  // Get biometrics from selected athlete(s)
+  let allBio = [];
+  if (_anlScope === 'team') {
+    athletes.forEach(a => {
+      (a.biometrics || []).forEach(b => allBio.push({ ...b, athlete: a.name }));
+    });
+  } else {
+    const ath = athletes.find(a => a.id === _anlScope);
+    if (ath) allBio = (ath.biometrics || []).map(b => ({ ...b }));
+  }
+  
+  if (allBio.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  
+  // Sort by date
+  allBio.sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  // Tabs
+  const tabs = [
+    { key: 'weight', label: '⚖️ Peso', unit: 'kg' },
+    { key: 'sleep', label: '😴 Sueño', unit: 'h' },
+    { key: 'energy', label: '⚡ Energía', unit: '' },
+  ];
+  
+  document.getElementById('anlBioTrendTabs').innerHTML = tabs.map(t =>
+    `<button class="anl-bio-tab${_anlBioMetric === t.key ? ' active' : ''}" onclick="_anlBioMetric='${t.key}';anlRenderBioTrend(DB.athletes)">${t.label}</button>`
+  ).join('');
+  
+  // Filter data for selected metric
+  const metric = tabs.find(t => t.key === _anlBioMetric);
+  const data = allBio.filter(b => b[_anlBioMetric]).map(b => ({
+    v: _anlBioMetric === 'energy' ? ({'low':1,'medium':2,'high':3}[b.energy] || 0) : parseFloat(b[_anlBioMetric]),
+    label: new Intl.DateTimeFormat('es', { day:'numeric', month:'short' }).format(new Date(b.date)),
+    unit: metric.unit
+  }));
+  
+  if (data.length >= 2) {
+    document.getElementById('anlBioTrendChart').innerHTML = anlSvgLine(data.slice(-15), 320, 160, '#a855f7', true);
+  } else if (data.length === 1) {
+    document.getElementById('anlBioTrendChart').innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:12px">Valor actual: <strong style="font-size:18px;color:var(--accent)">${data[0].v}${metric.unit}</strong><br>Necesita 2+ registros para gráfica</div>`;
+  } else {
+    document.getElementById('anlBioTrendChart').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:40px">Sin datos de ' + metric.label + '</div>';
+  }
+  
+  // Summary
+  if (data.length >= 2) {
+    const first = data[0].v, last = data[data.length - 1].v;
+    const diff = last - first;
+    const avg = (data.reduce((s, d) => s + d.v, 0) / data.length).toFixed(1);
+    const deltaColor = _anlBioMetric === 'weight' ? (diff <= 0 ? 'var(--green)' : 'var(--yellow)') : (diff >= 0 ? 'var(--green)' : 'var(--yellow)');
+    const energyLabels = {1:'Baja', 2:'Media', 3:'Alta'};
+    const fmtVal = (v) => _anlBioMetric === 'energy' ? (energyLabels[Math.round(v)] || v) : v + metric.unit;
+    
+    document.getElementById('anlBioTrendSummary').innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:14px;font-weight:800;color:var(--accent)">${fmtVal(last)}</div><div style="font-size:10px;color:var(--text-muted)">Actual</div></div>
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:14px;font-weight:800;color:var(--text-secondary)">${fmtVal(avg)}</div><div style="font-size:10px;color:var(--text-muted)">Promedio</div></div>
+      <div style="flex:1;min-width:70px;text-align:center;padding:8px;background:var(--bg-input);border-radius:8px"><div style="font-size:14px;font-weight:800;color:${deltaColor}">${diff >= 0 ? '+' : ''}${diff.toFixed(1)}${metric.unit}</div><div style="font-size:10px;color:var(--text-muted)">Cambio</div></div>
+    </div>`;
+  } else {
+    document.getElementById('anlBioTrendSummary').innerHTML = '';
+  }
+}
+
+// ============ SKILL CHECKLIST / BADGES ============
+const SKILL_TREE = [
+  // Beginner
+  { id: 'popup', name: 'Pop-Up', icon: '🧍', level: 'Principiante', req: 'Lograr pop-up de pie en 5+ olas', check: (w) => w.filter(x => x.type === 'caught').length >= 5 },
+  { id: 'paddle', name: 'Remada Independiente', icon: '🏊', level: 'Principiante', req: 'Agarrar 10+ olas con remada propia', check: (w) => w.filter(x => x.type === 'caught').length >= 10 },
+  { id: 'whitewash', name: 'Rey de la Espuma', icon: '🫧', level: 'Principiante', req: 'Surfear 20+ olas de espuma', check: (w) => w.filter(x => x.type === 'caught').length >= 20 },
+  // Intermediate
+  { id: 'greenwave', name: 'Ola Verde', icon: '💚', level: 'Intermedio', req: 'Surfear 5+ olas verdes', check: (w) => w.filter(x => x.type === 'caught' && x.wave_type === 'green').length >= 5 },
+  { id: 'bottomturn', name: 'Bottom Turn', icon: '↩️', level: 'Intermedio', req: 'Ejecutar bottom_turn en 5+ olas', check: (w) => w.filter(x => x.maneuvers && x.maneuvers.includes('bottom_turn')).length >= 5 },
+  { id: 'cutback', name: 'Cutback', icon: '🔄', level: 'Intermedio', req: 'Ejecutar cutback en 3+ olas', check: (w) => w.filter(x => x.maneuvers && x.maneuvers.includes('cutback')).length >= 3 },
+  { id: 'consistency', name: 'Consistencia', icon: '📊', level: 'Intermedio', req: 'Catch ratio 60%+ en 3+ sesiones', checkSessions: true },
+  // Advanced
+  { id: 'snap', name: 'Snap / Re-entry', icon: '💥', level: 'Avanzado', req: 'Ejecutar snap en 3+ olas', check: (w) => w.filter(x => x.maneuvers && (x.maneuvers.includes('snap') || x.maneuvers.includes('reentry'))).length >= 3 },
+  { id: 'floater', name: 'Floater', icon: '☁️', level: 'Avanzado', req: 'Ejecutar floater en 3+ olas', check: (w) => w.filter(x => x.maneuvers && x.maneuvers.includes('floater')).length >= 3 },
+  { id: 'tube', name: 'Tubo', icon: '🌀', level: 'Avanzado', req: 'Completar tube ride', check: (w) => w.filter(x => x.maneuvers && x.maneuvers.includes('tube_ride')).length >= 1 },
+  { id: 'aerial', name: 'Aéreo', icon: '🚀', level: 'Experto', req: 'Completar un aéreo', check: (w) => w.filter(x => x.maneuvers && x.maneuvers.includes('aerial')).length >= 1 },
+];
+
+function anlRenderSkills(waves, athletes) {
+  const card = document.getElementById('anlSkillCard');
+  
+  // Only show for individual athlete
+  if (_anlScope === 'team') { card.style.display = athletes.length > 0 ? 'block' : 'none'; if (_anlScope === 'team' && athletes.length > 0) { document.getElementById('anlSkillList').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Selecciona un atleta para ver sus habilidades</div>'; document.getElementById('anlSkillBar').innerHTML = ''; } return; }
+  
+  card.style.display = 'block';
+  const ath = athletes.find(a => a.id === _anlScope);
+  if (!ath) { card.style.display = 'none'; return; }
+  
+  // Get all waves for this athlete across all sessions
+  const allSessions = DB.sessions.filter(s => s.athlete_data && s.athlete_data[_anlScope]);
+  const athWaves = [];
+  let consistentSessions = 0;
+  
+  allSessions.forEach(s => {
+    const d = s.athlete_data[_anlScope];
+    (d.waves || []).forEach(w => athWaves.push(w));
+    // Check consistency (60%+ catch ratio)
+    if (d.paddled > 0 && (d.caught / d.paddled) >= 0.6) consistentSessions++;
+  });
+  
+  // Evaluate each skill
+  let unlocked = 0;
+  const total = SKILL_TREE.length;
+  
+  const skillHtml = SKILL_TREE.map(skill => {
+    let achieved = false;
+    if (skill.checkSessions) {
+      achieved = consistentSessions >= 3;
+    } else {
+      achieved = skill.check(athWaves);
+    }
+    if (achieved) unlocked++;
+    
+    // Progress estimation (rough)
+    let progress = 0;
+    if (achieved) {
+      progress = 100;
+    } else if (!skill.checkSessions) {
+      // Try to get partial progress
+      const numStr = skill.req.match(/(\d+)\+/);
+      if (numStr) {
+        const needed = parseInt(numStr[1]);
+        const count = skill.check === undefined ? 0 : (() => {
+          // Rough count - check waves matching maneuver or type
+          if (skill.id === 'popup' || skill.id === 'paddle' || skill.id === 'whitewash') return athWaves.filter(x => x.type === 'caught').length;
+          if (skill.id === 'greenwave') return athWaves.filter(x => x.type === 'caught' && x.wave_type === 'green').length;
+          return 0;
+        })();
+        progress = Math.min(99, Math.round(count / needed * 100));
+      }
+    }
+    
+    const badgeClass = achieved ? 'unlocked' : 'locked';
+    const levelColors = { 'Principiante': '#06b6d4', 'Intermedio': '#3b82f6', 'Avanzado': '#a855f7', 'Experto': '#f59e0b' };
+    const progressColor = achieved ? 'var(--green)' : 'var(--accent)';
+    
+    return `<div class="anl-skill">
+      <div class="anl-skill-badge ${badgeClass}">${achieved ? skill.icon : '🔒'}</div>
+      <div class="anl-skill-info">
+        <div class="anl-skill-name" style="${achieved ? '' : 'opacity:.6'}">${skill.name} <span style="font-size:9px;color:${levelColors[skill.level]};background:${levelColors[skill.level]}15;padding:1px 5px;border-radius:4px">${skill.level}</span></div>
+        <div class="anl-skill-req">${skill.req}</div>
+        <div class="anl-skill-progress"><div class="anl-skill-fill" style="width:${progress}%;background:${progressColor}"></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:800;color:${achieved ? 'var(--green)' : 'var(--text-muted)'}">${achieved ? '✅' : progress > 0 ? progress + '%' : ''}</div>
+    </div>`;
+  }).join('');
+  
+  // Overall progress bar
+  const pct = Math.round(unlocked / total * 100);
+  const levels = ['🌱 Principiante', '🏄 Intermedio', '🔥 Avanzado', '⭐ Experto'];
+  const currentLevel = unlocked >= 9 ? levels[3] : unlocked >= 6 ? levels[2] : unlocked >= 3 ? levels[1] : levels[0];
+  
+  document.getElementById('anlSkillBar').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:800">${currentLevel}</div>
+      <div style="font-size:12px;color:var(--text-muted)">${unlocked}/${total} habilidades</div>
+    </div>
+    <div style="height:8px;background:var(--bg-input);border-radius:4px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#06b6d4,#3b82f6,#a855f7,#f59e0b);border-radius:4px;transition:width .5s"></div>
+    </div>`;
+  
+  document.getElementById('anlSkillList').innerHTML = skillHtml;
 }
 
 function anlRenderCompare() {
@@ -9064,5 +10114,21 @@ setInterval(() => { if (currentView === 'judge') jmUpdateSequential(); }, 2000);
   });
 })();
 </script>
+<!-- Frame Selector Modal -->
+<div id="fsOverlay" class="fs-overlay" style="display:none" onclick="if(event.target===this)fsClose()">
+  <div class="fs-modal">
+    <div class="fs-header">
+      <h3>📸 Exportar Imagen</h3>
+      <button class="fs-close" onclick="fsClose()">✕</button>
+    </div>
+    <div class="fs-body" id="fsBody">
+      <!-- Dynamic content -->
+    </div>
+    <div class="fs-footer">
+      <button class="btn btn-outline" onclick="fsClose()">Cancelar</button>
+      <button class="btn" id="fsExportBtn" onclick="fsDoExport()" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6);color:#fff">📸 Exportar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
