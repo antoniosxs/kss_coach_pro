@@ -416,6 +416,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-fs-close:active{transform:scale(.9)}
 .lab-fs-expand{position:absolute;top:8px;right:8px;z-index:10;background:rgba(0,0,0,.6);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .lab-fs-expand:active{transform:scale(.9)}
+.lab-ctrl-toggle{position:absolute;bottom:8px;right:8px;z-index:25;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .2s}
+.lab-ctrl-toggle:active{transform:scale(.9)}
+.lab-fullscreen .lab-ctrl-toggle{bottom:auto;top:calc(var(--safe-t) + 8px);left:12px;right:auto;z-index:10000}
 
 .lab-frames{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .lab-frame{border-radius:8px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative}
@@ -479,6 +482,13 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* Fullscreen - both orientations: always overlay controls */
 .lab-fullscreen .lab-tool .lab-tool-text{display:none}
 
+/* Tablet landscape (larger screens rotated) */
+@media (orientation:landscape) and (min-height:500px) and (max-height:900px) {
+  .lab-video{max-height:55vh}
+  .lab-dual-wrap{grid-template-columns:1fr 1fr}
+  .lab-dual-slot video{max-height:45vh}
+}
+
 /* ===== BEGINNER MODE ===== */
 .beg-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;z-index:10;background:var(--bg)}
 .beg-wave-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:0 16px 10px}
@@ -526,8 +536,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-lb-btn.dl{background:var(--accent);color:#fff}
 .lab-lb-btn.del{background:var(--red);color:#fff}
 .lab-lb-btn.close{background:rgba(255,255,255,.15);color:#fff}
-.lab-lb-close{position:absolute;top:calc(var(--safe-t) + 8px);right:12px;background:rgba(255,255,255,.15);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.lab-lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lab-lb-close{display:none}
+.lab-lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
 .lab-lb-nav.prev{left:8px}
 .lab-lb-nav.next{right:8px}
 .lab-lb-info{color:rgba(255,255,255,.6);font-size:11px;margin-top:6px;text-align:center}
@@ -541,6 +551,14 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 /* ===== A→B LOOP ===== */
 .lab-ab-bar{display:none;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-card);border:1px solid var(--accent);border-radius:8px;margin-bottom:8px}
+
+/* ===== TEXT ANNOTATION INPUT ===== */
+.lab-text-input{position:absolute;z-index:30;display:flex;gap:4px;align-items:center;background:rgba(0,0,0,.85);border:2px solid var(--accent);border-radius:10px;padding:6px 8px;box-shadow:0 4px 20px rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transform:translate(-50%,-120%)}
+.lab-text-input input{background:transparent;border:none;color:#fff;font-size:14px;font-weight:700;width:180px;outline:none;font-family:inherit}
+.lab-text-input input::placeholder{color:rgba(255,255,255,.4)}
+.lab-text-input button{width:30px;height:30px;border-radius:6px;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lab-text-input button{background:var(--accent);color:#fff}
+.lab-text-input button.cancel{background:rgba(255,255,255,.15);color:#fff}
 .lab-ab-bar.active{display:flex}
 .lab-ab-label{font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
 .lab-ab-time{font-size:12px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums}
@@ -1670,6 +1688,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </div>
         <img class="kss-watermark" id="labWatermark" alt="KSS">
         <button class="lab-fs-expand" onclick="labEnterFullscreen()" id="labFsExpand" title="Pantalla completa">⛶</button>
+        <!-- Floating controls toggle (visible in fullscreen/landscape) -->
+        <button class="lab-ctrl-toggle" id="labCtrlToggle" onclick="labToggleControls()" style="display:none">☰</button>
         <!-- Gesture layer -->
         <div class="lab-gesture" id="labGesture">
           <div class="lab-gest-skip left" id="labGestL"><div class="lab-gest-skip-inner">⏪</div></div>
@@ -1677,6 +1697,12 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
           <div class="lab-gest-indicator" id="labGestPlay">▶️</div>
           <div class="lab-gest-scrub" id="labGestScrub"><div class="lab-gest-scrub-time" id="labGestScrubTime">0:00</div><div class="lab-gest-scrub-delta" id="labGestScrubDelta"></div></div>
           <div class="lab-gest-speed" id="labGestSpeed">2.0x ⏩</div>
+        </div>
+        <!-- Text input overlay -->
+        <div class="lab-text-input" id="labTextInput" style="display:none">
+          <input type="text" id="labTextValue" placeholder="Escribe aquí..." maxlength="60" autocomplete="off">
+          <button onclick="labTextConfirm()">✓</button>
+          <button onclick="labTextCancel()" class="cancel">✕</button>
         </div>
       </div>
 
@@ -1727,6 +1753,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
           <button class="lab-tool" onclick="labSetTool('pen',this)">✏️<span class="lab-tool-text"> Dibujar</span></button>
           <button class="lab-tool" onclick="labSetTool('arrow',this)">➡️<span class="lab-tool-text"> Flecha</span></button>
           <button class="lab-tool" onclick="labSetTool('angle',this)">📐<span class="lab-tool-text"> Ángulo</span></button>
+          <button class="lab-tool" onclick="labSetTool('text',this)">🔤<span class="lab-tool-text"> Texto</span></button>
           <button class="lab-tool" onclick="labClearDraw()">🗑️<span class="lab-tool-text"> Borrar</span></button>
           <button class="lab-tool" onclick="labOpenStickerModal()">🏄<span class="lab-tool-text"> Stickers</span></button>
           <button class="lab-tool" onclick="labAbMark('A')">🅰️</button>
@@ -1769,6 +1796,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="lab-lb-actions">
       <button class="lab-lb-btn dl" onclick="labLbDownload()">💾 Descargar</button>
       <button class="lab-lb-btn del" onclick="labLbDelete()">🗑️ Eliminar</button>
+      <button class="lab-lb-btn" onclick="labLbClose()" style="background:rgba(255,255,255,.15)">✕ Cerrar</button>
     </div>
   </div>
 
@@ -6466,16 +6494,7 @@ function labEnterFullscreen() {
   const video = document.getElementById('labVideo');
   const nav = document.querySelector('.bottom-nav');
   
-  // iOS Safari: only video element supports native fullscreen
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  
-  if (isIOS && video.webkitEnterFullscreen) {
-    // Use native iOS video fullscreen
-    try { video.webkitEnterFullscreen(); } catch(e) {}
-    return;
-  }
-  
-  // Desktop + Android: CSS fullscreen with native API
+  // Try CSS fullscreen + Fullscreen API first (works on most browsers including iPad Safari 16+)
   container.classList.add('lab-fullscreen');
   if (nav) nav.style.display = 'none';
   document.getElementById('labFsClose').style.display = 'flex';
@@ -6483,6 +6502,7 @@ function labEnterFullscreen() {
   document.body.style.overflow = 'hidden';
   labIsFullscreen = true;
   
+  // Try native Fullscreen API
   try {
     if (container.requestFullscreen) container.requestFullscreen();
     else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
@@ -6491,6 +6511,7 @@ function labEnterFullscreen() {
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen'); } catch(e) {}
   
   setTimeout(labResizeCanvas, 100);
+  setTimeout(labMobCheckOrientation, 200);
 }
 
 function labExitFullscreen() {
@@ -6713,6 +6734,10 @@ function labPointerDown(e) {
     labDrawPoints = [pos];
   } else if (labDrawTool === 'arrow') {
     labDrawPoints = [pos];
+  } else if (labDrawTool === 'text') {
+    labDrawing = false;
+    labTextShow(pos, e);
+    return;
   } else if (labDrawTool === 'angle') {
     labAnglePoints.push(pos);
     if (labAnglePoints.length === 3) {
@@ -6837,6 +6862,23 @@ function labRedraw() {
         ctx.fillStyle = a.color;
         ctx.fill();
       });
+    } else if (a.type === 'text') {
+      const fontSize = a.size || Math.max(18, Math.floor(canvas.width / 35));
+      ctx.font = `bold ${fontSize}px -apple-system, "Segoe UI", sans-serif`;
+      ctx.textBaseline = 'top';
+      // Background pill
+      const metrics = ctx.measureText(a.text);
+      const pad = fontSize * 0.35;
+      const bgW = metrics.width + pad * 2;
+      const bgH = fontSize + pad * 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(a.pos.x - pad, a.pos.y - pad, bgW, bgH, fontSize * 0.3);
+      else ctx.rect(a.pos.x - pad, a.pos.y - pad, bgW, bgH);
+      ctx.fill();
+      // Text
+      ctx.fillStyle = a.color;
+      ctx.fillText(a.text, a.pos.x, a.pos.y);
     }
   });
   
@@ -6892,6 +6934,54 @@ function labClearDraw() {
   const canvas = document.getElementById('labCanvas');
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 }
+
+// ============ TEXT ANNOTATION TOOL ============
+let labTextPos = null;
+function labTextShow(canvasPos, mouseEvt) {
+  labTextPos = canvasPos;
+  const overlay = document.getElementById('labTextInput');
+  const input = document.getElementById('labTextValue');
+  const wrap = document.getElementById('labVideoWrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const canvas = document.getElementById('labCanvas');
+  const canvasRect = canvas.getBoundingClientRect();
+  
+  // Convert canvas coords to screen coords relative to wrap
+  const screenX = (canvasPos.x / canvas.width) * canvasRect.width + (canvasRect.left - wrapRect.left);
+  const screenY = (canvasPos.y / canvas.height) * canvasRect.height + (canvasRect.top - wrapRect.top);
+  
+  overlay.style.display = 'flex';
+  overlay.style.left = Math.max(100, Math.min(screenX, wrapRect.width - 100)) + 'px';
+  overlay.style.top = Math.max(50, screenY) + 'px';
+  input.value = '';
+  input.style.color = labDrawColor;
+  setTimeout(() => input.focus(), 50);
+}
+
+function labTextConfirm() {
+  const input = document.getElementById('labTextValue');
+  const text = input.value.trim();
+  if (text && labTextPos) {
+    labAnnotations.push({ type: 'text', pos: { x: labTextPos.x, y: labTextPos.y }, text: text, color: labDrawColor });
+    labRedraw();
+  }
+  labTextCancel();
+}
+
+function labTextCancel() {
+  document.getElementById('labTextInput').style.display = 'none';
+  labTextPos = null;
+}
+
+// Enter key confirms text
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && labTextPos) {
+    e.preventDefault();
+    labTextConfirm();
+  } else if (e.key === 'Escape' && labTextPos) {
+    labTextCancel();
+  }
+});
 
 function labSetColor(color, el) {
   labDrawColor = color;
@@ -7588,10 +7678,16 @@ function labInitGestures() {
     }
   }, { passive: true });
   
-  // Desktop click = play/pause
+  // Desktop click = play/pause + show controls in fullscreen
   el.addEventListener('click', function(e) {
     if ('ontouchstart' in window) return; // skip on touch devices
     labTogglePlay();
+    if (labIsFullscreen) labMobShowControls();
+  });
+  
+  // Desktop mouse move in fullscreen = show controls
+  el.addEventListener('mousemove', function(e) {
+    if (labIsFullscreen) labMobShowControls();
   });
 }
 
@@ -7605,13 +7701,17 @@ function labMobShowControls() {
   const wrap = document.getElementById('labControlsWrap');
   if (!wrap) return;
   wrap.classList.remove('mob-hidden');
+  labUpdateCtrlToggle();
   clearTimeout(labMobTimer);
   labMobTimer = setTimeout(() => {
+    // Don't auto-hide when a drawing tool is active
+    if (labDrawTool && labDrawTool !== 'none') return;
     // Auto-hide only in landscape mobile or fullscreen
     if (labIsLandscape() || labIsFullscreen) {
       wrap.classList.add('mob-hidden');
+      labUpdateCtrlToggle();
     }
-  }, 3500);
+  }, 4000);
 }
 
 function labMobCheckOrientation() {
@@ -7624,6 +7724,28 @@ function labMobCheckOrientation() {
   } else {
     // Landscape or fullscreen: auto-hide
     labMobShowControls();
+  }
+  labUpdateCtrlToggle();
+}
+
+// Floating toggle button — always visible in fullscreen when controls are hidden
+function labUpdateCtrlToggle() {
+  let btn = document.getElementById('labCtrlToggle');
+  if (!btn) return;
+  const wrap = document.getElementById('labControlsWrap');
+  const hidden = wrap && wrap.classList.contains('mob-hidden');
+  btn.style.display = (labIsFullscreen || labIsLandscape()) ? 'flex' : 'none';
+  btn.style.opacity = hidden ? '0.7' : '0.3';
+}
+
+function labToggleControls() {
+  const wrap = document.getElementById('labControlsWrap');
+  if (!wrap) return;
+  if (wrap.classList.contains('mob-hidden')) {
+    labMobShowControls();
+  } else {
+    wrap.classList.add('mob-hidden');
+    labUpdateCtrlToggle();
   }
 }
 
@@ -8609,6 +8731,24 @@ function labSetMode(mode) {
   // Hide/show sections
   document.getElementById('labPlayerSection').style.display = 'none';
   document.getElementById('labDualSection').style.display = 'none';
+  
+  // Reset video elements when switching modes
+  if (mode === 'single') {
+    // Reset single video so fresh load works
+    const video = document.getElementById('labVideo');
+    video.src = '';
+    video.removeAttribute('src');
+    video.load();
+    // Reset file inputs so onchange fires again
+    document.querySelectorAll('#labUploadSingle input[type=file]').forEach(i => i.value = '');
+  } else {
+    // Reset dual videos
+    ['A', 'B'].forEach(slot => {
+      const vid = document.getElementById('labDualVideo' + slot);
+      if (vid) { vid.src = ''; vid.removeAttribute('src'); vid.load(); }
+    });
+    document.querySelectorAll('#labUploadDual input[type=file]').forEach(i => i.value = '');
+  }
 }
 
 // ============================================================
