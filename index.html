@@ -328,8 +328,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .drill-cat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* ===== PHASE 3: TECH LAB ===== */
-.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:0;touch-action:none;-webkit-user-select:none;user-select:none}
-.lab-video{width:100%;display:block;max-height:55vh}
+.lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:0;touch-action:none;-webkit-user-select:none;user-select:none;display:flex;align-items:center;justify-content:center}
+.lab-video{display:block;max-width:100%;max-height:55vh;width:auto;height:auto}
+.lab-video-inner{transform-origin:center center;will-change:transform;position:relative;display:inline-flex;align-items:center;justify-content:center;max-width:100%;max-height:100%}
 .lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;touch-action:none}
 .lab-canvas.drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
 
@@ -397,8 +398,8 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
 /* Lab Fullscreen Mode - use ID to beat media query specificity */
 .lab-fullscreen,#labFsContainer.lab-fullscreen{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:9999!important;background:#000!important;display:flex!important;flex-direction:column!important;border-radius:0!important;margin:0!important;padding:0!important;padding-top:var(--safe-t)!important;padding-bottom:var(--safe-b)!important;height:auto!important;width:auto!important}
-.lab-fullscreen .lab-video-wrap{flex:1!important;border-radius:0!important;margin:0!important;min-height:0!important}
-.lab-fullscreen .lab-video{max-height:none!important;height:100%!important;object-fit:contain!important}
+.lab-fullscreen .lab-video-wrap{flex:1!important;border-radius:0!important;margin:0!important;min-height:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.lab-fullscreen .lab-video{max-height:100%!important;max-width:100%!important;width:auto!important;height:auto!important;object-fit:contain!important}
 .lab-fullscreen .lab-controls-wrap{position:relative!important;background:rgba(0,0,0,.85)!important;padding:4px 12px!important;opacity:1!important;pointer-events:auto!important}
 .lab-fullscreen .lab-controls-wrap.mob-hidden{opacity:0!important;pointer-events:none!important}
 .lab-fullscreen .lab-controls{padding:6px 0}
@@ -432,7 +433,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-clip-meta{font-size:11px;color:var(--text-muted)}
 
 /* Video wrapper zoom support */
-.lab-video-inner{transform-origin:center center;will-change:transform;position:relative}
+.lab-fullscreen .lab-video-inner{max-width:100%!important;max-height:100%!important}
 
 /* ===== LAB MOBILE RESPONSIVE ===== */
 /* Mobile portrait: compact controls BELOW video */
@@ -454,7 +455,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* Mobile landscape: overlay controls ON video */
 @media (orientation:landscape) and (max-height:500px) {
   #labFsContainer:not(.lab-fullscreen) .lab-video-wrap{margin-bottom:0;border-radius:10px}
-  #labFsContainer:not(.lab-fullscreen) .lab-video{max-height:calc(100dvh - 80px);object-fit:contain}
+  #labFsContainer:not(.lab-fullscreen) .lab-video{max-height:calc(100dvh - 80px);max-width:100%;width:auto;height:auto;object-fit:contain}
   
   #labFsContainer:not(.lab-fullscreen) .lab-controls-wrap{position:absolute;bottom:0;left:0;right:0;z-index:20;background:linear-gradient(transparent,rgba(0,0,0,.9) 30%);padding:24px 8px 6px!important;border-radius:0 0 10px 10px;transition:opacity .3s}
   #labFsContainer:not(.lab-fullscreen) .lab-controls-wrap.mob-hidden{opacity:0;pointer-events:none}
@@ -744,6 +745,18 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="dash-hero-sub" id="homeGreeting">Surf Coaching System</div>
   </div>
 
+  <!-- Paused Session Banner -->
+  <div id="homePausedBanner" style="display:none;margin-bottom:12px;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(249,115,22,.08));border:1.5px solid rgba(234,179,8,.3);cursor:pointer" onclick="resumeSession()">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:28px">⏸️</span>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:800;color:var(--yellow)">Sesión Pausada</div>
+        <div style="font-size:12px;color:var(--text-secondary)" id="homePausedInfo">—</div>
+      </div>
+      <span style="font-size:13px;font-weight:700;color:var(--yellow)">Reanudar ›</span>
+    </div>
+  </div>
+
   <button class="btn btn-accent" onclick="startNewSession()" id="homeStartBtn" style="margin-bottom:16px;font-size:17px;padding:18px">
     ⚡ Nueva Sesión
   </button>
@@ -863,6 +876,84 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <input class="field-input" id="ssFocus" placeholder="Ej: Técnica de Bottom Turn">
   </div>
 
+  <!-- Session Goals -->
+  <div class="card">
+    <div class="card-header">🏆 Metas de la Sesión</div>
+    <div id="ssGoalList" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <select class="field-input" id="ssGoalType" style="flex:1;font-size:12px" onchange="ssGoalTypeChanged()">
+        <option value="">+ Agregar meta...</option>
+        <option value="catch_ratio">📊 Catch Ratio mínimo</option>
+        <option value="wave_count">🌊 Cantidad de olas</option>
+        <option value="combo">🔗 Combo de maniobras</option>
+        <option value="set_ratio">🌊 % Olas de Set</option>
+        <option value="direction_balance">⬅️➡️ Balance Izq/Der</option>
+      </select>
+    </div>
+    <!-- Goal config panel (dynamic) -->
+    <div id="ssGoalConfig" style="display:none">
+      <!-- Catch ratio config -->
+      <div id="ssGoalCatchRatio" style="display:none">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:600">Mínimo:</span>
+          <input type="number" class="field-input" id="ssGoalCatchVal" value="50" min="10" max="100" step="5" style="width:70px;font-size:13px;text-align:center">
+          <span style="font-size:12px;color:var(--text-muted)">%</span>
+          <button class="btn btn-accent btn-sm" onclick="ssAddGoal('catch_ratio')" style="margin-left:auto;width:auto;padding:6px 14px;font-size:12px">✓</button>
+        </div>
+      </div>
+      <!-- Wave count config -->
+      <div id="ssGoalWaveCount" style="display:none">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:600">Mínimo:</span>
+          <input type="number" class="field-input" id="ssGoalWaveVal" value="8" min="1" max="50" style="width:70px;font-size:13px;text-align:center">
+          <span style="font-size:12px;color:var(--text-muted)">olas</span>
+          <button class="btn btn-accent btn-sm" onclick="ssAddGoal('wave_count')" style="margin-left:auto;width:auto;padding:6px 14px;font-size:12px">✓</button>
+        </div>
+      </div>
+      <!-- Set ratio config -->
+      <div id="ssGoalSetRatio" style="display:none">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:600">% Set mínimo:</span>
+          <input type="number" class="field-input" id="ssGoalSetVal" value="50" min="10" max="100" step="10" style="width:70px;font-size:13px;text-align:center">
+          <span style="font-size:12px;color:var(--text-muted)">%</span>
+          <button class="btn btn-accent btn-sm" onclick="ssAddGoal('set_ratio')" style="margin-left:auto;width:auto;padding:6px 14px;font-size:12px">✓</button>
+        </div>
+      </div>
+      <!-- Direction balance config -->
+      <div id="ssGoalDirBalance" style="display:none">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">Al menos X% de olas hacia el lado menos surfeado</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;font-weight:600">Mínimo:</span>
+          <input type="number" class="field-input" id="ssGoalDirVal" value="30" min="10" max="50" step="5" style="width:70px;font-size:13px;text-align:center">
+          <span style="font-size:12px;color:var(--text-muted)">%</span>
+          <button class="btn btn-accent btn-sm" onclick="ssAddGoal('direction_balance')" style="margin-left:auto;width:auto;padding:6px 14px;font-size:12px">✓</button>
+        </div>
+      </div>
+      <!-- Combo config -->
+      <div id="ssGoalCombo" style="display:none">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Selecciona la secuencia de maniobras que quieres ver en una misma ola:</div>
+        <div id="ssComboChain" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;min-height:32px;padding:6px;background:var(--bg-input);border-radius:8px;align-items:center">
+          <span style="font-size:11px;color:var(--text-muted)">Selecciona maniobras ↓</span>
+        </div>
+        <div class="tag-row" id="ssComboTags" style="margin-bottom:8px">
+          <button class="tag-btn" onclick="ssComboAdd('takeoff',this)">Take Off</button>
+          <button class="tag-btn" onclick="ssComboAdd('bt',this)">BT</button>
+          <button class="tag-btn" onclick="ssComboAdd('carving',this)">Carving</button>
+          <button class="tag-btn" onclick="ssComboAdd('cutback',this)">Cutback</button>
+          <button class="tag-btn" onclick="ssComboAdd('snap',this)">Snap</button>
+          <button class="tag-btn" onclick="ssComboAdd('floater',this)">Floater</button>
+          <button class="tag-btn" onclick="ssComboAdd('aerial',this)">Aerial</button>
+          <button class="tag-btn" onclick="ssComboAdd('tube',this)">Tube</button>
+          <button class="tag-btn" onclick="ssComboAdd('reentry',this)">Re-entry</button>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-outline btn-sm" onclick="ssComboReset()" style="flex:1;font-size:11px">Limpiar</button>
+          <button class="btn btn-accent btn-sm" onclick="ssAddGoal('combo')" style="flex:1;font-size:12px">✓ Agregar Combo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Athletes -->
   <div class="card">
     <div class="card-header flex-between" style="margin-bottom:8px">
@@ -882,7 +973,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <div class="view" id="view-session-hub">
   <div style="text-align:center;margin:16px 0 20px">
     <img class="kss-logo" id="hubLogoImg" alt="KSS" style="margin:0 auto">
-    <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em">● Sesión Activa</div>
+    <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em" id="hubStatusBadge">● Sesión Activa</div>
     <div style="font-size:22px;font-weight:800;margin-top:4px" id="hubSpot">—</div>
     <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="hubConditions">—</div>
     <div style="font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text-primary);margin-top:8px" id="hubTimer">00:00</div>
@@ -929,10 +1020,15 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     📊 Vista General (Quick Overview)
   </button>
 
-  <!-- End session -->
-  <button class="btn" onclick="endSessionFromHub()" style="background:var(--bg-card);border:1px solid var(--red);color:var(--red);font-size:14px;padding:14px">
-    🏁 Finalizar Sesión
-  </button>
+  <!-- Pause / End session -->
+  <div style="display:flex;gap:8px;margin-top:4px">
+    <button class="btn" id="hubPauseBtn" onclick="pauseSession()" style="flex:1;background:var(--bg-card);border:1px solid var(--yellow);color:var(--yellow);font-size:14px;padding:14px">
+      ⏸️ Pausar Sesión
+    </button>
+    <button class="btn" onclick="endSessionFromHub()" style="flex:1;background:var(--bg-card);border:1px solid var(--red);color:var(--red);font-size:14px;padding:14px">
+      🏁 Finalizar
+    </button>
+  </div>
 </div>
 
 <!-- ==================== TACTICAL IQ ==================== -->
@@ -1021,6 +1117,19 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </div>
       </div>
 
+      <!-- Wave Score (Coach) -->
+      <div class="eval-section">
+        <div class="eval-label">Puntaje de Ola <span style="font-weight:400;color:var(--text-muted)">(opcional, 0.1 - 10)</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="range" id="tacWaveScoreSlider" min="0" max="100" value="0" step="1" oninput="tacWaveScoreUpdate(this.value)" style="flex:1;accent-color:var(--accent);height:8px">
+          <div id="tacWaveScoreDisplay" style="min-width:52px;text-align:center;font-size:20px;font-weight:800;color:var(--text-muted);background:var(--bg-input);border-radius:8px;padding:6px 4px;border:1px solid var(--border)">—</div>
+          <button onclick="tacWaveScoreClear()" style="font-size:11px;color:var(--text-muted);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:transparent">✕</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);margin-top:2px;padding:0 2px">
+          <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
+        </div>
+      </div>
+
       <div class="eval-section">
         <div class="eval-label">Wave Selection</div>
         <div class="eval-row" id="evalSelection">
@@ -1065,11 +1174,15 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <button class="btn btn-sm" onclick="confirmWave()" style="margin-top:12px;background:#f97316;color:#fff;font-weight:800;font-size:16px;padding:16px;box-shadow:0 0 20px rgba(249,115,22,.5);border:2px solid #fb923c;letter-spacing:.03em">✓ CONFIRMAR OLA</button>
     </div>
 
-    <!-- Falls counter visible -->
+    <!-- Falls counter + avg score visible -->
     <div class="tac-stat-row" style="margin-top:12px">
       <div class="tac-stat"><div class="tac-stat-val" id="tacFalls" style="color:var(--red)">0</div><div class="tac-stat-label">Caídas</div></div>
       <div class="tac-stat"><div class="tac-stat-val" id="tacWaves" style="color:var(--text-primary)">0</div><div class="tac-stat-label">Total Olas</div></div>
+      <div class="tac-stat"><div class="tac-stat-val" id="tacAvgScore" style="color:var(--accent)">—</div><div class="tac-stat-label">Avg Score</div></div>
     </div>
+    <!-- Goal Tracker -->
+    <div id="tacGoalTracker"></div>
+
     </div><!-- end tacWaveMode -->
 
     <!-- ===== BIOMECHANICS MODE ===== -->
@@ -1436,6 +1549,9 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div style="font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">📊 Catch Ratio Comparado</div>
     <div id="dbChartBars"></div>
   </div>
+
+  <!-- Goals Summary -->
+  <div id="dbGoalsSummary"></div>
 
   <div class="field" style="margin-top:16px">
     <label class="field-label">📝 Nota General</label>
@@ -1870,9 +1986,18 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <!-- Captured Frames -->
   <div id="labFramesSection" style="display:none">
     <div class="flex-between" style="margin-bottom:8px">
-      <div style="font-size:13px;font-weight:700">📸 Frames Capturados</div>
+      <div style="font-size:13px;font-weight:700">📸 Frames Capturados <span id="labFrameCount" style="font-size:11px;color:var(--text-muted);font-weight:500"></span></div>
       <button class="text-sm" style="color:var(--accent);font-weight:700" onclick="labCompareMode()">Comparar</button>
     </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="labSaveAllFrames()" style="flex:1;min-width:90px;font-size:11px">💾 Guardar Todo</button>
+      <button class="btn btn-outline btn-sm" onclick="labClearAllFrames()" style="flex:1;min-width:90px;font-size:11px;border-color:var(--red);color:var(--red)">🗑️ Limpiar Cache</button>
+      <label class="btn btn-outline btn-sm" style="flex:1;min-width:90px;font-size:11px;text-align:center;cursor:pointer">
+        📂 Subir Frames
+        <input type="file" accept="image/*" multiple onchange="labUploadFrames(this)" style="display:none">
+      </label>
+    </div>
+    <div id="labFrameStorage" style="font-size:10px;color:var(--text-muted);margin-bottom:8px"></div>
     <div class="lab-frames" id="labFrames"></div>
   </div>
 
@@ -2125,6 +2250,42 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <div class="view" id="view-settings">
   <div class="kss-header"><img class="kss-logo-sm" id="settingsLogoImg" alt="KSS"><div><div class="kss-title">⚙️ Configuración</div><div class="kss-subtitle">KSS Coach · Karibe Surf Score</div></div></div>
 
+  <!-- COACH BRANDING -->
+  <div class="card">
+    <div class="card-header">🎨 Brand / Marca</div>
+    <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+      <div id="brandLogoPreview" onclick="document.getElementById('brandLogoInput').click()" style="width:72px;height:72px;border-radius:16px;background:var(--bg-input);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;position:relative">
+        <span id="brandLogoPlaceholder" style="font-size:24px;color:var(--text-muted)">📷</span>
+        <img id="brandLogoImg" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:14px">
+      </div>
+      <div style="flex:1">
+        <input class="field-input" id="brandCoachName" placeholder="Nombre del Coach" style="margin-bottom:6px;font-size:13px" oninput="saveBrand()">
+        <input class="field-input" id="brandAcademy" placeholder="Academia / Escuela / Asociación" style="font-size:13px" oninput="saveBrand()">
+      </div>
+    </div>
+    <input type="file" id="brandLogoInput" accept="image/*" onchange="brandUploadLogo(this)" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <span style="font-size:11px;font-weight:700;color:var(--text-secondary)">Color de marca:</span>
+      <div class="lab-color-dot" style="background:#38bdf8;width:28px;height:28px" onclick="setBrandColor('#38bdf8',this)"></div>
+      <div class="lab-color-dot" style="background:#22c55e;width:28px;height:28px" onclick="setBrandColor('#22c55e',this)"></div>
+      <div class="lab-color-dot" style="background:#f59e0b;width:28px;height:28px" onclick="setBrandColor('#f59e0b',this)"></div>
+      <div class="lab-color-dot" style="background:#ef4444;width:28px;height:28px" onclick="setBrandColor('#ef4444',this)"></div>
+      <div class="lab-color-dot" style="background:#8b5cf6;width:28px;height:28px" onclick="setBrandColor('#8b5cf6',this)"></div>
+      <div class="lab-color-dot" style="background:#ec4899;width:28px;height:28px" onclick="setBrandColor('#ec4899',this)"></div>
+    </div>
+    <div id="brandPreviewCard" style="background:var(--bg-input);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+      <div id="brandPrevLogo" style="width:36px;height:36px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;overflow:hidden;flex-shrink:0"></div>
+      <div>
+        <div id="brandPrevName" style="font-weight:800;font-size:13px;color:var(--text-primary)">Coach</div>
+        <div id="brandPrevAcademy" style="font-size:11px;color:var(--text-secondary)">KSS Coach</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text-muted);margin-top:6px">Este logo y nombre aparecerán en exports, watermarks y reportes.</div>
+    <div style="margin-top:8px;display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" onclick="brandRemoveLogo()" style="flex:1;font-size:11px">🗑️ Quitar Logo</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-header">📍 Spots</div>
     <div id="setSpotList"></div>
@@ -2195,7 +2356,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <div style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:12px">
     <img id="footerLogoImg" alt="KSS" style="width:44px;height:44px;border-radius:50%;margin-bottom:6px;opacity:.6"><br>
-    KSS Coach v7.0 · Phase 8<br>Karibe Surf Score
+    KSS Coach v8.1 · Phase 9<br>Karibe Surf Score
   </div>
 </div>
 
@@ -2537,12 +2698,14 @@ function updateNavBar(hasSession) {
 
 function startSessionTimer() {
   const s = DB.activeSession;
-  if (!s) return;
-  sessionStartTime = new Date(s.started_at);
+  if (!s || s.status === 'paused') return;
+  sessionStartTime = new Date(s.resumed_at || s.started_at);
+  const prevElapsed = s.elapsed_seconds || 0;
   sessionTimer = setInterval(() => {
-    const diff = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
-    const m = String(Math.floor(diff / 60)).padStart(2, '0');
-    const sec = String(diff % 60).padStart(2, '0');
+    const currentSegment = Math.floor((Date.now() - sessionStartTime.getTime()) / 1000);
+    const total = prevElapsed + currentSegment;
+    const m = String(Math.floor(total / 60)).padStart(2, '0');
+    const sec = String(total % 60).padStart(2, '0');
     document.getElementById('sbTime').textContent = `${m}:${sec}`;
   }, 1000);
 }
@@ -2569,11 +2732,29 @@ function renderHome() {
   // If active session, change button
   const btn = document.getElementById('homeStartBtn');
   if (s) {
-    btn.textContent = '🏄 Volver a Sesión';
-    btn.onclick = () => showView('session-hub');
+    if (s.status === 'paused') {
+      btn.textContent = '▶️ Reanudar Sesión';
+      btn.onclick = () => resumeSession();
+    } else {
+      btn.textContent = '🏄 Volver a Sesión';
+      btn.onclick = () => showView('session-hub');
+    }
   } else {
     btn.textContent = '⚡ Nueva Sesión';
     btn.onclick = () => startNewSession();
+  }
+  
+  // Paused session banner
+  const pausedBanner = document.getElementById('homePausedBanner');
+  if (s && s.status === 'paused') {
+    pausedBanner.style.display = 'block';
+    const elapsed = s.elapsed_seconds || 0;
+    const m = Math.floor(elapsed / 60);
+    const ath = Object.keys(s.athlete_data).length;
+    const totalWaves = Object.values(s.athlete_data).reduce((sum, d) => sum + (d.caught || 0), 0);
+    document.getElementById('homePausedInfo').textContent = `📍 ${s.spot} · ${m} min · ${ath} atletas · ${totalWaves} olas`;
+  } else {
+    pausedBanner.style.display = 'none';
   }
   
   // KPIs
@@ -2737,6 +2918,11 @@ function renderSessionSetup() {
   
   // Athletes
   renderSSAthletes();
+  
+  // Reset goals
+  window._sessionGoals = [];
+  window._comboChain = [];
+  ssRenderGoalList();
 }
 
 function renderSSAthletes() {
@@ -2814,7 +3000,8 @@ function launchSession() {
     athlete_data: athleteData,
     status: 'active',
     modules_used: [], // auto-detected on close
-    judge_data: null   // captured from tracker on close
+    judge_data: null,   // captured from tracker on close
+    goals: window._sessionGoals.length > 0 ? [...window._sessionGoals] : []
   };
   
   DB.activeSession = session;
@@ -2822,6 +3009,7 @@ function launchSession() {
   window._ssSelected = null;
   window._tacIdx = 0;
   window._pendingWave = null;
+  window._sessionGoals = []; // Reset for next session
   
   showView('session-hub');
 }
@@ -2881,13 +3069,41 @@ function renderSessionHub() {
     </div>`;
   }).join('');
   
-  // Hub timer
-  if (!hubTimerInterval) {
-    const startTime = new Date(s.started_at);
+  // Hub timer with pause support
+  if (hubTimerInterval) { clearInterval(hubTimerInterval); hubTimerInterval = null; }
+  
+  const statusBadge = document.getElementById('hubStatusBadge');
+  const pauseBtn = document.getElementById('hubPauseBtn');
+  
+  if (s.status === 'paused') {
+    // Show paused state
+    statusBadge.innerHTML = '⏸️ Sesión Pausada';
+    statusBadge.style.color = 'var(--yellow)';
+    pauseBtn.innerHTML = '▶️ Reanudar';
+    pauseBtn.onclick = () => resumeSession();
+    pauseBtn.style.borderColor = 'var(--green)';
+    pauseBtn.style.color = 'var(--green)';
+    // Show frozen time
+    const elapsed = s.elapsed_seconds || 0;
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const sec = String(elapsed % 60).padStart(2, '0');
+    document.getElementById('hubTimer').textContent = `${m}:${sec}`;
+  } else {
+    // Active state
+    statusBadge.innerHTML = '● Sesión Activa';
+    statusBadge.style.color = 'var(--green)';
+    pauseBtn.innerHTML = '⏸️ Pausar Sesión';
+    pauseBtn.onclick = () => pauseSession();
+    pauseBtn.style.borderColor = 'var(--yellow)';
+    pauseBtn.style.color = 'var(--yellow)';
+    
+    const startTime = new Date(s.resumed_at || s.started_at);
+    const prevElapsed = s.elapsed_seconds || 0;
     hubTimerInterval = setInterval(() => {
-      const diff = Math.floor((Date.now() - startTime.getTime()) / 1000);
-      const m = String(Math.floor(diff / 60)).padStart(2, '0');
-      const sec = String(diff % 60).padStart(2, '0');
+      const currentSegment = Math.floor((Date.now() - startTime.getTime()) / 1000);
+      const total = prevElapsed + currentSegment;
+      const m = String(Math.floor(total / 60)).padStart(2, '0');
+      const sec = String(total % 60).padStart(2, '0');
       const el = document.getElementById('hubTimer');
       if (el) el.textContent = `${m}:${sec}`;
     }, 1000);
@@ -2931,11 +3147,56 @@ function hubEnterJudge() {
   showView('judge');
 }
 
+function pauseSession() {
+  const s = DB.activeSession;
+  if (!s || s.status === 'paused') return;
+  
+  // Calculate current elapsed time
+  const startTime = new Date(s.resumed_at || s.started_at);
+  const currentSegment = Math.floor((Date.now() - startTime.getTime()) / 1000);
+  s.elapsed_seconds = (s.elapsed_seconds || 0) + currentSegment;
+  s.status = 'paused';
+  s.paused_at = new Date().toISOString();
+  delete s.resumed_at;
+  DB.activeSession = s;
+  
+  // Stop timer
+  if (hubTimerInterval) { clearInterval(hubTimerInterval); hubTimerInterval = null; }
+  stopSessionTimer();
+  
+  if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+  showUndoToast('⏸️ Sesión pausada — puedes reanudar cuando quieras', null, 4000);
+  showView('home');
+}
+
+function resumeSession() {
+  const s = DB.activeSession;
+  if (!s) return;
+  
+  s.status = 'active';
+  s.resumed_at = new Date().toISOString();
+  delete s.paused_at;
+  DB.activeSession = s;
+  
+  if (navigator.vibrate) navigator.vibrate(50);
+  showView('session-hub');
+}
+
 function endSessionFromHub() {
   if (!confirm('¿Finalizar esta sesión? Podrás revisar el debrief.')) return;
   
   // Stop hub timer
   if (hubTimerInterval) { clearInterval(hubTimerInterval); hubTimerInterval = null; }
+  
+  // Calculate elapsed time if active
+  const s = DB.activeSession;
+  if (s && s.status !== 'paused') {
+    const startTime = new Date(s.resumed_at || s.started_at);
+    const currentSegment = Math.floor((Date.now() - startTime.getTime()) / 1000);
+    s.elapsed_seconds = (s.elapsed_seconds || 0) + currentSegment;
+    s.status = 'active'; // Mark as active for debrief
+    DB.activeSession = s;
+  }
   
   // Auto-confirm any pending wave
   if (window._pendingWave) confirmWave();
@@ -3043,6 +3304,18 @@ function renderTactical() {
   document.getElementById('tacFalls').textContent = data.falls;
   document.getElementById('tacWaves').textContent = data.waves.length;
   
+  // Avg wave score
+  const scoredWaves = (data.waves || []).filter(w => w.type === 'caught' && w.score != null);
+  const avgScoreEl = document.getElementById('tacAvgScore');
+  if (scoredWaves.length > 0) {
+    const avg = (scoredWaves.reduce((s, w) => s + w.score, 0) / scoredWaves.length).toFixed(1);
+    avgScoreEl.textContent = avg;
+    avgScoreEl.style.color = parseFloat(avg) >= 6 ? 'var(--green)' : parseFloat(avg) >= 4 ? 'var(--accent)' : 'var(--red)';
+  } else {
+    avgScoreEl.textContent = '—';
+    avgScoreEl.style.color = 'var(--accent)';
+  }
+  
   // Catch ratio
   const ratio = data.paddled > 0 ? Math.round(data.caught / data.paddled * 100) : 0;
   const catchEl = document.getElementById('tacCatch');
@@ -3052,6 +3325,10 @@ function renderTactical() {
   // Reset eval section
   document.getElementById('tacEvalSection').style.display = window._pendingWave ? 'block' : 'none';
   if (!window._pendingWave) resetEvalUI();
+  
+  // Goal tracker
+  const goalEl = document.getElementById('tacGoalTracker');
+  if (goalEl) goalEl.innerHTML = renderGoalTracker(data);
   
   updateSessionBar();
 }
@@ -3104,7 +3381,7 @@ function tacCount(type) {
     data.caught++;
     if (data.paddled < data.caught) data.paddled = data.caught; // Auto-correct
     // Show eval section for this wave
-    window._pendingWave = { type: 'caught', timestamp: new Date().toISOString(), discipline: getActiveDisc(currentId), wave_type: null, direction: null, wave_quality: null, selection: null, position: null, commit: null, maneuvers: [] };
+    window._pendingWave = { type: 'caught', timestamp: new Date().toISOString(), discipline: getActiveDisc(currentId), wave_type: null, direction: null, wave_quality: null, score: null, selection: null, position: null, commit: null, maneuvers: [] };
     document.getElementById('tacEvalSection').style.display = 'block';
     resetEvalUI();
     showUndoToast('Atrapada +1', () => { 
@@ -3165,9 +3442,34 @@ function confirmWave() {
   if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
 }
 
+function tacWaveScoreUpdate(val) {
+  const score = val > 0 ? (val / 10).toFixed(1) : null;
+  const display = document.getElementById('tacWaveScoreDisplay');
+  if (score) {
+    const num = parseFloat(score);
+    const color = num >= 8 ? 'var(--green)' : num >= 6 ? 'var(--accent)' : num >= 4 ? 'var(--yellow)' : 'var(--red)';
+    display.textContent = score;
+    display.style.color = color;
+    display.style.borderColor = color;
+  } else {
+    display.textContent = '—';
+    display.style.color = 'var(--text-muted)';
+    display.style.borderColor = 'var(--border)';
+  }
+  if (window._pendingWave) window._pendingWave.score = score ? parseFloat(score) : null;
+}
+
+function tacWaveScoreClear() {
+  document.getElementById('tacWaveScoreSlider').value = 0;
+  tacWaveScoreUpdate(0);
+}
+
 function resetEvalUI() {
   document.querySelectorAll('#tacEvalSection .eval-btn').forEach(b => b.className = 'eval-btn');
   document.querySelectorAll('#tacTags .tag-btn').forEach(b => b.classList.remove('selected'));
+  // Reset wave score
+  const slider = document.getElementById('tacWaveScoreSlider');
+  if (slider) { slider.value = 0; tacWaveScoreUpdate(0); }
 }
 
 // ============================================================
@@ -3916,6 +4218,7 @@ function renderDebrief() {
         <div class="db-stat"><div class="db-stat-v">${ad.paddled}</div><div class="db-stat-l">Remó</div></div>
         <div class="db-stat"><div class="db-stat-v">${ad.caught}</div><div class="db-stat-l">Atrapó</div></div>
         <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
+        ${(() => { const sw = (ad.waves||[]).filter(w => w.type==='caught' && w.score!=null); if (sw.length===0) return ''; const avg = (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1); const sc = parseFloat(avg) >= 6 ? 'var(--green)' : parseFloat(avg) >= 4 ? 'var(--accent)' : 'var(--red)'; return `<div class="db-stat"><div class="db-stat-v" style="color:${sc}">${avg}</div><div class="db-stat-l">Avg Score</div></div>`; })()}
       </div>
       ${ad.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${ad.falls} caída${ad.falls > 1 ? 's' : ''}</div>` : ''}
       ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:4px">🏄 ${manStr}</div>` : ''}
@@ -3928,7 +4231,9 @@ function renderDebrief() {
         let t = '';
         if (sets || inters) t += `<span style="margin-right:10px">🌊 Set:${sets} 〰️ Inter:${inters}</span>`;
         if (lefts || rights) t += `<span>⬅️ ${lefts} ➡️ ${rights}</span>`;
-        return t ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${t}</div>` : '';
+        const sw = cw.filter(w => w.score != null);
+        if (sw.length > 0) { const avg = (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1); const best = Math.max(...sw.map(w=>w.score)).toFixed(1); const sc = parseFloat(avg) >= 6 ? 'var(--green)' : parseFloat(avg) >= 4 ? 'var(--accent)' : 'var(--red)'; t += `<span style="color:${sc};font-weight:700">📊 Avg:${avg} Best:${best}</span>`; }
+        return t ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">${t}</div>` : '';
       })()}`;
       }
     }
@@ -3975,6 +4280,31 @@ function renderDebrief() {
     }).join('');
   } else {
     document.getElementById('dbChart').style.display = 'none';
+  }
+  
+  // Goals summary
+  const goalsSummary = document.getElementById('dbGoalsSummary');
+  if (s.goals && s.goals.length > 0) {
+    let goalsHtml = '<div class="card" style="margin-top:12px;padding:12px"><div style="font-size:12px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🏆 Resumen de Metas</div>';
+    ids.forEach(id => {
+      const a = athletes.find(x => x.id === id);
+      const ad = s.athlete_data[id];
+      const results = evaluateGoals(ad);
+      const achieved = results.filter(r => r.achieved).length;
+      goalsHtml += `<div style="margin-bottom:8px"><div style="font-weight:700;font-size:13px;margin-bottom:4px">${a ? a.name : 'Atleta'} — ${achieved}/${results.length} ✅</div>`;
+      results.forEach(r => {
+        goalsHtml += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:12px">
+          <span>${r.achieved ? '✅' : '❌'}</span>
+          <span style="color:${r.achieved ? 'var(--green)' : 'var(--text-secondary)'}">${r.label}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">${r.detail}</span>
+        </div>`;
+      });
+      goalsHtml += '</div>';
+    });
+    goalsHtml += '</div>';
+    goalsSummary.innerHTML = goalsHtml;
+  } else {
+    goalsSummary.innerHTML = '';
   }
 }
 
@@ -4036,10 +4366,21 @@ function saveDebrief() {
   s.coach_notes = document.getElementById('dbNotes').value;
   s.coach_rating = getStarValue('dbRating');
   
-  // Calculate duration
-  const start = new Date(s.started_at);
-  const end = new Date(s.ended_at);
-  s.duration_min = Math.round((end - start) / 60000);
+  // Calculate duration (handling paused sessions)
+  if (s.elapsed_seconds != null) {
+    // Session was paused at some point — add any active segment since last resume
+    if (s.status !== 'paused' && s.resumed_at) {
+      const lastResume = new Date(s.resumed_at);
+      s.elapsed_seconds += Math.floor((Date.now() - lastResume.getTime()) / 1000);
+    }
+    s.duration_min = Math.round(s.elapsed_seconds / 60);
+    s.duration = s.elapsed_seconds;
+  } else {
+    const start = new Date(s.started_at);
+    const end = new Date(s.ended_at);
+    s.duration_min = Math.round((end - start) / 60000);
+    s.duration = Math.floor((end - start) / 1000);
+  }
   
   // Detect which modules were actually used
   s.modules_used = detectModulesUsed(s);
@@ -4217,7 +4558,7 @@ function exportSessionCSV() {
     'modules_used',
     'athlete','discipline',
     'paddled','caught','falls','catch_ratio',
-    'waves_total','set_waves','interset_waves','left_waves','right_waves','maneuvers',
+    'waves_total','set_waves','interset_waves','left_waves','right_waves','avg_score','best_score','scored_waves','maneuvers',
     'selection_poor','selection_normal','selection_excellent',
     'position_poor','position_normal','position_excellent',
     'commit_poor','commit_normal','commit_excellent',
@@ -4298,6 +4639,9 @@ function exportSessionCSV() {
       usedTactical ? d.waves.filter(w => w.wave_type === 'interset').length : '',
       usedTactical ? d.waves.filter(w => w.direction === 'left').length : '',
       usedTactical ? d.waves.filter(w => w.direction === 'right').length : '',
+      (() => { const sw = (d.waves||[]).filter(w => w.score!=null); return sw.length > 0 ? (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1) : ''; })(),
+      (() => { const sw = (d.waves||[]).filter(w => w.score!=null); return sw.length > 0 ? Math.max(...sw.map(w=>w.score)).toFixed(1) : ''; })(),
+      (d.waves||[]).filter(w => w.score!=null).length || '',
       esc(manStr),
       usedTactical ? sel.poor : '', usedTactical ? sel.normal : '', usedTactical ? sel.excellent : '',
       usedTactical ? pos.poor : '', usedTactical ? pos.normal : '', usedTactical ? pos.excellent : '',
@@ -4508,6 +4852,7 @@ function exportAllSessionsCSV() {
     'athlete','discipline',
     'paddled','caught','falls','catch_ratio',
     'set_waves','interset_waves','left_waves','right_waves',
+    'avg_score','best_score','scored_waves',
     'maneuvers',
     'selection_excellent','selection_normal','selection_poor',
     'position_excellent','position_normal','position_poor',
@@ -4561,6 +4906,9 @@ function exportAllSessionsCSV() {
         (d.waves || []).filter(w => w.wave_type === 'interset').length,
         (d.waves || []).filter(w => w.direction === 'left').length,
         (d.waves || []).filter(w => w.direction === 'right').length,
+        (() => { const sw = (d.waves||[]).filter(w => w.score!=null); return sw.length > 0 ? (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1) : ''; })(),
+        (() => { const sw = (d.waves||[]).filter(w => w.score!=null); return sw.length > 0 ? Math.max(...sw.map(w=>w.score)).toFixed(1) : ''; })(),
+        (d.waves||[]).filter(w => w.score!=null).length || '',
         csvSafe(manStr),
         sel.excellent, sel.normal, sel.poor,
         pos.excellent, pos.normal, pos.poor,
@@ -5036,7 +5384,7 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
       const mans = (w.maneuvers || []).map(m => m.toUpperCase()).join(', ');
       const wt = w.wave_type === 'set' ? '🌊S' : w.wave_type === 'interset' ? '〰️I' : '';
       const dir = w.direction === 'left' ? '⬅️' : w.direction === 'right' ? '➡️' : '';
-      return { num: i + 1, qual: qMap[w.wave_quality] || '', mans, sel: w.selection, pos: w.position, com: w.commit, wt, dir };
+      return { num: i + 1, qual: qMap[w.wave_quality] || '', mans, sel: w.selection, pos: w.position, com: w.commit, wt, dir, score: w.score };
     }) : [];
 
     // Judge summary data
@@ -5099,7 +5447,12 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
     footerNoteLines = wrapText(tmpCtx, s.notes, W - 80);
   }
   const footerNotesH = footerNoteLines.length > 0 ? footerNoteLines.length * 18 + 8 : 0;
-  const totalFooterH = footerH + footerNotesH;
+  
+  // Goals height
+  const exportGoals = (s.goals || []);
+  const goalsH = exportGoals.length > 0 ? 22 + exportGoals.length * 20 : 0;
+  
+  const totalFooterH = footerH + footerNotesH + goalsH;
 
   const H = headerH + athTotalH + framesH + totalFooterH;
 
@@ -5169,9 +5522,30 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
   const judgeScoreColor = v => v >= 6 ? '#22c55e' : v >= 4 ? '#facc15' : '#ef4444';
 
   // === HEADER ===
-  drawText('KSS', 30, 20, '800 28px -apple-system, sans-serif', '#06b6d4');
-  drawText('COACH', 88, 20, '800 28px -apple-system, sans-serif', '#94a3b8');
-  if (isSingle) drawText('REPORTE INDIVIDUAL', 200, 26, '700 13px -apple-system, sans-serif', '#8b5cf6');
+  const brand = DB.coach;
+  const brandName = brand.academy || 'KSS';
+  const brandSub = brand.academy ? 'KSS Coach' : 'COACH';
+  const brandColor = brand.brandColor || '#06b6d4';
+  
+  // Draw brand logo if available
+  let headerTextX = 30;
+  if (brand.logo) {
+    try {
+      const logoImg = new Image();
+      logoImg.src = brand.logo;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(50, 28, 20, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(logoImg, 30, 8, 40, 40);
+      ctx.restore();
+      headerTextX = 80;
+    } catch(e) {}
+  }
+  drawText(brandName, headerTextX, 20, '800 28px -apple-system, sans-serif', brandColor);
+  const brandNameW = ctx.measureText(brandName).width;
+  drawText(brandSub, headerTextX + brandNameW + 10, 20, '800 28px -apple-system, sans-serif', '#94a3b8');
+  if (isSingle) drawText('REPORTE INDIVIDUAL', headerTextX + brandNameW + ctx.measureText(brandSub).width + 24, 26, '700 13px -apple-system, sans-serif', '#8b5cf6');
 
   const dt = new Date(s.date || s.started_at);
   const dateStr = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
@@ -5238,6 +5612,16 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
       drawText(ratio + '%', W - 40, ay + 8, '800 22px -apple-system, sans-serif', ratioColor, 'right');
       drawText((ad.caught || 0) + '/' + paddled + ' olas', W - 40, ay + 34, '400 12px -apple-system, sans-serif', '#64748b', 'right');
       drawMiniBar(82, ay + 48, 200, 6, ratio / 100, ratioColor);
+      
+      // Avg wave score
+      const scoredW = (ad.waves||[]).filter(w => w.type==='caught' && w.score!=null);
+      if (scoredW.length > 0) {
+        const avgS = (scoredW.reduce((s,w)=>s+w.score,0)/scoredW.length).toFixed(1);
+        const bestS = Math.max(...scoredW.map(w=>w.score)).toFixed(1);
+        const sColor = parseFloat(avgS) >= 6 ? '#22c55e' : parseFloat(avgS) >= 4 ? '#38bdf8' : '#ef4444';
+        drawText('Avg: ' + avgS, 300, ay + 48, '700 11px -apple-system, sans-serif', sColor);
+        drawText('Best: ' + bestS, 370, ay + 48, '600 11px -apple-system, sans-serif', '#94a3b8');
+      }
     } else if (ad.race && ad.race.sessions.length > 0) {
       const best = ad.race.sessions.reduce((b, r) => !b || r.total_ms < b.total_ms ? r : b, null);
       drawText('🏁 ' + ad.race.sessions.length + ' carrera(s)', W - 40, ay + 8, '600 14px -apple-system, sans-serif', '#06b6d4', 'right');
@@ -5382,6 +5766,7 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
         if (w.sel) { drawText(evalDot(w.sel), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
         if (w.pos) { drawText(evalDot(w.pos), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
         if (w.com) { drawText(evalDot(w.com), wx, lineY, '400 11px -apple-system, sans-serif', '#94a3b8'); wx += 18; }
+        if (w.score != null) { const sColor = w.score >= 6 ? '#22c55e' : w.score >= 4 ? '#38bdf8' : '#ef4444'; drawText(w.score.toFixed(1), wx, lineY, '700 11px -apple-system, sans-serif', sColor); wx += 32; }
         if (w.mans) drawText(w.mans, wx, lineY, '400 10px -apple-system, sans-serif', '#a78bfa');
         lineY += 18;
       });
@@ -5486,7 +5871,22 @@ function _doExportSessionImage(source, singleAthId, selectedFrames, embedFrames)
     if (s.rating) drawText('⭐'.repeat(s.rating), W - 30, fy + 2, '400 14px -apple-system, sans-serif', '#facc15', 'right');
     if (s.coach_rating) drawText('⭐'.repeat(s.coach_rating), W - 30, fy + 2, '400 14px -apple-system, sans-serif', '#facc15', 'right');
 
-    drawText('Powered by KSS Coach · Karibe Surf Score', W / 2, H - 30, '400 11px -apple-system, sans-serif', '#475569', 'center');
+    // Goals
+    if (exportGoals.length > 0 && athData.length > 0) {
+      drawText('🏆 Metas', 30, footY, '700 11px -apple-system, sans-serif', '#a78bfa');
+      footY += 16;
+      // Evaluate goals for first athlete (or aggregate)
+      const goalData = isSingle ? athData[0].ad : athData[0].ad;
+      const gResults = evaluateGoals(goalData);
+      gResults.forEach(r => {
+        const icon = r.achieved ? '✅' : '❌';
+        drawText(`${icon} ${r.label} — ${r.detail}`, 44, footY, '500 10px -apple-system, sans-serif', r.achieved ? '#22c55e' : '#94a3b8');
+        footY += 16;
+      });
+      footY += 4;
+    }
+
+    drawText(getBrandFooterText(), W / 2, H - 30, '400 11px -apple-system, sans-serif', '#475569', 'center');
 
     // Export the main card
     c.toBlob(function(blob) {
@@ -5824,6 +6224,7 @@ function renderSessionDetail() {
         <div class="db-stat"><div class="db-stat-v">${d.paddled}</div><div class="db-stat-l">Remó</div></div>
         <div class="db-stat"><div class="db-stat-v">${d.caught}</div><div class="db-stat-l">Atrapó</div></div>
         <div class="db-stat"><div class="db-stat-v" style="color:${ratioColor}">${ratio}%</div><div class="db-stat-l">Catch</div></div>
+        ${(() => { const sw = (d.waves||[]).filter(w => w.type==='caught' && w.score!=null); if (sw.length===0) return ''; const avg = (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1); const sc = parseFloat(avg) >= 6 ? 'var(--green)' : parseFloat(avg) >= 4 ? 'var(--accent)' : 'var(--red)'; return `<div class="db-stat"><div class="db-stat-v" style="color:${sc}">${avg}</div><div class="db-stat-l">Avg Score</div></div>`; })()}
       </div>
       ${d.falls > 0 ? `<div style="font-size:12px;color:var(--red);font-weight:600">💥 ${d.falls} caída${d.falls > 1 ? 's' : ''}</div>` : ''}
       ${manStr ? `<div style="font-size:12px;color:var(--text-secondary);margin-top:6px">🏄 ${manStr}</div>` : ''}
@@ -5837,6 +6238,8 @@ function renderSessionDetail() {
         let tags = '';
         if (sets || inters) tags += `<span style="margin-right:10px">🌊 Set:${sets} 〰️ Inter:${inters}</span>`;
         if (lefts || rights) tags += `<span>⬅️ ${lefts} ➡️ ${rights}</span>`;
+        const sw = caught.filter(w => w.score != null);
+        if (sw.length > 0) { const avg = (sw.reduce((s,w)=>s+w.score,0)/sw.length).toFixed(1); const best = Math.max(...sw.map(w=>w.score)).toFixed(1); const sc = parseFloat(avg) >= 6 ? 'var(--green)' : parseFloat(avg) >= 4 ? 'var(--accent)' : 'var(--red)'; tags += `<span style="color:${sc};font-weight:700">📊 Avg:${avg} Best:${best}</span>`; }
         return tags ? `<div style="font-size:11px;color:var(--text-secondary);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">${tags}</div>` : '';
       })()}`;
     }
@@ -6096,13 +6499,22 @@ function renderAnalytics() {
   const falls = waves.filter(w => w.type === 'fall').length;
   const catchPct = paddled > 0 ? Math.round(caught / paddled * 100) : 0;
   const avgHeatScore = heats.length > 0 ? (heats.reduce((s, h) => s + (h.total || 0), 0) / heats.length).toFixed(1) : '—';
+  const scoredWaves = waves.filter(w => w.type === 'caught' && w.score != null);
+  const avgWaveScore = scoredWaves.length > 0 ? (scoredWaves.reduce((s, w) => s + w.score, 0) / scoredWaves.length).toFixed(1) : null;
 
-  document.getElementById('anlKPIs').innerHTML = [
+  const kpiItems = [
     { val: sessions.length, lbl: 'Sesiones', color: 'var(--accent)' },
     { val: caught, lbl: 'Olas', color: 'var(--green)' },
     { val: catchPct + '%', lbl: 'Catch %', color: catchPct >= 60 ? 'var(--green)' : catchPct >= 40 ? 'var(--yellow)' : 'var(--red)' },
-    { val: heats.length > 0 ? avgHeatScore : bio.length, lbl: heats.length > 0 ? 'Avg Heat' : 'Evals Bio', color: 'var(--accent)' },
-  ].map(k => `<div class="dash-kpi"><div class="dash-kpi-val" style="color:${k.color}">${k.val}</div><div class="dash-kpi-lbl">${k.lbl}</div></div>`).join('');
+  ];
+  if (avgWaveScore) {
+    kpiItems.push({ val: avgWaveScore, lbl: 'Avg Score', color: parseFloat(avgWaveScore) >= 6 ? 'var(--green)' : 'var(--accent)' });
+  } else if (heats.length > 0) {
+    kpiItems.push({ val: avgHeatScore, lbl: 'Avg Heat', color: 'var(--accent)' });
+  } else {
+    kpiItems.push({ val: bio.length, lbl: 'Evals Bio', color: 'var(--accent)' });
+  }
+  document.getElementById('anlKPIs').innerHTML = kpiItems.map(k => `<div class="dash-kpi"><div class="dash-kpi-val" style="color:${k.color}">${k.val}</div><div class="dash-kpi-lbl">${k.lbl}</div></div>`).join('');
 
   // === Session Frequency ===
   const freqData = {};
@@ -7690,6 +8102,7 @@ function labEnterFullscreen() {
   
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen'); } catch(e) {}
   
+  labZoomReset();
   setTimeout(labResizeCanvas, 100);
   setTimeout(labMobCheckOrientation, 200);
 }
@@ -7711,6 +8124,7 @@ function labExitFullscreen() {
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   } catch(e) {}
   
+  labZoomReset();
   setTimeout(labResizeCanvas, 100);
   setTimeout(labMobCheckOrientation, 150);
 }
@@ -8254,6 +8668,17 @@ function renderLabFrames() {
     return;
   }
   section.style.display = 'block';
+  
+  // Frame count + estimated size
+  const countEl = document.getElementById('labFrameCount');
+  const storageEl = document.getElementById('labFrameStorage');
+  countEl.textContent = `(${frames.length})`;
+  const totalBytes = frames.reduce((s, f) => s + (f.image?.length || 0), 0);
+  const mb = (totalBytes / 1024 / 1024).toFixed(1);
+  const maxMb = 4.5;
+  const pct = Math.min(100, Math.round(totalBytes / 1024 / 1024 / maxMb * 100));
+  const barColor = pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--yellow)' : 'var(--green)';
+  storageEl.innerHTML = `💾 ~${mb}MB usado · <div style="display:inline-block;width:80px;height:6px;background:var(--bg-input);border-radius:3px;vertical-align:middle"><div style="width:${pct}%;height:100%;background:${barColor};border-radius:3px"></div></div> ${pct > 80 ? ' ⚠️ Guarda y limpia' : ''}`;
   
   document.getElementById('labFrames').innerHTML = frames.slice().reverse().map((f, ri) => {
     const idx = frames.length - 1 - ri; // real index
@@ -8937,8 +9362,8 @@ function labZoomIn() {
 }
 
 function labZoomOut() {
-  labZoom = Math.max(1, labZoom - 0.5);
-  if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+  labZoom = Math.max(0.25, +(labZoom - 0.25).toFixed(2));
+  if (labZoom <= 1) { labPanX = 0; labPanY = 0; }
   labClampPan();
   labApplyZoom();
 }
@@ -8964,7 +9389,9 @@ function labInitZoomGestures() {
   const wrap = document.getElementById('labVideoWrap');
   if (!wrap) return;
   
-  // Pinch-to-zoom (on video wrap, always works)
+  let pinchMidX = 0, pinchMidY = 0, pinchStartPanX = 0, pinchStartPanY = 0;
+  
+  // Pinch-to-zoom + 2-finger pan
   wrap.addEventListener('touchstart', function(e) {
     if (e.touches.length === 2) {
       e.preventDefault();
@@ -8972,6 +9399,10 @@ function labInitZoomGestures() {
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       labPinchStartDist = Math.hypot(dx, dy);
       labPinchStartZoom = labZoom;
+      pinchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      pinchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      pinchStartPanX = labPanX;
+      pinchStartPanY = labPanY;
     }
   }, { passive: false });
   
@@ -8981,9 +9412,15 @@ function labInitZoomGestures() {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
       const dist = Math.hypot(dx, dy);
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      
       if (labPinchStartDist > 0) {
-        labZoom = Math.max(1, Math.min(5, labPinchStartZoom * (dist / labPinchStartDist)));
-        if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+        labZoom = Math.max(0.25, Math.min(5, labPinchStartZoom * (dist / labPinchStartDist)));
+        // Pan with 2 fingers
+        labPanX = pinchStartPanX + (midX - pinchMidX);
+        labPanY = pinchStartPanY + (midY - pinchMidY);
+        if (labZoom <= 1) { labPanX = 0; labPanY = 0; }
         labClampPan();
         labApplyZoom();
       }
@@ -8998,11 +9435,35 @@ function labInitZoomGestures() {
   wrap.addEventListener('wheel', function(e) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.25 : 0.25;
-    labZoom = Math.max(1, Math.min(5, labZoom + delta));
-    if (labZoom === 1) { labPanX = 0; labPanY = 0; }
+    labZoom = Math.max(0.25, Math.min(5, +(labZoom + delta).toFixed(2)));
+    if (labZoom <= 1) { labPanX = 0; labPanY = 0; }
     labClampPan();
     labApplyZoom();
   }, { passive: false });
+  
+  // Mouse drag to pan (desktop, when zoomed)
+  let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0;
+  wrap.addEventListener('mousedown', function(e) {
+    if (labZoom > 1 && e.button === 0) {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartPanX = labPanX;
+      dragStartPanY = labPanY;
+      wrap.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    labPanX = dragStartPanX + (e.clientX - dragStartX);
+    labPanY = dragStartPanY + (e.clientY - dragStartY);
+    labClampPan();
+    labApplyZoom();
+  });
+  window.addEventListener('mouseup', function() {
+    if (isDragging) { isDragging = false; wrap.style.cursor = ''; }
+  });
 }
 
 // ============ VLC-STYLE GESTURE SYSTEM ============
@@ -9012,9 +9473,10 @@ function labInitGestures() {
   if (!el) return;
   const video = document.getElementById('labVideo');
   
-  let startX, startY, startTime, isScrubbing = false, isSpeedSwipe = false;
+  let startX, startY, startTime, isScrubbing = false, isSpeedSwipe = false, isZoomPan = false;
   let tapCount = 0, tapTimer = null, tapSide = null;
   let scrubStartTime = 0;
+  let zoomPanStartX = 0, zoomPanStartY = 0, zoomPanStartPanX = 0, zoomPanStartPanY = 0;
   
   function fmt(t) {
     const m = Math.floor(t / 60), s = Math.floor(t % 60);
@@ -9034,6 +9496,9 @@ function labInitGestures() {
     startX = t.clientX; startY = t.clientY;
     startTime = Date.now();
     isScrubbing = false; isSpeedSwipe = false;
+    isZoomPan = labZoom > 1;
+    zoomPanStartX = t.clientX; zoomPanStartY = t.clientY;
+    zoomPanStartPanX = labPanX; zoomPanStartPanY = labPanY;
     scrubStartTime = video.currentTime;
   }, { passive: true });
   
@@ -9045,6 +9510,16 @@ function labInitGestures() {
     const elapsed = Date.now() - startTime;
     
     if (elapsed < 100) return; // debounce
+    
+    // When zoomed in, 1-finger drag = pan
+    if (isZoomPan) {
+      e.preventDefault();
+      labPanX = zoomPanStartPanX + (t.clientX - zoomPanStartX);
+      labPanY = zoomPanStartPanY + (t.clientY - zoomPanStartY);
+      labClampPan();
+      labApplyZoom();
+      return;
+    }
     
     const rect = el.getBoundingClientRect();
     const relX = (startX - rect.left) / rect.width; // 0-1
@@ -9356,6 +9831,9 @@ function renderLabFramesForAthlete(a) {
 // SETTINGS
 // ============================================================
 function renderSettings() {
+  // Load brand
+  loadBrand();
+  
   const spots = DB.spots;
   document.getElementById('setSpotList').innerHTML = spots.map((s, i) => 
     `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
@@ -9429,6 +9907,403 @@ function removeCustomDrill(i) {
   customs.splice(i, 1);
   DB.customDrills = customs;
   renderSettings();
+}
+
+// ============================================================
+// COACH BRANDING
+// ============================================================
+function loadBrand() {
+  const c = DB.coach;
+  document.getElementById('brandCoachName').value = c.name || '';
+  document.getElementById('brandAcademy').value = c.academy || '';
+  if (c.logo) {
+    document.getElementById('brandLogoImg').src = c.logo;
+    document.getElementById('brandLogoImg').style.display = 'block';
+    document.getElementById('brandLogoPlaceholder').style.display = 'none';
+  } else {
+    document.getElementById('brandLogoImg').style.display = 'none';
+    document.getElementById('brandLogoPlaceholder').style.display = '';
+  }
+  // Highlight active color
+  const dots = document.querySelectorAll('#view-settings .card:first-of-type .lab-color-dot');
+  dots.forEach(d => d.style.outline = d.style.backgroundColor === (c.brandColor || '#38bdf8') ? '2px solid #fff' : 'none');
+  renderBrandPreview();
+}
+
+function saveBrand() {
+  const c = DB.coach;
+  c.name = document.getElementById('brandCoachName').value.trim() || 'Coach';
+  c.academy = document.getElementById('brandAcademy').value.trim() || '';
+  DB.coach = c;
+  renderBrandPreview();
+  updateGreeting();
+}
+
+function brandUploadLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    // Resize to max 200x200 to save space
+    const img = new Image();
+    img.onload = () => {
+      const maxSz = 200;
+      let w = img.width, h = img.height;
+      if (w > maxSz || h > maxSz) {
+        if (w > h) { h = Math.round(h * maxSz / w); w = maxSz; }
+        else { w = Math.round(w * maxSz / h); h = maxSz; }
+      }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = cv.toDataURL('image/jpeg', 0.8);
+      const c = DB.coach;
+      c.logo = dataUrl;
+      DB.coach = c;
+      document.getElementById('brandLogoImg').src = dataUrl;
+      document.getElementById('brandLogoImg').style.display = 'block';
+      document.getElementById('brandLogoPlaceholder').style.display = 'none';
+      renderBrandPreview();
+      // Update all KSS logo instances
+      updateBrandLogos();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function setBrandColor(color, el) {
+  const c = DB.coach;
+  c.brandColor = color;
+  DB.coach = c;
+  // Highlight
+  const dots = el.parentElement.querySelectorAll('.lab-color-dot');
+  dots.forEach(d => d.style.outline = 'none');
+  el.style.outline = '2px solid #fff';
+  renderBrandPreview();
+}
+
+function brandRemoveLogo() {
+  const c = DB.coach;
+  c.logo = null;
+  DB.coach = c;
+  document.getElementById('brandLogoImg').style.display = 'none';
+  document.getElementById('brandLogoPlaceholder').style.display = '';
+  renderBrandPreview();
+  updateBrandLogos();
+}
+
+function renderBrandPreview() {
+  const c = DB.coach;
+  const prevLogo = document.getElementById('brandPrevLogo');
+  const color = c.brandColor || '#38bdf8';
+  if (c.logo) {
+    prevLogo.innerHTML = `<img src="${c.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`;
+  } else {
+    prevLogo.style.background = color;
+    prevLogo.innerHTML = (c.name || 'C')[0].toUpperCase();
+  }
+  document.getElementById('brandPrevName').textContent = c.name || 'Coach';
+  document.getElementById('brandPrevAcademy').textContent = c.academy || 'KSS Coach';
+}
+
+function updateBrandLogos() {
+  const c = DB.coach;
+  // Update watermarks and logos throughout the app
+  const logoImgs = document.querySelectorAll('.kss-logo-sm, .kss-watermark');
+  logoImgs.forEach(img => {
+    if (c.logo) img.src = c.logo;
+  });
+}
+
+function getBrandFooterText() {
+  const c = DB.coach;
+  let text = 'Powered by KSS Coach';
+  if (c.academy) text = c.academy + ' · ' + text;
+  return text;
+}
+
+// ============================================================
+// LAB FRAME MANAGEMENT
+// ============================================================
+function labSaveAllFrames() {
+  const frames = DB.labFrames;
+  if (frames.length === 0) return alert('No hay frames para guardar');
+  
+  // Try to share as batch
+  const files = [];
+  frames.forEach((f, i) => {
+    const t = f.timestamp || 0;
+    const timeStr = Math.floor(t/60) + 'm' + Math.floor(t%60) + 's';
+    const athName = f.athlete_id ? (DB.athletes.find(a => a.id === f.athlete_id)?.name?.replace(/\\s/g,'_') || '') : '';
+    const fname = `KSS_Frame_${athName ? athName+'_' : ''}${timeStr}_${new Date(f.created_at||Date.now()).toISOString().slice(0,10)}.jpg`;
+    
+    // Convert data URL to blob
+    const byteString = atob(f.image.split(',')[1]);
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let j = 0; j < byteString.length; j++) ia[j] = byteString.charCodeAt(j);
+    const blob = new Blob([ab], { type: 'image/jpeg' });
+    files.push(new File([blob], fname, { type: 'image/jpeg' }));
+  });
+  
+  if (navigator.canShare && navigator.canShare({ files })) {
+    navigator.share({ title: 'KSS Coach Frames', files }).then(() => {
+      showUndoToast(`💾 ${files.length} frames compartidos`, null, 3000);
+    }).catch(() => {
+      // Fallback: download individually
+      labDownloadAllFrames(files);
+    });
+  } else {
+    labDownloadAllFrames(files);
+  }
+}
+
+function labDownloadAllFrames(files) {
+  files.forEach((file, i) => {
+    setTimeout(() => {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url; a.download = file.name; a.click();
+      URL.revokeObjectURL(url);
+    }, i * 300);
+  });
+  showUndoToast(`💾 Descargando ${files.length} frames...`, null, 3000);
+}
+
+function labClearAllFrames() {
+  const frames = DB.labFrames;
+  if (frames.length === 0) return;
+  if (!confirm(`¿Eliminar ${frames.length} frames del cache? Asegúrate de guardarlos primero.`)) return;
+  DB.labFrames = [];
+  renderLabFrames();
+  showUndoToast('🗑️ Cache limpiado', () => { DB.labFrames = frames; renderLabFrames(); }, 5000);
+}
+
+function labUploadFrames(input) {
+  const files = Array.from(input.files);
+  if (files.length === 0) return;
+  
+  const athId = document.getElementById('labAthlete')?.value || null;
+  let loaded = 0;
+  
+  files.forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Resize to reasonable size
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1280;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        const dataUrl = cv.toDataURL('image/jpeg', 0.7);
+        
+        const frame = {
+          id: DB.genId(),
+          athlete_id: athId,
+          discipline: null,
+          timestamp: 0,
+          image: dataUrl,
+          created_at: new Date().toISOString(),
+          source: 'upload'
+        };
+        
+        const frames = DB.labFrames;
+        frames.push(frame);
+        DB.labFrames = frames;
+        loaded++;
+        
+        if (loaded === files.length) {
+          renderLabFrames();
+          showUndoToast(`📂 ${loaded} frames subidos`, null, 3000);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+// ============================================================
+// SESSION GOALS SYSTEM
+// ============================================================
+window._sessionGoals = [];
+window._comboChain = [];
+
+function ssGoalTypeChanged() {
+  const type = document.getElementById('ssGoalType').value;
+  const config = document.getElementById('ssGoalConfig');
+  config.style.display = type ? 'block' : 'none';
+  
+  // Hide all sub-configs
+  ['ssGoalCatchRatio','ssGoalWaveCount','ssGoalCombo','ssGoalSetRatio','ssGoalDirBalance'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  
+  const map = {
+    'catch_ratio': 'ssGoalCatchRatio',
+    'wave_count': 'ssGoalWaveCount',
+    'combo': 'ssGoalCombo',
+    'set_ratio': 'ssGoalSetRatio',
+    'direction_balance': 'ssGoalDirBalance'
+  };
+  if (map[type]) document.getElementById(map[type]).style.display = 'block';
+}
+
+function ssComboAdd(maneuver, el) {
+  window._comboChain.push(maneuver);
+  ssRenderComboChain();
+}
+
+function ssComboReset() {
+  window._comboChain = [];
+  ssRenderComboChain();
+}
+
+function ssRenderComboChain() {
+  const chain = window._comboChain;
+  const container = document.getElementById('ssComboChain');
+  if (chain.length === 0) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--text-muted)">Selecciona maniobras ↓</span>';
+    return;
+  }
+  container.innerHTML = chain.map((m, i) => {
+    const label = m.charAt(0).toUpperCase() + m.slice(1);
+    return `<span style="background:var(--accent);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:2px">${label}<span onclick="ssComboRemoveAt(${i})" style="cursor:pointer;margin-left:2px;opacity:.7">×</span></span>` +
+      (i < chain.length - 1 ? '<span style="color:var(--accent);font-weight:800;font-size:14px">→</span>' : '');
+  }).join('');
+}
+
+function ssComboRemoveAt(idx) {
+  window._comboChain.splice(idx, 1);
+  ssRenderComboChain();
+}
+
+function ssAddGoal(type) {
+  let goal = { type, id: Date.now().toString(36) };
+  
+  if (type === 'catch_ratio') {
+    goal.value = parseInt(document.getElementById('ssGoalCatchVal').value) || 50;
+    goal.label = `📊 Catch Ratio ≥ ${goal.value}%`;
+  } else if (type === 'wave_count') {
+    goal.value = parseInt(document.getElementById('ssGoalWaveVal').value) || 8;
+    goal.label = `🌊 Atrapar ≥ ${goal.value} olas`;
+  } else if (type === 'set_ratio') {
+    goal.value = parseInt(document.getElementById('ssGoalSetVal').value) || 50;
+    goal.label = `🌊 ≥ ${goal.value}% olas de Set`;
+  } else if (type === 'direction_balance') {
+    goal.value = parseInt(document.getElementById('ssGoalDirVal').value) || 30;
+    goal.label = `⬅️➡️ Balance ≥ ${goal.value}% lado débil`;
+  } else if (type === 'combo') {
+    if (window._comboChain.length < 2) return alert('Selecciona al menos 2 maniobras para el combo');
+    goal.combo = [...window._comboChain];
+    goal.label = '🔗 ' + goal.combo.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' → ');
+    window._comboChain = [];
+    ssRenderComboChain();
+  }
+  
+  window._sessionGoals.push(goal);
+  document.getElementById('ssGoalType').value = '';
+  document.getElementById('ssGoalConfig').style.display = 'none';
+  ssRenderGoalList();
+}
+
+function ssRemoveGoal(id) {
+  window._sessionGoals = window._sessionGoals.filter(g => g.id !== id);
+  ssRenderGoalList();
+}
+
+function ssRenderGoalList() {
+  const list = document.getElementById('ssGoalList');
+  if (window._sessionGoals.length === 0) {
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">Sin metas definidas — opcional</div>';
+    return;
+  }
+  list.innerHTML = window._sessionGoals.map(g =>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg-input);border-radius:8px;margin-bottom:4px">
+      <span style="flex:1;font-size:12px;font-weight:600">${g.label}</span>
+      <button onclick="ssRemoveGoal('${g.id}')" style="color:var(--text-muted);font-size:14px;padding:2px 6px">×</button>
+    </div>`
+  ).join('');
+}
+
+function evaluateGoals(athleteData) {
+  const goals = (DB.activeSession || {}).goals || [];
+  if (goals.length === 0) return [];
+  
+  const results = [];
+  goals.forEach(g => {
+    let achieved = false;
+    let progress = 0;
+    let detail = '';
+    
+    const waves = athleteData.waves || [];
+    const caught = waves.filter(w => w.type === 'caught');
+    const paddled = athleteData.paddled || 0;
+    
+    if (g.type === 'catch_ratio') {
+      const ratio = paddled > 0 ? Math.round(caught.length / paddled * 100) : 0;
+      progress = Math.min(100, Math.round(ratio / g.value * 100));
+      achieved = ratio >= g.value;
+      detail = `${ratio}% / ${g.value}%`;
+    } else if (g.type === 'wave_count') {
+      progress = Math.min(100, Math.round(caught.length / g.value * 100));
+      achieved = caught.length >= g.value;
+      detail = `${caught.length} / ${g.value}`;
+    } else if (g.type === 'set_ratio') {
+      const sets = caught.filter(w => w.wave_type === 'set').length;
+      const pct = caught.length > 0 ? Math.round(sets / caught.length * 100) : 0;
+      progress = Math.min(100, Math.round(pct / g.value * 100));
+      achieved = pct >= g.value;
+      detail = `${pct}% / ${g.value}%`;
+    } else if (g.type === 'direction_balance') {
+      const lefts = caught.filter(w => w.direction === 'left').length;
+      const rights = caught.filter(w => w.direction === 'right').length;
+      const total = lefts + rights;
+      const minority = total > 0 ? Math.round(Math.min(lefts, rights) / total * 100) : 0;
+      progress = Math.min(100, Math.round(minority / g.value * 100));
+      achieved = minority >= g.value;
+      detail = `⬅️${lefts} ➡️${rights} (${minority}% min)`;
+    } else if (g.type === 'combo') {
+      // Check if ANY wave contains all combo maneuvers (in any order)
+      const comboCount = caught.filter(w => {
+        const mans = w.maneuvers || [];
+        return g.combo.every(m => mans.includes(m));
+      }).length;
+      achieved = comboCount > 0;
+      progress = achieved ? 100 : 0;
+      detail = comboCount > 0 ? `✅ ${comboCount} ola${comboCount>1?'s':''} con combo` : 'Pendiente';
+    }
+    
+    results.push({ ...g, achieved, progress, detail });
+  });
+  
+  return results;
+}
+
+function renderGoalTracker(athleteData) {
+  const results = evaluateGoals(athleteData);
+  if (results.length === 0) return '';
+  
+  return `<div style="margin-top:10px;padding:8px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:10px">
+    <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">🏆 Metas</div>
+    ${results.map(r => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <span style="font-size:14px">${r.achieved ? '✅' : '⬜'}</span>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:600;color:${r.achieved ? 'var(--green)' : 'var(--text-primary)'}">${r.label}</div>
+        <div style="height:4px;background:var(--bg-input);border-radius:2px;margin-top:2px">
+          <div style="height:100%;width:${r.progress}%;background:${r.achieved ? 'var(--green)' : 'var(--accent)'};border-radius:2px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:1px">${r.detail}</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
 }
 
 function confirmClearData() {
