@@ -330,7 +330,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* ===== PHASE 3: TECH LAB ===== */
 .lab-video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;margin-bottom:0;touch-action:none;-webkit-user-select:none;user-select:none;display:flex;align-items:center;justify-content:center}
 .lab-video{display:block;max-width:100%;max-height:55vh;width:auto;height:auto}
-.lab-video-inner{transform-origin:center center;will-change:transform;position:relative;display:inline-flex;align-items:center;justify-content:center;max-width:100%;max-height:100%}
+.lab-video-inner{transform-origin:center center;will-change:transform;position:relative;overflow:visible}
 .lab-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;touch-action:none}
 .lab-canvas.drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
 
@@ -433,7 +433,7 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 .lab-clip-meta{font-size:11px;color:var(--text-muted)}
 
 /* Video wrapper zoom support */
-.lab-fullscreen .lab-video-inner{max-width:100%!important;max-height:100%!important}
+.lab-fullscreen .lab-video-inner{max-width:100%!important;max-height:100%!important;margin:auto!important}
 
 /* ===== LAB MOBILE RESPONSIVE ===== */
 /* Mobile portrait: compact controls BELOW video */
@@ -8103,7 +8103,9 @@ function labEnterFullscreen() {
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen'); } catch(e) {}
   
   labZoomReset();
-  setTimeout(labResizeCanvas, 100);
+  setTimeout(labResizeCanvas, 50);
+  setTimeout(labResizeCanvas, 200);
+  setTimeout(labResizeCanvas, 500);
   setTimeout(labMobCheckOrientation, 200);
 }
 
@@ -8125,7 +8127,9 @@ function labExitFullscreen() {
   } catch(e) {}
   
   labZoomReset();
-  setTimeout(labResizeCanvas, 100);
+  setTimeout(labResizeCanvas, 50);
+  setTimeout(labResizeCanvas, 200);
+  setTimeout(labResizeCanvas, 500);
   setTimeout(labMobCheckOrientation, 150);
 }
 
@@ -8195,7 +8199,6 @@ function labLoadVideo(input) {
     document.getElementById('labPlayerSection').style.display = 'block';
     document.getElementById('labDualSection').style.display = 'none';
     document.getElementById('labTimeline').max = video.duration;
-    labResizeCanvas();
     labAnnotations = [];
     labPlacedStickers = [];
     labActiveSticker = null;
@@ -8204,6 +8207,16 @@ function labLoadVideo(input) {
     labInitZoomGestures();
     labInitGestures();
     labMobCheckOrientation();
+    
+    // Sync canvas after video has actually rendered
+    setTimeout(labResizeCanvas, 50);
+    setTimeout(labResizeCanvas, 200);
+    setTimeout(labResizeCanvas, 500);
+    
+    // Use ResizeObserver to keep canvas synced on resize/fullscreen
+    if (window._labResizeObs) window._labResizeObs.disconnect();
+    window._labResizeObs = new ResizeObserver(() => labResizeCanvas());
+    window._labResizeObs.observe(video);
   };
   
   video.ontimeupdate = () => {
@@ -8222,10 +8235,22 @@ function labLoadVideo(input) {
 function labResizeCanvas() {
   const video = document.getElementById('labVideo');
   const canvas = document.getElementById('labCanvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
+  const inner = document.getElementById('labVideoInner');
+  
+  // Canvas internal resolution = video native pixels
+  canvas.width = video.videoWidth || 1920;
+  canvas.height = video.videoHeight || 1080;
+  
+  // Force inner container to exactly match the video's rendered size
+  // This ensures canvas overlay perfectly covers the video for both vertical and horizontal
+  requestAnimationFrame(() => {
+    const vw = video.clientWidth;
+    const vh = video.clientHeight;
+    if (vw && vh) {
+      inner.style.width = vw + 'px';
+      inner.style.height = vh + 'px';
+    }
+  });
 }
 
 function labTogglePlay() {
@@ -8587,14 +8612,14 @@ function labCapture() {
   const video = document.getElementById('labVideo');
   const canvas = document.getElementById('labCanvas');
   
-  // Create composite: video frame + annotations + stickers
+  // Create composite: video frame + annotations + stickers at full video resolution
   const tmpCanvas = document.createElement('canvas');
   tmpCanvas.width = video.videoWidth;
   tmpCanvas.height = video.videoHeight;
   const ctx = tmpCanvas.getContext('2d');
   
-  // Draw video frame
-  ctx.drawImage(video, 0, 0);
+  // Draw video frame at native resolution
+  ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
   
   // Temporarily hide selection UI for clean capture
   const prevTool = labDrawTool;
@@ -9087,10 +9112,14 @@ async function labStartRec() {
   if (!video.src && !video.srcObject) return alert('Carga un video primero');
 
   try {
-    // Create composite canvas
+    // Create composite canvas (capped at 720p for performance)
     labRecCanvas = document.createElement('canvas');
-    labRecCanvas.width = video.videoWidth || 1280;
-    labRecCanvas.height = video.videoHeight || 720;
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+    const maxDim = 720;
+    const scale = Math.min(1, maxDim / Math.max(vw, vh));
+    labRecCanvas.width = Math.round(vw * scale);
+    labRecCanvas.height = Math.round(vh * scale);
     labRecCtx = labRecCanvas.getContext('2d');
 
     // Get mic audio (optional - don't block if denied)
@@ -9102,7 +9131,7 @@ async function labStartRec() {
     }
 
     // Capture canvas stream
-    const canvasStream = labRecCanvas.captureStream(30);
+    const canvasStream = labRecCanvas.captureStream(15);
 
     // Combine video + audio tracks
     const tracks = [...canvasStream.getVideoTracks()];
@@ -9128,7 +9157,7 @@ async function labStartRec() {
     if (!mimeType) return alert('Tu navegador no soporta grabación de video');
 
     labRecChunks = [];
-    labMediaRecorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 2500000 });
+    labMediaRecorder = new MediaRecorder(combinedStream, { mimeType, videoBitsPerSecond: 1500000 });
 
     labMediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0) labRecChunks.push(e.data);
@@ -9138,34 +9167,38 @@ async function labStartRec() {
       labFinalizeRec(audioStream);
     };
 
-    // Start compositing loop
+    // Start compositing loop at ~15fps (not 60fps) for smoother UI during recording
     labRecAnimId = null;
-    const drawFrame = () => {
+    let lastRecFrame = 0;
+    const REC_FRAME_INTERVAL = 66; // ~15fps
+    const drawFrame = (ts) => {
       if (!labRecording) return;
-      labRecCtx.drawImage(video, 0, 0, labRecCanvas.width, labRecCanvas.height);
-      // Draw annotations on top
-      labRecCtx.drawImage(annotCanvas, 0, 0, labRecCanvas.width, labRecCanvas.height);
+      if (ts - lastRecFrame >= REC_FRAME_INTERVAL) {
+        lastRecFrame = ts;
+        labRecCtx.drawImage(video, 0, 0, labRecCanvas.width, labRecCanvas.height);
+        // Draw annotations on top
+        labRecCtx.drawImage(annotCanvas, 0, 0, labRecCanvas.width, labRecCanvas.height);
 
-      // Burn REC indicator
-      labRecCtx.fillStyle = 'rgba(220,38,38,.8)';
-      labRecCtx.beginPath();
-      labRecCtx.arc(labRecCanvas.width - 30, 30, 8, 0, Math.PI * 2);
-      labRecCtx.fill();
-      labRecCtx.font = 'bold 16px sans-serif';
-      labRecCtx.fillStyle = '#fff';
-      labRecCtx.textAlign = 'right';
-      labRecCtx.textBaseline = 'top';
-      const elapsed = Math.floor((Date.now() - labRecStartTime) / 1000);
-      const rm = Math.floor(elapsed / 60);
-      const rs = elapsed % 60;
-      labRecCtx.fillText(`REC ${rm}:${rs.toString().padStart(2,'0')}`, labRecCanvas.width - 46, 22);
-      labRecCtx.textAlign = 'left';
+        // Burn REC indicator
+        labRecCtx.fillStyle = 'rgba(220,38,38,.8)';
+        labRecCtx.beginPath();
+        labRecCtx.arc(labRecCanvas.width - 30, 30, 8, 0, Math.PI * 2);
+        labRecCtx.fill();
+        labRecCtx.font = 'bold 16px sans-serif';
+        labRecCtx.fillStyle = '#fff';
+        labRecCtx.textAlign = 'right';
+        labRecCtx.textBaseline = 'top';
+        const elapsed = Math.floor((Date.now() - labRecStartTime) / 1000);
+        const rm = Math.floor(elapsed / 60);
+        const rs = elapsed % 60;
+        labRecCtx.fillText(`REC ${rm}:${rs.toString().padStart(2,'0')}`, labRecCanvas.width - 46, 22);
+        labRecCtx.textAlign = 'left';
 
-      // KSS watermark text
-      labRecCtx.font = 'bold 14px sans-serif';
-      labRecCtx.fillStyle = 'rgba(255,255,255,.4)';
-      labRecCtx.fillText('KSS Coach', 12, labRecCanvas.height - 24);
-
+        // KSS watermark text
+        labRecCtx.font = 'bold 14px sans-serif';
+        labRecCtx.fillStyle = 'rgba(255,255,255,.4)';
+        labRecCtx.fillText('KSS Coach', 12, labRecCanvas.height - 24);
+      }
       labRecAnimId = requestAnimationFrame(drawFrame);
     };
 
@@ -9375,12 +9408,13 @@ function labZoomReset() {
 
 function labClampPan() {
   if (labZoom <= 1) { labPanX = 0; labPanY = 0; return; }
-  const wrap = document.getElementById('labVideoWrap');
-  if (!wrap) return;
-  const w = wrap.clientWidth;
-  const h = wrap.clientHeight;
-  const maxX = w * (labZoom - 1) / 2;
-  const maxY = h * (labZoom - 1) / 2;
+  const inner = document.getElementById('labVideoInner');
+  if (!inner) return;
+  const w = inner.clientWidth || 300;
+  const h = inner.clientHeight || 300;
+  // Allow panning so any part of zoomed content can reach center of view
+  const maxX = w * labZoom / 2;
+  const maxY = h * labZoom / 2;
   labPanX = Math.max(-maxX, Math.min(maxX, labPanX));
   labPanY = Math.max(-maxY, Math.min(maxY, labPanY));
 }
