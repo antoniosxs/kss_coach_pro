@@ -435,6 +435,53 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 /* Video wrapper zoom support */
 .lab-fullscreen .lab-video-inner{max-width:100%!important;max-height:100%!important;margin:auto!important}
 
+/* ===== COACH BIG MODE (Accessibility) ===== */
+body.big-mode{font-size:18px}
+.big-mode .card{padding:18px!important}
+.big-mode .card-header{font-size:18px!important;margin-bottom:14px!important}
+.big-mode .field-label{font-size:15px!important}
+.big-mode .field-input,.big-mode select,.big-mode textarea{font-size:17px!important;padding:14px!important}
+.big-mode .btn{font-size:17px!important;padding:18px!important}
+.big-mode .btn-sm{font-size:16px!important;padding:16px 18px!important}
+.big-mode .btn-accent{font-size:19px!important;padding:20px!important}
+.big-mode .nav-btn{font-size:13px!important}
+.big-mode .nav-btn span:first-child{font-size:22px!important}
+.big-mode .eval-btn{font-size:16px!important;padding:14px 16px!important}
+.big-mode .tag-btn{font-size:15px!important;padding:12px 16px!important}
+.big-mode .tac-stat-val{font-size:32px!important}
+.big-mode .tac-stat-label{font-size:13px!important}
+.big-mode .db-stat-v{font-size:26px!important}
+.big-mode .db-stat-l{font-size:12px!important}
+.big-mode .dash-kpi-val{font-size:28px!important}
+.big-mode .dash-kpi-lbl{font-size:12px!important}
+.big-mode .dash-hero-title{font-size:34px!important}
+.big-mode .dash-hero-sub{font-size:16px!important}
+.big-mode .kss-title{font-size:22px!important}
+.big-mode .kss-subtitle{font-size:14px!important}
+.big-mode .eval-label{font-size:15px!important}
+.big-mode .avi{width:44px!important;height:44px!important;font-size:16px!important}
+.big-mode .hist-badge{font-size:13px!important;padding:5px 10px!important}
+.big-mode .sem-btn{font-size:16px!important;padding:14px!important}
+.big-mode .db-tag{font-size:14px!important;padding:6px 12px!important}
+.big-mode #tacWaveScoreDisplay{font-size:26px!important;min-width:62px!important}
+.big-mode .lab-tool{font-size:17px!important;padding:10px 14px!important}
+.big-mode .lab-tool .lab-tool-text{font-size:14px!important}
+.big-mode .lab-ctrl-btn{width:48px!important;height:48px!important;font-size:20px!important}
+.big-mode .lab-zoom-level{font-size:15px!important}
+.big-mode .lab-time{font-size:14px!important}
+.big-mode .wo-item{font-size:15px!important}
+.big-mode .wo-check{width:32px!important;height:32px!important;font-size:18px!important}
+.big-mode .wo-q-btn{width:38px!important;height:38px!important;font-size:15px!important}
+.big-mode .jm-wave-score{font-size:28px!important}
+.big-mode .counter-btn{width:52px!important;height:52px!important;font-size:26px!important}
+.big-mode .share-btn{font-size:16px!important;padding:14px!important}
+.big-mode .beg-eval-btn{font-size:15px!important;padding:14px!important}
+.big-mode .tpl-card{font-size:15px!important;padding:14px!important}
+.big-mode .dash-ath-chip{font-size:14px!important;padding:10px 14px!important}
+.big-mode #hubTimer{font-size:36px!important}
+.big-mode .bottom-nav{height:64px!important;padding-bottom:max(6px,env(safe-area-inset-bottom))!important}
+body.big-mode{padding-bottom:80px!important}
+
 /* ===== LAB MOBILE RESPONSIVE ===== */
 /* Mobile portrait: compact controls BELOW video */
 @media (max-width:768px) {
@@ -2284,6 +2331,16 @@ select.field-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div style="margin-top:8px;display:flex;gap:6px">
       <button class="btn btn-outline btn-sm" onclick="brandRemoveLogo()" style="flex:1;font-size:11px">🗑️ Quitar Logo</button>
     </div>
+  </div>
+
+  <!-- DISPLAY MODE -->
+  <div class="card">
+    <div class="card-header">👓 Modo de Pantalla</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="bigModeOff" onclick="setBigMode(false)" style="flex:1;font-size:14px">📱 Normal</button>
+      <button class="btn btn-sm" id="bigModeOn" onclick="setBigMode(true)" style="flex:1;font-size:14px">🔍 Grande (Coach)</button>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:6px">El modo Grande aumenta el tamaño de botones, texto y controles — ideal para tablets y coaches con vista cansada 👴🏄</div>
   </div>
 
   <div class="card">
@@ -9864,9 +9921,37 @@ function renderLabFramesForAthlete(a) {
 // ============================================================
 // SETTINGS
 // ============================================================
+function setBigMode(on) {
+  if (on) {
+    document.body.classList.add('big-mode');
+    localStorage.setItem('kss_big_mode', '1');
+  } else {
+    document.body.classList.remove('big-mode');
+    localStorage.setItem('kss_big_mode', '0');
+  }
+  updateBigModeUI();
+}
+
+function updateBigModeUI() {
+  const isOn = document.body.classList.contains('big-mode');
+  const onBtn = document.getElementById('bigModeOn');
+  const offBtn = document.getElementById('bigModeOff');
+  if (onBtn && offBtn) {
+    onBtn.style.background = isOn ? 'var(--accent)' : 'transparent';
+    onBtn.style.color = isOn ? '#fff' : 'var(--text-secondary)';
+    onBtn.style.borderColor = isOn ? 'var(--accent)' : 'var(--border)';
+    offBtn.style.background = !isOn ? 'var(--accent)' : 'transparent';
+    offBtn.style.color = !isOn ? '#fff' : 'var(--text-secondary)';
+    offBtn.style.borderColor = !isOn ? 'var(--accent)' : 'var(--border)';
+  }
+}
+
 function renderSettings() {
   // Load brand
   loadBrand();
+  
+  // Big mode toggle
+  updateBigModeUI();
   
   const spots = DB.spots;
   document.getElementById('setSpotList').innerHTML = spots.map((s, i) => 
@@ -11410,6 +11495,9 @@ setInterval(() => { if (currentView === 'judge') jmUpdateSequential(); }, 2000);
 // INIT
 // ============================================================
 (function init() {
+  // Apply big mode if saved
+  if (localStorage.getItem('kss_big_mode') === '1') document.body.classList.add('big-mode');
+  
   // Populate all KSS logos
   document.querySelectorAll('[id$="LogoImg"]').forEach(img => img.src = KSS_LOGO);
   document.getElementById('labWatermark').src = KSS_LOGO;
